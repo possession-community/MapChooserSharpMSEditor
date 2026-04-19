@@ -1,4 +1,6 @@
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
@@ -50,6 +52,13 @@ public partial class PropertySetViewModel : ViewModelBase
     /// </summary>
     public PropertyScope Scope { get; }
 
+    /// <summary>
+    /// Provider for the parent inheritance chain (immediate parent first, root default last).
+    /// Called at Reset time so the latest state is used — group/map references might have
+    /// changed since this VM was constructed.
+    /// </summary>
+    private readonly Func<IReadOnlyList<PropertySet>>? _inheritanceChain;
+
     public ObservableCollection<GroupRefViewModel> GroupReferences { get; } = new();
 
     // Row visibility bindings. Default is permissive (useful as a project-wide fallback).
@@ -59,11 +68,16 @@ public partial class PropertySetViewModel : ViewModelBase
     public bool ShowGroupSettings => Scope is PropertyScope.Default or PropertyScope.Map;
     public bool ShowCooldownOverride => Scope is PropertyScope.Default or PropertyScope.Group;
 
-    public PropertySetViewModel(PropertySet model, PropertyScope scope = PropertyScope.Default, ProjectContext? project = null)
+    public PropertySetViewModel(
+        PropertySet model,
+        PropertyScope scope = PropertyScope.Default,
+        ProjectContext? project = null,
+        Func<IReadOnlyList<PropertySet>>? inheritanceChain = null)
     {
         Model = model;
         Scope = scope;
         Project = project;
+        _inheritanceChain = inheritanceChain;
 
         RebuildGroupReferences();
         // The Has* auto-set now lives on PropertySet itself so that, from the undo system's
@@ -108,30 +122,100 @@ public partial class PropertySetViewModel : ViewModelBase
     {
         if (string.IsNullOrEmpty(propertyName)) return;
 
-        // Wrap the whole operation in an undo batch so Ctrl+Z restores collection contents
-        // and the HasX flag in one step. We deliberately use iterative RemoveAt instead of
-        // Clear(): Clear emits a Reset event that carries no item data, which our hooks
-        // cannot undo. RemoveAt emits one Remove per item — each recordable.
+        // Wrap in an undo batch so Ctrl+Z rewinds value restoration + HasX flip in one step.
         using var _ = Project?.Undo.BeginBatch("Reset " + propertyName);
 
         if (!value)
         {
-            switch (propertyName)
-            {
-                case "GroupSettings":
-                    for (var i = Model.GroupSettings.Count - 1; i >= 0; i--) Model.GroupSettings.RemoveAt(i);
-                    break;
-                case "DaysAllowed":
-                    for (var i = Model.DaysAllowed.Count - 1; i >= 0; i--) Model.DaysAllowed.RemoveAt(i);
-                    break;
-                case "AllowedTimeRanges":
-                    for (var i = Model.AllowedTimeRanges.Count - 1; i >= 0; i--) Model.AllowedTimeRanges.RemoveAt(i);
-                    break;
-            }
+            // Restore the value the server would resolve to: walk the inheritance chain
+            // (immediate parent → default) and take the first parent with HasX = true.
+            // If none, fall back to the type's natural default (0, false, "", empty list).
+            RestoreInheritedValue(propertyName);
         }
 
+        // Assign HasX last so the value-setter's auto-set HasX=true side-effect is undone.
         var hasProp = typeof(PropertySet).GetProperty("Has" + propertyName, BindingFlags.Public | BindingFlags.Instance);
         hasProp?.SetValue(Model, value);
+    }
+
+    private void RestoreInheritedValue(string propertyName)
+    {
+        switch (propertyName)
+        {
+            case "GroupSettings":
+                RestoreCollection(Model.GroupSettings, FindInheritedEnumerable<string>(propertyName));
+                break;
+            case "DaysAllowed":
+                RestoreCollection(Model.DaysAllowed, FindInheritedEnumerable<DayOfWeek>(propertyName));
+                break;
+            case "AllowedTimeRanges":
+                RestoreCollection(Model.AllowedTimeRanges, FindInheritedEnumerable<TimeRangeSpec>(propertyName));
+                break;
+            default:
+                RestoreScalar(propertyName);
+                break;
+        }
+    }
+
+    private void RestoreScalar(string propertyName)
+    {
+        var valueProp = typeof(PropertySet).GetProperty(propertyName, BindingFlags.Public | BindingFlags.Instance);
+        if (valueProp is null) return;
+
+        object? value = FindInheritedScalar(propertyName);
+        if (value is null)
+        {
+            // Type-level default: zero for numeric, false for bool, empty string for string.
+            value = valueProp.PropertyType.IsValueType
+                ? Activator.CreateInstance(valueProp.PropertyType)
+                : (valueProp.PropertyType == typeof(string) ? string.Empty : null);
+        }
+        valueProp.SetValue(Model, value);
+    }
+
+    private object? FindInheritedScalar(string propertyName)
+    {
+        var chain = _inheritanceChain?.Invoke();
+        if (chain is null) return null;
+        foreach (var parent in chain)
+        {
+            if (HasFlagOn(parent, propertyName))
+            {
+                var vp = typeof(PropertySet).GetProperty(propertyName, BindingFlags.Public | BindingFlags.Instance);
+                return vp?.GetValue(parent);
+            }
+        }
+        return null;
+    }
+
+    private IEnumerable<T>? FindInheritedEnumerable<T>(string propertyName)
+    {
+        var chain = _inheritanceChain?.Invoke();
+        if (chain is null) return null;
+        foreach (var parent in chain)
+        {
+            if (HasFlagOn(parent, propertyName))
+            {
+                var vp = typeof(PropertySet).GetProperty(propertyName, BindingFlags.Public | BindingFlags.Instance);
+                return vp?.GetValue(parent) as IEnumerable<T>;
+            }
+        }
+        return null;
+    }
+
+    private static bool HasFlagOn(PropertySet target, string propertyName)
+    {
+        var p = typeof(PropertySet).GetProperty("Has" + propertyName, BindingFlags.Public | BindingFlags.Instance);
+        return p?.GetValue(target) is bool b && b;
+    }
+
+    /// <summary>Rewrites <paramref name="coll"/> in place using iterative RemoveAt/Insert so
+    /// every mutation flows through CollectionChanged and gets recorded for undo.</summary>
+    private static void RestoreCollection<T>(ObservableCollection<T> coll, IEnumerable<T>? inherited)
+    {
+        for (var i = coll.Count - 1; i >= 0; i--) coll.RemoveAt(i);
+        if (inherited is null) return;
+        foreach (var item in inherited) coll.Add(item);
     }
 
     // Collection-mutating commands are wrapped in undo batches so the collection change

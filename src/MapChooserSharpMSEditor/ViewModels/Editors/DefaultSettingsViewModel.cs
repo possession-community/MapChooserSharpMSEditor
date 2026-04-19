@@ -11,6 +11,7 @@ public sealed class DefaultSettingsViewModel : ViewModelBase
     {
         File = file;
         file.DefaultSettings ??= new PropertySet();
+        // Default has no further inheritance — Reset falls back to type-level defaults.
         Properties = new PropertySetViewModel(file.DefaultSettings, PropertyScope.Default, project);
     }
 }

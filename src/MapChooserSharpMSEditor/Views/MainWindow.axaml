@@ -11,7 +11,7 @@
         x:DataType="vm:MainWindowViewModel"
         Title="MapChooserSharpMS Config Editor"
         Width="1280" Height="800"
-        MinWidth="900" MinHeight="600">
+        MinWidth="1407" MinHeight="600">
 
     <Window.KeyBindings>
         <KeyBinding Gesture="Ctrl+Z" Command="{Binding UndoActionCommand}" />
@@ -94,7 +94,7 @@
         <!-- Sidebar + content -->
         <Grid>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="320" MinWidth="200" />
+                <ColumnDefinition Width="320" MinWidth="320" />
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
@@ -143,7 +143,7 @@
                     </Button>
                 </Border>
 
-                <Border DockPanel.Dock="Right" Width="340" Background="#1a1a1a"
+                <Border DockPanel.Dock="Right" Width="340" MinWidth="340" Background="#1a1a1a"
                         BorderBrush="#2a2a2a" BorderThickness="1,0,0,0"
                         IsVisible="{Binding IsResolvedPanelVisible}">
                     <views:ResolvedPropertiesPanel DataContext="{Binding Resolved}" />
@@ -152,8 +152,12 @@
                 <GridSplitter DockPanel.Dock="Right" Width="3" Background="#2a2a2a"
                               ResizeDirection="Columns" IsVisible="{Binding IsResolvedPanelVisible}" />
 
-                <Border Background="#1c1c1c">
-                    <ScrollViewer>
+                <!-- MinWidth keeps the pane from collapsing below a usable size even when the
+                     user drags the splitters to the extreme. HorizontalScrollBarVisibility is
+                     Disabled so the ScrollViewer passes the viewport width down to children,
+                     which lets the property-row Grid's "*" column stretch with the pane. -->
+                <Border Background="#1c1c1c" MinWidth="717">
+                    <ScrollViewer HorizontalScrollBarVisibility="Disabled">
                         <ContentControl Content="{Binding CurrentEditor}" Margin="20" />
                     </ScrollViewer>
                 </Border>

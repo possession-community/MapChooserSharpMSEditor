@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using CommunityToolkit.Mvvm.Input;
 using MapChooserSharpMSEditor.Models;
 
@@ -13,7 +14,34 @@ public sealed partial class MapEditorViewModel : ViewModelBase
     {
         File = file;
         Map = map;
-        Properties = new PropertySetViewModel(map.Properties, PropertyScope.Map, project);
+        // Map inherits: referenced groups (in order) → default. Computed lazily so it
+        // reflects the current GroupSettings list at Reset time rather than at VM construction.
+        Properties = new PropertySetViewModel(map.Properties, PropertyScope.Map, project,
+            inheritanceChain: () => BuildMapChain(file, map, project));
+    }
+
+    internal static List<PropertySet> BuildMapChain(MapConfigFile file, MapEntryModel map, ProjectContext? project)
+    {
+        var list = new List<PropertySet>();
+        if (map.Properties.HasGroupSettings && project is not null)
+        {
+            foreach (var gn in map.Properties.GroupSettings)
+            {
+                var g = FindGroup(gn, project);
+                if (g is not null) list.Add(g.Properties);
+            }
+        }
+        if (file.DefaultSettings is not null) list.Add(file.DefaultSettings);
+        return list;
+    }
+
+    private static GroupEntryModel? FindGroup(string name, ProjectContext project)
+    {
+        foreach (var f in project.Files)
+            foreach (var g in f.Groups)
+                if (string.Equals(g.GroupName, name, System.StringComparison.OrdinalIgnoreCase))
+                    return g;
+        return null;
     }
 
     [RelayCommand]

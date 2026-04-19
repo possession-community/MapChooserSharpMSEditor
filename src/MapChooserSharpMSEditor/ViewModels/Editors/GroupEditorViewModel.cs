@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using CommunityToolkit.Mvvm.Input;
 using MapChooserSharpMSEditor.Models;
 
@@ -13,7 +14,14 @@ public sealed partial class GroupEditorViewModel : ViewModelBase
     {
         File = file;
         Group = group;
-        Properties = new PropertySetViewModel(group.Properties, PropertyScope.Group, project);
+        // Group inherits from Default only.
+        Properties = new PropertySetViewModel(group.Properties, PropertyScope.Group, project,
+            inheritanceChain: () =>
+            {
+                var list = new List<PropertySet>();
+                if (file.DefaultSettings is not null) list.Add(file.DefaultSettings);
+                return list;
+            });
     }
 
     [RelayCommand]
