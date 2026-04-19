@@ -119,14 +119,17 @@ public sealed partial class SearchViewModel : ViewModelBase
     {
         if (result is null) return;
         _main.NavigateToSearchResult(result);
+        _main.CloseSearchWindow();
     }
 
-    /// <summary>
-    /// Enter key on the query box: open the first match if there is one.
-    /// </summary>
+    /// <summary>Enter key on the query box: open the first match if there is one.</summary>
     [RelayCommand]
     private void OpenTop()
     {
         if (Results.Count > 0) Open(Results[0]);
     }
+
+    /// <summary>Escape — closes the search window via the owner.</summary>
+    [RelayCommand]
+    private void Close() => _main.CloseSearchWindow();
 }

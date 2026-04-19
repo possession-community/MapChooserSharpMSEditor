@@ -20,6 +20,7 @@
         <KeyBinding Gesture="Ctrl+Y" Command="{Binding RedoActionCommand}" />
         <KeyBinding Gesture="Ctrl+Shift+Z" Command="{Binding RedoActionCommand}" />
         <KeyBinding Gesture="Ctrl+S" Command="{Binding SaveCommand}" />
+        <KeyBinding Gesture="Ctrl+F" Command="{Binding OpenSearchCommand}" />
     </Window.KeyBindings>
 
     <Window.Resources>
@@ -83,6 +84,8 @@
                 <MenuItem Header="{l:Localize Menu.Edit.Undo}" Command="{Binding UndoActionCommand}" InputGesture="Ctrl+Z" />
                 <MenuItem Header="{l:Localize Menu.Edit.Redo}" Command="{Binding RedoActionCommand}" InputGesture="Ctrl+Y" />
                 <Separator />
+                <MenuItem Header="{l:Localize Menu.Edit.Find}" Command="{Binding OpenSearchCommand}" InputGesture="Ctrl+F" />
+                <Separator />
                 <MenuItem Header="{l:Localize Menu.Edit.AddMap}" Command="{Binding AddMapCommand}" />
                 <MenuItem Header="{l:Localize Menu.Edit.AddGroup}" Command="{Binding AddGroupCommand}" />
             </MenuItem>
@@ -118,7 +121,6 @@
                     <Border DockPanel.Dock="Top" Padding="10,8" Background="#141414">
                         <TextBlock Text="{l:Localize Sidebar.Header}" FontWeight="SemiBold" Foreground="#ddd" />
                     </Border>
-                    <views:SearchBar DockPanel.Dock="Bottom" DataContext="{Binding Search}" />
                     <TreeView ItemsSource="{Binding Tree}"
                               SelectedItem="{Binding SelectedNode, Mode=TwoWay}">
                         <TreeView.ItemTemplate>

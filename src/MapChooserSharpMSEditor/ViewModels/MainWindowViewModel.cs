@@ -60,6 +60,28 @@ public sealed partial class MainWindowViewModel : ViewModelBase
     [RelayCommand]
     private void ToggleResolvedPanel() => IsResolvedPanelVisible = !IsResolvedPanelVisible;
 
+    private SearchWindow? _searchWindow;
+
+    [RelayCommand]
+    private void OpenSearch()
+    {
+        if (_searchWindow is { IsVisible: true })
+        {
+            _searchWindow.Activate();
+            return;
+        }
+
+        _searchWindow = new SearchWindow { DataContext = Search };
+        _searchWindow.Closed += (_, _) => _searchWindow = null;
+
+        if (GetTopLevel() is Window owner)
+            _searchWindow.Show(owner);
+        else
+            _searchWindow.Show();
+    }
+
+    public void CloseSearchWindow() => _searchWindow?.Close();
+
     /// <summary>Available languages for the View → Language submenu.</summary>
     public LocaleOption[] AvailableLocales => Localization.AvailableLocales;
 

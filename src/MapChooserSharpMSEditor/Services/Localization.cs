@@ -76,6 +76,7 @@ public static class Localization
             ["Menu.Edit.Redo"] = "_Redo",
             ["Menu.Edit.AddMap"] = "Add _Map",
             ["Menu.Edit.AddGroup"] = "Add _Group",
+            ["Menu.Edit.Find"] = "_Find...",
             ["Menu.View"] = "_View",
             ["Menu.View.Language"] = "_Language",
 
@@ -90,6 +91,7 @@ public static class Localization
             ["Sidebar.ToggleResolved"] = "Toggle resolved-values panel",
 
             // ===== Search =====
+            ["Search.Title"] = "Search",
             ["Search.Watermark"] = "Search maps, groups, overrides...",
             ["Search.NoResults"] = "No matches",
             ["Search.Filter.Maps"] = "Maps",
@@ -284,6 +286,7 @@ public static class Localization
             ["Menu.Edit.Redo"] = "やり直し(_R)",
             ["Menu.Edit.AddMap"] = "マップを追加(_M)",
             ["Menu.Edit.AddGroup"] = "グループを追加(_G)",
+            ["Menu.Edit.Find"] = "検索...(_F)",
             ["Menu.View"] = "表示(_V)",
             ["Menu.View.Language"] = "言語(_L)",
 
@@ -295,6 +298,7 @@ public static class Localization
             ["Sidebar.Header"] = "設定ファイル",
             ["Sidebar.ToggleResolved"] = "Effective Valuesパネルの開閉",
 
+            ["Search.Title"] = "検索",
             ["Search.Watermark"] = "Map・Group・Override を検索...",
             ["Search.NoResults"] = "一致なし",
             ["Search.Filter.Maps"] = "Map",

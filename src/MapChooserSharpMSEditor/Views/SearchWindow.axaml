@@ -1,0 +1,87 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:MapChooserSharpMSEditor.ViewModels"
+        xmlns:models="using:MapChooserSharpMSEditor.Models"
+        xmlns:l="using:MapChooserSharpMSEditor.Services"
+        x:Class="MapChooserSharpMSEditor.Views.SearchWindow"
+        x:DataType="vm:SearchViewModel"
+        Title="{l:Localize Search.Title}"
+        Width="640" Height="520"
+        MinWidth="480" MinHeight="320"
+        Background="#1c1c1c"
+        WindowStartupLocation="CenterOwner">
+
+    <Window.KeyBindings>
+        <KeyBinding Gesture="Escape" Command="{Binding CloseCommand}" />
+        <KeyBinding Gesture="Enter" Command="{Binding OpenTopCommand}" />
+    </Window.KeyBindings>
+
+    <Window.Styles>
+        <Style Selector="CheckBox.chip">
+            <Setter Property="Padding" Value="6,2" />
+            <Setter Property="FontSize" Value="12" />
+        </Style>
+        <Style Selector="Button.result">
+            <Setter Property="HorizontalContentAlignment" Value="Left" />
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+            <Setter Property="Padding" Value="10,6" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+        </Style>
+        <Style Selector="Button.result:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="#2a3148" />
+        </Style>
+    </Window.Styles>
+
+    <DockPanel LastChildFill="True">
+
+        <!-- Header: query input + filter chips -->
+        <Border DockPanel.Dock="Top" Background="#141414" Padding="12,10" BorderBrush="#2a2a2a" BorderThickness="0,0,0,1">
+            <StackPanel Spacing="8">
+                <TextBox x:Name="QueryBox"
+                         Text="{Binding Query, Mode=TwoWay}"
+                         Watermark="{l:Localize Search.Watermark}"
+                         FontSize="14" />
+                <WrapPanel>
+                    <CheckBox Classes="chip" Content="{l:Localize Search.Filter.Defaults}"
+                              IsChecked="{Binding IncludeDefaults, Mode=TwoWay}" Margin="0,0,10,0" />
+                    <CheckBox Classes="chip" Content="{l:Localize Search.Filter.Groups}"
+                              IsChecked="{Binding IncludeGroups, Mode=TwoWay}" Margin="0,0,10,0" />
+                    <CheckBox Classes="chip" Content="{l:Localize Search.Filter.Maps}"
+                              IsChecked="{Binding IncludeMaps, Mode=TwoWay}" Margin="0,0,10,0" />
+                    <CheckBox Classes="chip" Content="{l:Localize Search.Filter.Overrides}"
+                              IsChecked="{Binding IncludeOverrides, Mode=TwoWay}" />
+                </WrapPanel>
+            </StackPanel>
+        </Border>
+
+        <Border DockPanel.Dock="Bottom" Padding="10,6" IsVisible="{Binding ShowNoResults}">
+            <TextBlock Text="{l:Localize Search.NoResults}" Foreground="#888" FontStyle="Italic" />
+        </Border>
+
+        <!-- Results list fills -->
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+            <ItemsControl ItemsSource="{Binding Results}" Padding="4">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate DataType="models:SearchResult">
+                        <Button Classes="result"
+                                Command="{Binding $parent[ItemsControl].((vm:SearchViewModel)DataContext).OpenCommand}"
+                                CommandParameter="{Binding}">
+                            <Grid ColumnDefinitions="Auto,*,Auto">
+                                <Border Grid.Column="0" Background="#2a3148" CornerRadius="3"
+                                        Padding="6,2" Margin="0,0,10,0" VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding Kind}" FontSize="10" Foreground="#9cdcfe" />
+                                </Border>
+                                <TextBlock Grid.Column="1" Text="{Binding Label}"
+                                           FontFamily="Cascadia Mono,Consolas" VerticalAlignment="Center" FontSize="13" />
+                                <TextBlock Grid.Column="2" Text="{Binding FileName}" FontSize="11"
+                                           Foreground="#666" VerticalAlignment="Center" />
+                            </Grid>
+                        </Button>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+
+    </DockPanel>
+</Window>
