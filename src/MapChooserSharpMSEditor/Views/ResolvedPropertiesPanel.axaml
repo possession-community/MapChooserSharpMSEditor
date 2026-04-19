@@ -18,7 +18,11 @@
                         <Border Background="#1e1e1e" Margin="2" Padding="6,4" CornerRadius="3">
                             <StackPanel Spacing="1">
                                 <Grid ColumnDefinitions="*,Auto">
-                                    <TextBlock Text="{Binding Property}" FontWeight="SemiBold" Foreground="#9cdcfe" />
+                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                        <TextBlock Text="{Binding Label}" FontWeight="SemiBold" Foreground="#9cdcfe" />
+                                        <TextBlock Text="{Binding Property}" Foreground="#666" FontSize="10"
+                                                   FontFamily="Cascadia Mono,Consolas" VerticalAlignment="Bottom" />
+                                    </StackPanel>
                                     <TextBlock Grid.Column="1" Text="{Binding Source}" FontSize="10"
                                                Foreground="#888" VerticalAlignment="Center" />
                                 </Grid>

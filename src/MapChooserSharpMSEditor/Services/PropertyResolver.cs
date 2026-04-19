@@ -14,7 +14,11 @@ namespace MapChooserSharpMSEditor.Services;
 /// </summary>
 public static class PropertyResolver
 {
-    public record ResolvedRow(string Property, string DisplayValue, string Source);
+    public record ResolvedRow(string Property, string DisplayValue, string Source)
+    {
+        /// <summary>Localized friendly name shown in the Effective Values panel.</summary>
+        public string Label => Localization.Get("Prop." + Property, Property);
+    }
 
     /// <summary>Scalar/array properties that appear on <see cref="PropertySet"/>.</summary>
     private static readonly string[] PropertyNames =
@@ -34,7 +38,7 @@ public static class PropertyResolver
         foreach (var name in PropertyNames)
         {
             if (def is not null && HasFlag(def, name))
-                rows.Add(new ResolvedRow(name, Format(Get(def, name)), "Default"));
+                rows.Add(new ResolvedRow(name, Format(Get(def, name)), Localization.Get("Source.Default")));
             else
                 rows.Add(new ResolvedRow(name, "—", Localization.Get("Source.Unset")));
         }
@@ -44,7 +48,7 @@ public static class PropertyResolver
     public static List<ResolvedRow> ResolveGroup(GroupEntryModel group, MapConfigFile file, ProjectContext project)
     {
         var sources = BuildDefaultSources(file, project);
-        var chain = new[] { (group.Properties, $"Group: {group.GroupName}") }.Concat(sources);
+        var chain = new[] { (group.Properties, Localization.Format("Source.Group", group.GroupName)) }.Concat(sources);
         var rows = new List<ResolvedRow>(PropertyNames.Length + 1);
         foreach (var name in PropertyNames)
             rows.Add(ResolveOne(name, chain));
@@ -52,7 +56,8 @@ public static class PropertyResolver
         // CooldownOverride is group-only; no inheritance, no Default fallback. Show it as its
         // own row so the user can see what this group pushes into its member maps.
         rows.Add(group.Properties.HasCooldownOverride
-            ? new ResolvedRow("CooldownOverride", group.Properties.CooldownOverride.ToString(CultureInfo.InvariantCulture), $"Group: {group.GroupName}")
+            ? new ResolvedRow("CooldownOverride", group.Properties.CooldownOverride.ToString(CultureInfo.InvariantCulture),
+                Localization.Format("Source.Group", group.GroupName))
             : new ResolvedRow("CooldownOverride", "—", Localization.Get("Source.Unset")));
         return rows;
     }
@@ -74,15 +79,15 @@ public static class PropertyResolver
         // the pane can see at a glance that unset rows inherit from that map, not Default.
         var chain = new List<(PropertySet Set, string Source)>
         {
-            (ov.Properties, $"Override: {ov.Name}"),
-            (map.Properties, string.Format(Localization.Get("Source.OverrideTargetMap"), map.MapName)),
+            (ov.Properties, Localization.Format("Source.Override", ov.Name)),
+            (map.Properties, Localization.Format("Source.OverrideTargetMap", map.MapName)),
         };
         if (map.Properties.HasGroupSettings)
         {
             foreach (var gn in map.Properties.GroupSettings)
             {
                 var g = FindGroup(gn, project);
-                if (g is not null) chain.Add((g.Properties, $"Group: {g.GroupName}"));
+                if (g is not null) chain.Add((g.Properties, Localization.Format("Source.Group", g.GroupName)));
             }
         }
         chain.AddRange(BuildDefaultSources(file, project));
@@ -99,8 +104,8 @@ public static class PropertyResolver
     {
         var chain = new List<(PropertySet Set, string Source)>
         {
-            (ov.Properties, $"Override: {ov.Name}"),
-            (group.Properties, string.Format(Localization.Get("Source.OverrideTargetGroup"), group.GroupName)),
+            (ov.Properties, Localization.Format("Source.Override", ov.Name)),
+            (group.Properties, Localization.Format("Source.OverrideTargetGroup", group.GroupName)),
         };
         chain.AddRange(BuildDefaultSources(file, project));
         var rows = new List<ResolvedRow>(PropertyNames.Length);
@@ -134,7 +139,7 @@ public static class PropertyResolver
         {
             return new ResolvedRow("Cooldown",
                 ov.Value.ToString(CultureInfo.InvariantCulture),
-                $"Group: {ov.Group.GroupName} (CooldownOverride)");
+                Localization.Format("Source.GroupCooldownOverride", ov.Group.GroupName));
         }
         return ResolveOne(property, chain);
     }
@@ -146,7 +151,7 @@ public static class PropertyResolver
     private static List<(PropertySet Set, string Source)> BuildMapChain(
         MapEntryModel map, MapConfigFile file, ProjectContext project)
     {
-        var chain = new List<(PropertySet, string)> { (map.Properties, $"Map: {map.MapName}") };
+        var chain = new List<(PropertySet, string)> { (map.Properties, Localization.Format("Source.Map", map.MapName)) };
 
         if (map.Properties.HasGroupSettings)
         {
@@ -154,7 +159,7 @@ public static class PropertyResolver
             {
                 var g = FindGroup(groupName, project);
                 if (g is not null)
-                    chain.Add((g.Properties, $"Group: {g.GroupName}"));
+                    chain.Add((g.Properties, Localization.Format("Source.Group", g.GroupName)));
             }
         }
 
@@ -170,11 +175,11 @@ public static class PropertyResolver
     {
         var list = new List<(PropertySet, string)>();
         if (file.DefaultSettings is not null)
-            list.Add((file.DefaultSettings, "Default"));
+            list.Add((file.DefaultSettings, Localization.Get("Source.Default")));
         foreach (var f in project.Files)
         {
             if (f != file && f.DefaultSettings is not null)
-                list.Add((f.DefaultSettings, $"Default ({f.DisplayName})"));
+                list.Add((f.DefaultSettings, Localization.Format("Source.DefaultFromFile", f.DisplayName)));
         }
         return list;
     }
