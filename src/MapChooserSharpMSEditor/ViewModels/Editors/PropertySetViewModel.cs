@@ -248,6 +248,31 @@ public partial class PropertySetViewModel : ViewModelBase
         Model.AllowedTimeRanges.Remove(range);
     }
 
+    // Reorder via RemoveAt + Insert so each step goes through CollectionChanged as a plain
+    // Add/Remove — UndoHooks records both, and the surrounding batch collapses them into
+    // a single Ctrl+Z step. ObservableCollection.Move would emit a Move event we don't record.
+    [RelayCommand]
+    private void MoveTimeRangeUp(TimeRangeSpec? range)
+    {
+        if (range is null) return;
+        var i = Model.AllowedTimeRanges.IndexOf(range);
+        if (i <= 0) return;
+        using var _ = Project?.Undo.BeginBatch("Move time range up");
+        Model.AllowedTimeRanges.RemoveAt(i);
+        Model.AllowedTimeRanges.Insert(i - 1, range);
+    }
+
+    [RelayCommand]
+    private void MoveTimeRangeDown(TimeRangeSpec? range)
+    {
+        if (range is null) return;
+        var i = Model.AllowedTimeRanges.IndexOf(range);
+        if (i < 0 || i >= Model.AllowedTimeRanges.Count - 1) return;
+        using var _ = Project?.Undo.BeginBatch("Move time range down");
+        Model.AllowedTimeRanges.RemoveAt(i);
+        Model.AllowedTimeRanges.Insert(i + 1, range);
+    }
+
     [RelayCommand]
     private void ToggleDay(DayOfWeek day)
     {
@@ -273,6 +298,31 @@ public partial class PropertySetViewModel : ViewModelBase
         if (reference is null) return;
         using var _ = Project?.Undo.BeginBatch("Remove group reference");
         Model.GroupSettings.Remove(reference.Name);
+    }
+
+    // Order matters: the server applies the first referenced group's values first.
+    [RelayCommand]
+    private void MoveGroupReferenceUp(GroupRefViewModel? reference)
+    {
+        if (reference is null) return;
+        var i = Model.GroupSettings.IndexOf(reference.Name);
+        if (i <= 0) return;
+        using var _ = Project?.Undo.BeginBatch("Move group reference up");
+        var name = reference.Name;
+        Model.GroupSettings.RemoveAt(i);
+        Model.GroupSettings.Insert(i - 1, name);
+    }
+
+    [RelayCommand]
+    private void MoveGroupReferenceDown(GroupRefViewModel? reference)
+    {
+        if (reference is null) return;
+        var i = Model.GroupSettings.IndexOf(reference.Name);
+        if (i < 0 || i >= Model.GroupSettings.Count - 1) return;
+        using var _ = Project?.Undo.BeginBatch("Move group reference down");
+        var name = reference.Name;
+        Model.GroupSettings.RemoveAt(i);
+        Model.GroupSettings.Insert(i + 1, name);
     }
 
     [RelayCommand]

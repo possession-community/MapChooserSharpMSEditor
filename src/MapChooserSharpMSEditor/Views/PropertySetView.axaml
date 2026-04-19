@@ -113,7 +113,7 @@
                 <ItemsControl ItemsSource="{Binding GroupReferences}" Margin="24,0,0,0">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate DataType="vme:GroupRefViewModel">
-                            <Grid ColumnDefinitions="Auto,*,Auto" Margin="0,2">
+                            <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto" Margin="0,2">
                                 <TextBlock Grid.Column="0" Text="&#xE7BA;"
                                            FontFamily="Segoe Fluent Icons,Segoe MDL2 Assets"
                                            Foreground="#f0a33d" Margin="0,0,6,0"
@@ -121,9 +121,17 @@
                                            ToolTip.Tip="{l:Localize Tip.UnknownGroup}"
                                            IsVisible="{Binding !IsKnown}" />
                                 <TextBlock Grid.Column="1" Text="{Binding Name}" VerticalAlignment="Center" />
-                                <Button Grid.Column="2" Content="×"
+                                <Button Grid.Column="2" Content="▲" Padding="6,2" Margin="0,0,2,0"
+                                        ToolTip.Tip="Move up"
+                                        Command="{Binding $parent[ItemsControl].((vme:PropertySetViewModel)DataContext).MoveGroupReferenceUpCommand}"
+                                        CommandParameter="{Binding}" />
+                                <Button Grid.Column="3" Content="▼" Padding="6,2" Margin="0,0,2,0"
+                                        ToolTip.Tip="Move down"
+                                        Command="{Binding $parent[ItemsControl].((vme:PropertySetViewModel)DataContext).MoveGroupReferenceDownCommand}"
+                                        CommandParameter="{Binding}" />
+                                <Button Grid.Column="4" Content="×" Padding="6,2"
                                         Command="{Binding $parent[ItemsControl].((vme:PropertySetViewModel)DataContext).RemoveGroupReferenceCommand}"
-                                        CommandParameter="{Binding}" Padding="6,2" />
+                                        CommandParameter="{Binding}" />
                             </Grid>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
@@ -289,9 +297,17 @@
                 <ItemsControl ItemsSource="{Binding Model.AllowedTimeRanges}" Margin="24,0,0,0">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate DataType="models:TimeRangeSpec">
-                            <Grid ColumnDefinitions="*,Auto" Margin="0,2">
+                            <Grid ColumnDefinitions="*,Auto,Auto,Auto" Margin="0,2">
                                 <TextBlock Text="{Binding}" VerticalAlignment="Center" />
-                                <Button Grid.Column="1" Content="×" Padding="6,2"
+                                <Button Grid.Column="1" Content="▲" Padding="6,2" Margin="0,0,2,0"
+                                        ToolTip.Tip="Move up"
+                                        Command="{Binding $parent[ItemsControl].((vme:PropertySetViewModel)DataContext).MoveTimeRangeUpCommand}"
+                                        CommandParameter="{Binding}" />
+                                <Button Grid.Column="2" Content="▼" Padding="6,2" Margin="0,0,2,0"
+                                        ToolTip.Tip="Move down"
+                                        Command="{Binding $parent[ItemsControl].((vme:PropertySetViewModel)DataContext).MoveTimeRangeDownCommand}"
+                                        CommandParameter="{Binding}" />
+                                <Button Grid.Column="3" Content="×" Padding="6,2"
                                         Command="{Binding $parent[ItemsControl].((vme:PropertySetViewModel)DataContext).RemoveTimeRangeCommand}"
                                         CommandParameter="{Binding}" />
                             </Grid>
