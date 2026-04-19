@@ -16,6 +16,7 @@ using MapChooserSharpMSEditor.Models;
 using MapChooserSharpMSEditor.Services;
 using MapChooserSharpMSEditor.ViewModels.Editors;
 using MapChooserSharpMSEditor.ViewModels.TreeNodes;
+using MapChooserSharpMSEditor.Views;
 
 namespace MapChooserSharpMSEditor.ViewModels;
 
@@ -55,6 +56,45 @@ public sealed partial class MainWindowViewModel : ViewModelBase
 
     [RelayCommand]
     private void ToggleResolvedPanel() => IsResolvedPanelVisible = !IsResolvedPanelVisible;
+
+    /// <summary>Available languages for the View → Language submenu.</summary>
+    public LocaleOption[] AvailableLocales => Localization.AvailableLocales;
+
+    /// <summary>Current locale (Id). Used by menu items to show a checkmark for the active choice.</summary>
+    public string CurrentLocale => Localization.CurrentLocale;
+
+    [RelayCommand]
+    private async Task SelectLanguageAsync(string? localeId)
+    {
+        if (string.IsNullOrEmpty(localeId)) return;
+        if (localeId == Localization.CurrentLocale) return;
+
+        UserSettings.SetLocale(localeId);
+
+        var top = GetTopLevel() as Window;
+        if (top is null) return;
+
+        var title = Localization.Get("Restart.Title");
+        var message = Localization.Get("Restart.Message");
+        var yes = Localization.Get("Restart.Yes");
+        var no = Localization.Get("Restart.No");
+        var restart = await ConfirmDialog.ShowAsync(top, title, message, yes, no);
+
+        if (restart) RestartApp();
+    }
+
+    private static void RestartApp()
+    {
+        // Environment.ProcessPath gives the host exe for a published app; when `dotnet run`
+        // launched us it still points at the dotnet host which re-launches the same process.
+        var exe = Environment.ProcessPath;
+        if (!string.IsNullOrEmpty(exe))
+        {
+            try { System.Diagnostics.Process.Start(exe); } catch { /* best effort */ }
+        }
+        if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+            desktop.Shutdown();
+    }
 
     [RelayCommand(CanExecute = nameof(CanUndoExec))]
     private void UndoAction() => Undo.Undo();

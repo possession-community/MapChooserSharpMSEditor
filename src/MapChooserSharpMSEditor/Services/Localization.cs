@@ -20,8 +20,21 @@ public static class Localization
 
     public static string CurrentLocale { get; set; } = DefaultLocale;
 
+    /// <summary>Locales the UI explicitly ships translations for.</summary>
+    public static readonly LocaleOption[] AvailableLocales =
+    {
+        new("en", "English"),
+        new("ja", "日本語"),
+    };
+
     static Localization()
     {
+        // Priority: explicit user choice → OS locale → "en".
+        if (!string.IsNullOrEmpty(UserSettings.Locale))
+        {
+            CurrentLocale = UserSettings.Locale!;
+            return;
+        }
         var ui = CultureInfo.CurrentUICulture;
         if (ui.TwoLetterISOLanguageName == "ja")
             CurrentLocale = "ja";
@@ -63,6 +76,14 @@ public static class Localization
             ["Menu.Edit.Redo"] = "_Redo",
             ["Menu.Edit.AddMap"] = "Add _Map",
             ["Menu.Edit.AddGroup"] = "Add _Group",
+            ["Menu.View"] = "_View",
+            ["Menu.View.Language"] = "_Language",
+
+            // ===== Restart confirmation =====
+            ["Restart.Title"] = "Restart Required",
+            ["Restart.Message"] = "Restart the app now to apply the language change?",
+            ["Restart.Yes"] = "Restart",
+            ["Restart.No"] = "Later",
 
             // ===== Sidebar =====
             ["Sidebar.Header"] = "Config Files",
@@ -245,6 +266,13 @@ public static class Localization
             ["Menu.Edit.Redo"] = "やり直し(_R)",
             ["Menu.Edit.AddMap"] = "マップを追加(_M)",
             ["Menu.Edit.AddGroup"] = "グループを追加(_G)",
+            ["Menu.View"] = "表示(_V)",
+            ["Menu.View.Language"] = "言語(_L)",
+
+            ["Restart.Title"] = "再起動が必要です",
+            ["Restart.Message"] = "言語設定を反映するため、今すぐ再起動しますか?",
+            ["Restart.Yes"] = "再起動",
+            ["Restart.No"] = "後で",
 
             ["Sidebar.Header"] = "設定ファイル",
             ["Sidebar.ToggleResolved"] = "Effective Valuesパネルの開閉",
