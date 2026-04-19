@@ -36,7 +36,7 @@ public static class PropertyResolver
             if (def is not null && HasFlag(def, name))
                 rows.Add(new ResolvedRow(name, Format(Get(def, name)), "Default"));
             else
-                rows.Add(new ResolvedRow(name, "—", "(unset)"));
+                rows.Add(new ResolvedRow(name, "—", Localization.Get("Source.Unset")));
         }
         return rows;
     }
@@ -53,7 +53,7 @@ public static class PropertyResolver
         // own row so the user can see what this group pushes into its member maps.
         rows.Add(group.Properties.HasCooldownOverride
             ? new ResolvedRow("CooldownOverride", group.Properties.CooldownOverride.ToString(CultureInfo.InvariantCulture), $"Group: {group.GroupName}")
-            : new ResolvedRow("CooldownOverride", "—", "(unset)"));
+            : new ResolvedRow("CooldownOverride", "—", Localization.Get("Source.Unset")));
         return rows;
     }
 
@@ -195,7 +195,7 @@ public static class PropertyResolver
             if (HasFlag(set, property))
                 return new ResolvedRow(property, Format(Get(set, property)), src);
         }
-        return new ResolvedRow(property, "—", "(unset)");
+        return new ResolvedRow(property, "—", Localization.Get("Source.Unset"));
     }
 
     // ===== Reflection helpers =====

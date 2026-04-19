@@ -4,6 +4,8 @@ using MapChooserSharpMSEditor.Models;
 using MapChooserSharpMSEditor.Services;
 using MapChooserSharpMSEditor.ViewModels.Editors;
 
+// L is shorthand for Localization used by the tables below; keeps string work on one line.
+
 namespace MapChooserSharpMSEditor.ViewModels;
 
 /// <summary>
@@ -14,8 +16,8 @@ public sealed partial class ResolvedPropertiesViewModel : ObservableObject
 {
     public ObservableCollection<PropertyResolver.ResolvedRow> Rows { get; } = new();
 
-    [ObservableProperty] private string _heading = "Resolved Values";
-    [ObservableProperty] private string _contextLine = "Select a map, group or override to preview.";
+    [ObservableProperty] private string _heading = Localization.Get("Resolved.Placeholder.Heading");
+    [ObservableProperty] private string _contextLine = Localization.Get("Resolved.Placeholder.Body");
 
     public void Refresh(ViewModelBase? currentEditor, ProjectContext project)
     {
@@ -24,28 +26,28 @@ public sealed partial class ResolvedPropertiesViewModel : ObservableObject
         switch (currentEditor)
         {
             case DefaultSettingsViewModel d:
-                Heading = "Effective Values — Default";
+                Heading = Localization.Get("Resolved.HeadingDefault");
                 ContextLine = d.File.DisplayName;
                 foreach (var r in PropertyResolver.ResolveDefault(d.File))
                     Rows.Add(r);
                 break;
 
             case GroupEditorViewModel g:
-                Heading = $"Effective Values — Group: {g.Group.GroupName}";
+                Heading = Localization.Format("Resolved.HeadingGroup", g.Group.GroupName);
                 ContextLine = g.File.DisplayName;
                 foreach (var r in PropertyResolver.ResolveGroup(g.Group, g.File, project))
                     Rows.Add(r);
                 break;
 
             case MapEditorViewModel m:
-                Heading = $"Effective Values — Map: {m.Map.MapName}";
+                Heading = Localization.Format("Resolved.HeadingMap", m.Map.MapName);
                 ContextLine = m.File.DisplayName;
                 foreach (var r in PropertyResolver.ResolveMap(m.Map, m.File, project))
                     Rows.Add(r);
                 break;
 
             case OverrideEditorViewModel o:
-                Heading = $"Effective Values — Override: {o.Override.Name}";
+                Heading = Localization.Format("Resolved.HeadingOverride", o.Override.Name);
                 ContextLine = $"{o.ParentDisplay} / {o.File.DisplayName}";
                 var rows = o.Parent switch
                 {
@@ -57,8 +59,8 @@ public sealed partial class ResolvedPropertiesViewModel : ObservableObject
                 break;
 
             default:
-                Heading = "Resolved Values";
-                ContextLine = "Select a map, group or override to preview.";
+                Heading = Localization.Get("Resolved.Placeholder.Heading");
+                ContextLine = Localization.Get("Resolved.Placeholder.Body");
                 break;
         }
     }

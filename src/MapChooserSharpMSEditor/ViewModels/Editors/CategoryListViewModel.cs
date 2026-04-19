@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MapChooserSharpMSEditor.Models;
+using MapChooserSharpMSEditor.Services;
 using MapChooserSharpMSEditor.ViewModels.TreeNodes;
 
 namespace MapChooserSharpMSEditor.ViewModels.Editors;
@@ -15,11 +16,8 @@ public sealed partial class CategoryListViewModel : ViewModelBase
 {
     public MapConfigFile File { get; }
     public CategoryKind Kind { get; }
-    public string Heading => Kind == CategoryKind.Maps ? "Maps" : "Groups";
-    public string EmptyText =>
-        Kind == CategoryKind.Maps
-            ? "このファイルにはマップがまだ定義されていません。"
-            : "このファイルにはグループがまだ定義されていません。";
+    public string Heading => Localization.Get(Kind == CategoryKind.Maps ? "Category.Maps" : "Category.Groups");
+    public string EmptyText => Localization.Get(Kind == CategoryKind.Maps ? "Category.EmptyMaps" : "Category.EmptyGroups");
 
     private readonly MainWindowViewModel _main;
 

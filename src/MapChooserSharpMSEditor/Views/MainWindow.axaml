@@ -6,10 +6,11 @@
         xmlns:vme="using:MapChooserSharpMSEditor.ViewModels.Editors"
         xmlns:vmt="using:MapChooserSharpMSEditor.ViewModels.TreeNodes"
         xmlns:views="using:MapChooserSharpMSEditor.Views"
+        xmlns:l="using:MapChooserSharpMSEditor.Services"
         mc:Ignorable="d" d:DesignWidth="1280" d:DesignHeight="800"
         x:Class="MapChooserSharpMSEditor.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
-        Title="MapChooserSharpMS Config Editor"
+        Title="{l:Localize App.Title}"
         Width="1280" Height="800"
         MinWidth="1407" MinHeight="600">
 
@@ -66,23 +67,23 @@
     <DockPanel>
         <!-- Menu bar -->
         <Menu DockPanel.Dock="Top">
-            <MenuItem Header="_File">
-                <MenuItem Header="_New" Command="{Binding NewFileCommand}" InputGesture="Ctrl+N" />
-                <MenuItem Header="_Open File..." Command="{Binding OpenFileCommand}" InputGesture="Ctrl+O" />
-                <MenuItem Header="Open _Folder..." Command="{Binding OpenFolderCommand}" />
+            <MenuItem Header="{l:Localize Menu.File}">
+                <MenuItem Header="{l:Localize Menu.File.New}" Command="{Binding NewFileCommand}" InputGesture="Ctrl+N" />
+                <MenuItem Header="{l:Localize Menu.File.OpenFile}" Command="{Binding OpenFileCommand}" InputGesture="Ctrl+O" />
+                <MenuItem Header="{l:Localize Menu.File.OpenFolder}" Command="{Binding OpenFolderCommand}" />
                 <Separator />
-                <MenuItem Header="_Save" Command="{Binding SaveCommand}" InputGesture="Ctrl+S" />
-                <MenuItem Header="Save _As..." Command="{Binding SaveAsCommand}" InputGesture="Ctrl+Shift+S" />
-                <MenuItem Header="Save A_ll" Command="{Binding SaveAllCommand}" />
+                <MenuItem Header="{l:Localize Menu.File.Save}" Command="{Binding SaveCommand}" InputGesture="Ctrl+S" />
+                <MenuItem Header="{l:Localize Menu.File.SaveAs}" Command="{Binding SaveAsCommand}" InputGesture="Ctrl+Shift+S" />
+                <MenuItem Header="{l:Localize Menu.File.SaveAll}" Command="{Binding SaveAllCommand}" />
                 <Separator />
-                <MenuItem Header="_Close File" Command="{Binding CloseFileCommand}" />
+                <MenuItem Header="{l:Localize Menu.File.Close}" Command="{Binding CloseFileCommand}" />
             </MenuItem>
-            <MenuItem Header="_Edit">
-                <MenuItem Header="_Undo" Command="{Binding UndoActionCommand}" InputGesture="Ctrl+Z" />
-                <MenuItem Header="_Redo" Command="{Binding RedoActionCommand}" InputGesture="Ctrl+Y" />
+            <MenuItem Header="{l:Localize Menu.Edit}">
+                <MenuItem Header="{l:Localize Menu.Edit.Undo}" Command="{Binding UndoActionCommand}" InputGesture="Ctrl+Z" />
+                <MenuItem Header="{l:Localize Menu.Edit.Redo}" Command="{Binding RedoActionCommand}" InputGesture="Ctrl+Y" />
                 <Separator />
-                <MenuItem Header="Add _Map" Command="{Binding AddMapCommand}" />
-                <MenuItem Header="Add _Group" Command="{Binding AddGroupCommand}" />
+                <MenuItem Header="{l:Localize Menu.Edit.AddMap}" Command="{Binding AddMapCommand}" />
+                <MenuItem Header="{l:Localize Menu.Edit.AddGroup}" Command="{Binding AddGroupCommand}" />
             </MenuItem>
         </Menu>
 
@@ -103,7 +104,7 @@
             <Border Grid.Column="0" Background="#181818" BorderBrush="#2a2a2a" BorderThickness="0,0,1,0">
                 <DockPanel>
                     <Border DockPanel.Dock="Top" Padding="10,8" Background="#141414">
-                        <TextBlock Text="Config Files" FontWeight="SemiBold" Foreground="#ddd" />
+                        <TextBlock Text="{l:Localize Sidebar.Header}" FontWeight="SemiBold" Foreground="#ddd" />
                     </Border>
                     <TreeView ItemsSource="{Binding Tree}"
                               SelectedItem="{Binding SelectedNode, Mode=TwoWay}">
@@ -135,7 +136,7 @@
                     <Button Command="{Binding ToggleResolvedPanelCommand}"
                             Padding="0" Background="Transparent" BorderThickness="0"
                             VerticalAlignment="Top" Margin="0,6,0,0"
-                            ToolTip.Tip="Toggle resolved-values panel">
+                            ToolTip.Tip="{l:Localize Sidebar.ToggleResolved}">
                         <TextBlock Text="{Binding IsResolvedPanelVisible, Converter={x:Static views:BoolToArrowConverter.Instance}}"
                                    FontFamily="Segoe Fluent Icons,Segoe MDL2 Assets"
                                    FontSize="14" Foreground="#bbb"

@@ -3,6 +3,7 @@
              xmlns:vme="using:MapChooserSharpMSEditor.ViewModels.Editors"
              xmlns:models="using:MapChooserSharpMSEditor.Models"
              xmlns:views="using:MapChooserSharpMSEditor.Views"
+             xmlns:l="using:MapChooserSharpMSEditor.Services"
              x:Class="MapChooserSharpMSEditor.Views.MapEditorView"
              x:DataType="vme:MapEditorViewModel">
     <UserControl.Resources>
@@ -12,16 +13,16 @@
         <StackPanel Orientation="Horizontal" Spacing="10">
             <TextBlock Text="&#xE707;" FontFamily="Segoe Fluent Icons,Segoe MDL2 Assets"
                        FontSize="22" Foreground="#7aa2f7" VerticalAlignment="Center" />
-            <TextBlock Text="Map:" FontSize="20" FontWeight="SemiBold" VerticalAlignment="Center" />
+            <TextBlock Text="{l:Localize Editor.Map}" FontSize="20" FontWeight="SemiBold" VerticalAlignment="Center" />
             <TextBox Text="{Binding Map.MapName}" Width="320" VerticalAlignment="Center" FontFamily="Cascadia Mono,Consolas" />
         </StackPanel>
-        <TextBlock Text="{Binding File.DisplayName, StringFormat='File: {0}'}" Foreground="#888" />
+        <TextBlock Text="{Binding File.DisplayName, StringFormat={l:Localize Label.FilePrefix}}" Foreground="#888" />
         <Separator />
         <views:PropertySetView DataContext="{Binding Properties}" />
 
-        <TextBlock Text="DaySettings Overrides" FontSize="14" FontWeight="SemiBold" Foreground="#9cdcfe" Margin="0,16,0,6" />
+        <TextBlock Text="{l:Localize DaySettings.Title}" FontSize="14" FontWeight="SemiBold" Foreground="#9cdcfe" Margin="0,16,0,6" />
         <StackPanel Orientation="Horizontal" Spacing="6">
-            <Button Content="+ Add Override" Command="{Binding AddDaySettingsCommand}" />
+            <Button Content="{l:Localize Button.AddOverride}" Command="{Binding AddDaySettingsCommand}" />
         </StackPanel>
         <ItemsControl ItemsSource="{Binding Map.DaySettings}">
             <ItemsControl.ItemTemplate>
@@ -31,16 +32,16 @@
                             <StackPanel Spacing="4">
                                 <TextBlock Text="{Binding Name}" FontWeight="SemiBold" />
                                 <TextBlock Foreground="#888" FontSize="12"
-                                           Text="{Binding TargetDays, Converter={StaticResource Join}, StringFormat='Days: {0}'}" />
+                                           Text="{Binding TargetDays, Converter={StaticResource Join}, StringFormat={l:Localize DaySettings.DaysLabel}}" />
                                 <TextBlock Foreground="#888" FontSize="12"
-                                           Text="{Binding TargetTimeRanges, Converter={StaticResource Join}, StringFormat='Times: {0}'}" />
+                                           Text="{Binding TargetTimeRanges, Converter={StaticResource Join}, StringFormat={l:Localize DaySettings.TimesLabel}}" />
                                 <TextBlock Foreground="#888" FontSize="12"
-                                           Text="{Binding OverridePriority, StringFormat='Priority: {0}'}" />
+                                           Text="{Binding OverridePriority, StringFormat={l:Localize DaySettings.PriorityLabel}}" />
                             </StackPanel>
-                            <Button Grid.Column="1" Content="Open" VerticalAlignment="Top" Margin="0,0,6,0"
+                            <Button Grid.Column="1" Content="{l:Localize Button.Open}" VerticalAlignment="Top" Margin="0,0,6,0"
                                     Command="{Binding $parent[ItemsControl].((vme:MapEditorViewModel)DataContext).OpenDaySettingsCommand}"
                                     CommandParameter="{Binding}" />
-                            <Button Grid.Column="2" Content="Remove" VerticalAlignment="Top"
+                            <Button Grid.Column="2" Content="{l:Localize Button.Remove}" VerticalAlignment="Top"
                                     Command="{Binding $parent[ItemsControl].((vme:MapEditorViewModel)DataContext).RemoveDaySettingsCommand}"
                                     CommandParameter="{Binding}" />
                         </Grid>
@@ -49,6 +50,6 @@
             </ItemsControl.ItemTemplate>
         </ItemsControl>
         <TextBlock Foreground="#888" FontStyle="Italic" TextWrapping="Wrap"
-                   Text="DaySettingsを編集するには、左のツリーで Map 配下のOverride名をクリックしてください。" />
+                   Text="{l:Localize DaySettings.EditHint}" />
     </StackPanel>
 </UserControl>

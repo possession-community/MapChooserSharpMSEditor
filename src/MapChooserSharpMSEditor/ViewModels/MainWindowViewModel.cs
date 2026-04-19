@@ -33,7 +33,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase
 
     [ObservableProperty] private TreeNodeBase? _selectedNode;
     [ObservableProperty] private ViewModelBase _currentEditor;
-    [ObservableProperty] private string _statusText = "Ready";
+    [ObservableProperty] private string _statusText = Localization.Get("Status.Ready");
 
     /// <summary>
     /// Toggle for the right-hand "Resolved Values" panel. Collapsible so the editor area
@@ -163,16 +163,16 @@ public sealed partial class MainWindowViewModel : ViewModelBase
             var rootNode = BuildFolderNode(folderPath, isRoot: true);
             if (rootNode.Children.Count == 0)
             {
-                StatusText = $"No .toml files found under {folderPath}";
+                StatusText = Localization.Format("Status.NoTomlFound", folderPath);
                 return;
             }
             Tree.Add(rootNode);
             SelectedNode = rootNode.Children.FirstOrDefault() ?? (TreeNodeBase)rootNode;
-            StatusText = $"Opened folder {folderPath}";
+            StatusText = Localization.Format("Status.OpenedFolder", folderPath);
         }
         catch (Exception ex)
         {
-            StatusText = $"Failed to open folder {folderPath}: {ex.Message}";
+            StatusText = Localization.Format("Status.LoadFailed", folderPath, ex.Message);
         }
     }
 
@@ -202,7 +202,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase
             }
             catch (Exception ex)
             {
-                StatusText = $"Skipped {f}: {ex.Message}";
+                StatusText = Localization.Format("Status.Skipped", f, ex.Message);
             }
         }
 
@@ -220,11 +220,11 @@ public sealed partial class MainWindowViewModel : ViewModelBase
             var node = BuildFileNode(file);
             Tree.Add(node);
             SelectedNode = node;
-            StatusText = $"Loaded {path}";
+            StatusText = Localization.Format("Status.Loaded", path);
         }
         catch (Exception ex)
         {
-            StatusText = $"Failed to load {path}: {ex.Message}";
+            StatusText = Localization.Format("Status.LoadFailed", path, ex.Message);
         }
     }
 
@@ -434,11 +434,11 @@ public sealed partial class MainWindowViewModel : ViewModelBase
                 return;
             }
             TomlConfigWriter.SaveFile(file);
-            StatusText = $"Saved {file.FilePath}";
+            StatusText = Localization.Format("Status.Saved", file.FilePath);
         }
         catch (Exception ex)
         {
-            StatusText = $"Save failed: {ex.Message}";
+            StatusText = Localization.Format("Status.SaveFailed", ex.Message);
         }
     }
 

@@ -4,36 +4,40 @@
              xmlns:sys="using:System"
              xmlns:models="using:MapChooserSharpMSEditor.Models"
              xmlns:views="using:MapChooserSharpMSEditor.Views"
+             xmlns:l="using:MapChooserSharpMSEditor.Services"
              x:Class="MapChooserSharpMSEditor.Views.OverrideEditorView"
              x:DataType="vme:OverrideEditorViewModel">
+    <UserControl.Resources>
+        <views:CollectionJoinConverter x:Key="Join" />
+    </UserControl.Resources>
     <StackPanel Spacing="10">
         <StackPanel Orientation="Horizontal" Spacing="10">
             <TextBlock Text="&#xE787;" FontFamily="Segoe Fluent Icons,Segoe MDL2 Assets"
                        FontSize="22" Foreground="#7aa2f7" VerticalAlignment="Center" />
-            <TextBlock Text="Override:" FontSize="20" FontWeight="SemiBold" VerticalAlignment="Center" />
+            <TextBlock Text="{l:Localize Editor.Override}" FontSize="20" FontWeight="SemiBold" VerticalAlignment="Center" />
             <TextBox Text="{Binding Override.Name}" Width="300" VerticalAlignment="Center" FontFamily="Cascadia Mono,Consolas" />
         </StackPanel>
         <TextBlock Text="{Binding ParentDisplay}" Foreground="#888" FontFamily="Cascadia Mono,Consolas" />
-        <TextBlock Text="{Binding File.DisplayName, StringFormat='File: {0}'}" Foreground="#888" />
+        <TextBlock Text="{Binding File.DisplayName, StringFormat={l:Localize Label.FilePrefix}}" Foreground="#888" />
 
         <Separator />
 
         <!-- Override trigger definition -->
         <Border Padding="12" Background="#1e1e1e" CornerRadius="4">
             <StackPanel Spacing="10">
-                <TextBlock Text="Trigger" FontWeight="SemiBold" Foreground="#9cdcfe" />
+                <TextBlock Text="{l:Localize Override.Trigger}" FontWeight="SemiBold" Foreground="#9cdcfe" />
                 <Grid ColumnDefinitions="200,*" RowDefinitions="Auto,Auto,Auto">
-                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Enabled" VerticalAlignment="Center" />
+                    <TextBlock Grid.Row="0" Grid.Column="0" Text="{l:Localize Override.Enabled}" VerticalAlignment="Center" />
                     <CheckBox Grid.Row="0" Grid.Column="1" IsChecked="{Binding Override.Enabled}" />
 
-                    <TextBlock Grid.Row="1" Grid.Column="0" Text="ForceOverride" VerticalAlignment="Center" />
+                    <TextBlock Grid.Row="1" Grid.Column="0" Text="{l:Localize Override.ForceOverride}" VerticalAlignment="Center" />
                     <CheckBox Grid.Row="1" Grid.Column="1" IsChecked="{Binding Override.ForceOverride}" />
 
-                    <TextBlock Grid.Row="2" Grid.Column="0" Text="OverridePriority" VerticalAlignment="Center" />
+                    <TextBlock Grid.Row="2" Grid.Column="0" Text="{l:Localize Override.OverridePriority}" VerticalAlignment="Center" />
                     <NumericUpDown Grid.Row="2" Grid.Column="1" Value="{Binding Override.OverridePriority}" FormatString="0" />
                 </Grid>
 
-                <TextBlock Text="TargetDays" FontWeight="SemiBold" Foreground="#9cdcfe" Margin="0,8,0,0" />
+                <TextBlock Text="{l:Localize Override.TargetDays}" FontWeight="SemiBold" Foreground="#9cdcfe" Margin="0,8,0,0" />
                 <ItemsControl ItemsSource="{x:Static vme:PropertySetViewModel.AllDays}">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
@@ -49,12 +53,12 @@
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
                 <TextBlock Foreground="#888" FontSize="12"
-                           Text="{Binding Override.TargetDays, StringFormat='selected: {0}'}" />
+                           Text="{Binding Override.TargetDays, Converter={StaticResource Join}, StringFormat={l:Localize Override.SelectedDays}}" />
 
-                <TextBlock Text="TargetTimeRanges" FontWeight="SemiBold" Foreground="#9cdcfe" Margin="0,8,0,0" />
+                <TextBlock Text="{l:Localize Override.TargetTimeRanges}" FontWeight="SemiBold" Foreground="#9cdcfe" Margin="0,8,0,0" />
                 <StackPanel Orientation="Horizontal" Spacing="6">
-                    <TextBox x:Name="NewRangeBox" Width="180" Watermark="HH:mm-HH:mm" />
-                    <Button Content="Add" Click="OnAddTargetTimeRange" />
+                    <TextBox x:Name="NewRangeBox" Width="180" Watermark="{l:Localize Watermark.TimeRange}" />
+                    <Button Content="{l:Localize Button.Add}" Click="OnAddTargetTimeRange" />
                 </StackPanel>
                 <ItemsControl ItemsSource="{Binding Override.TargetTimeRanges}">
                     <ItemsControl.ItemTemplate>
@@ -70,7 +74,7 @@
             </StackPanel>
         </Border>
 
-        <TextBlock Text="Overridden Properties (only checked fields are written)"
+        <TextBlock Text="{l:Localize Override.OverriddenProps}"
                    FontSize="14" FontWeight="SemiBold" Foreground="#9cdcfe" Margin="0,16,0,0" />
         <views:PropertySetView DataContext="{Binding Properties}" />
     </StackPanel>

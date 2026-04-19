@@ -101,7 +101,7 @@
                                          Text="{Binding NewGroupName, Mode=TwoWay}"
                                          ItemsSource="{Binding Project.AllGroupNames}"
                                          FilterMode="ContainsOrdinal"
-                                         Watermark="group name"
+                                         Watermark="{l:Localize Watermark.GroupName}"
                                          MinimumPrefixLength="0" />
                         <Button Content="{l:Localize Button.Add}" Command="{Binding AddGroupReferenceCommand}" />
                     </StackPanel>
@@ -118,7 +118,7 @@
                                            FontFamily="Segoe Fluent Icons,Segoe MDL2 Assets"
                                            Foreground="#f0a33d" Margin="0,0,6,0"
                                            VerticalAlignment="Center"
-                                           ToolTip.Tip="このグループ名は読み込まれたファイル群の中に存在しません"
+                                           ToolTip.Tip="{l:Localize Tip.UnknownGroup}"
                                            IsVisible="{Binding !IsKnown}" />
                                 <TextBlock Grid.Column="1" Text="{Binding Name}" VerticalAlignment="Center" />
                                 <Button Grid.Column="2" Content="×"
@@ -278,7 +278,7 @@
                 <Grid ColumnDefinitions="220,*,130,Auto">
                     <TextBlock Grid.Column="0" Classes="propLabel" Text="{l:Localize Prop.AllowedTimeRanges}" ToolTip.Tip="{l:Localize Prop.AllowedTimeRanges.Desc}" />
                     <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6">
-                        <TextBox Text="{Binding NewTimeRange}" Width="160" Watermark="HH:mm-HH:mm" />
+                        <TextBox Text="{Binding NewTimeRange}" Width="160" Watermark="{l:Localize Watermark.TimeRange}" />
                         <Button Content="{l:Localize Button.Add}" Command="{Binding AddTimeRangeCommand}" />
                     </StackPanel>
                     <TextBlock Grid.Column="2" Text="{Binding InheritedStatusText}" Classes="usingDefault" Margin="8,0" IsVisible="{Binding !Model.HasAllowedTimeRanges}" />
@@ -316,7 +316,7 @@
         <Border Classes="propRow" Classes.hasOverride="{Binding Model.HasCooldownDateTime}">
             <Grid ColumnDefinitions="220,*,130,Auto">
                 <TextBlock Grid.Column="0" Classes="propLabel" Text="{l:Localize Prop.CooldownDateTime}" ToolTip.Tip="{l:Localize Prop.CooldownDateTime.Desc}" />
-                <TextBox Grid.Column="1" Text="{Binding Model.CooldownDateTime}" Watermark="e.g. 2d or 1m" />
+                <TextBox Grid.Column="1" Text="{Binding Model.CooldownDateTime}" Watermark="{l:Localize Watermark.CooldownDateTime}" />
                 <TextBlock Grid.Column="2" Text="{Binding InheritedStatusText}" Classes="usingDefault" Margin="8,0" IsVisible="{Binding !Model.HasCooldownDateTime}" />
                 <Button Grid.Column="3" Classes="action" Content="{l:Localize Button.Reset}" ToolTip.Tip="{l:Localize Tip.Reset}" Command="{Binding ClearOverrideCommand}" CommandParameter="CooldownDateTime"
                         IsVisible="{Binding Model.HasCooldownDateTime}" />
@@ -327,7 +327,7 @@
         <Border Classes="propRow">
             <StackPanel Spacing="6">
                 <StackPanel Orientation="Horizontal" Spacing="6">
-                    <TextBox Text="{Binding NewExtraSectionName}" Width="220" Watermark="section name (e.g. shop)" />
+                    <TextBox Text="{Binding NewExtraSectionName}" Width="220" Watermark="{l:Localize Watermark.SectionName}" />
                     <Button Content="{l:Localize Button.AddSection}" Command="{Binding AddExtraSectionCommand}" />
                 </StackPanel>
                 <ItemsControl ItemsSource="{Binding Model.Extras}">
@@ -336,7 +336,7 @@
                             <Border Background="#1e1e1e" Padding="8" Margin="0,4" CornerRadius="4">
                                 <StackPanel Spacing="6">
                                     <Grid ColumnDefinitions="Auto,*,Auto">
-                                        <TextBlock Text="[extra." VerticalAlignment="Center" Foreground="#888" />
+                                        <TextBlock Text="{l:Localize Extra.Prefix}" VerticalAlignment="Center" Foreground="#888" />
                                         <TextBox Grid.Column="1" Text="{Binding Name}" />
                                         <Button Grid.Column="2" Content="{l:Localize Button.RemoveSection}" Margin="6,0,0,0"
                                                 Command="{Binding $parent[ItemsControl].((vme:PropertySetViewModel)DataContext).RemoveExtraSectionCommand}"
@@ -346,7 +346,7 @@
                                         <ItemsControl.ItemTemplate>
                                             <DataTemplate DataType="models:ExtraKeyValue">
                                                 <Grid ColumnDefinitions="180,120,*,Auto" Margin="0,2">
-                                                    <TextBox Text="{Binding Key}" Watermark="key" />
+                                                    <TextBox Text="{Binding Key}" Watermark="{l:Localize Watermark.ExtraKey}" />
                                                     <ComboBox Grid.Column="1" Margin="4,0"
                                                               SelectedItem="{Binding Kind}">
                                                         <models:ExtraValueKind>String</models:ExtraValueKind>
@@ -354,7 +354,7 @@
                                                         <models:ExtraValueKind>Float</models:ExtraValueKind>
                                                         <models:ExtraValueKind>Boolean</models:ExtraValueKind>
                                                     </ComboBox>
-                                                    <TextBox Grid.Column="2" Text="{Binding Value}" Watermark="value" />
+                                                    <TextBox Grid.Column="2" Text="{Binding Value}" Watermark="{l:Localize Watermark.ExtraValue}" />
                                                 </Grid>
                                             </DataTemplate>
                                         </ItemsControl.ItemTemplate>

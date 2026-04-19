@@ -3,6 +3,7 @@
              xmlns:vme="using:MapChooserSharpMSEditor.ViewModels.Editors"
              xmlns:models="using:MapChooserSharpMSEditor.Models"
              xmlns:views="using:MapChooserSharpMSEditor.Views"
+             xmlns:l="using:MapChooserSharpMSEditor.Services"
              x:Class="MapChooserSharpMSEditor.Views.GroupEditorView"
              x:DataType="vme:GroupEditorViewModel">
     <UserControl.Resources>
@@ -12,16 +13,16 @@
         <StackPanel Orientation="Horizontal" Spacing="10">
             <TextBlock Text="&#xE902;" FontFamily="Segoe Fluent Icons,Segoe MDL2 Assets"
                        FontSize="22" Foreground="#7aa2f7" VerticalAlignment="Center" />
-            <TextBlock Text="Group:" FontSize="20" FontWeight="SemiBold" VerticalAlignment="Center" />
+            <TextBlock Text="{l:Localize Editor.Group}" FontSize="20" FontWeight="SemiBold" VerticalAlignment="Center" />
             <TextBox Text="{Binding Group.GroupName}" Width="320" VerticalAlignment="Center" FontFamily="Cascadia Mono,Consolas" />
         </StackPanel>
-        <TextBlock Text="{Binding File.DisplayName, StringFormat='File: {0}'}" Foreground="#888" />
+        <TextBlock Text="{Binding File.DisplayName, StringFormat={l:Localize Label.FilePrefix}}" Foreground="#888" />
         <Separator />
         <views:PropertySetView DataContext="{Binding Properties}" />
 
-        <TextBlock Text="DaySettings Overrides (applies to all maps referencing this group)"
+        <TextBlock Text="{l:Localize DaySettings.GroupTitle}"
                    FontSize="14" FontWeight="SemiBold" Foreground="#9cdcfe" Margin="0,16,0,6" />
-        <Button Content="+ Add Override" HorizontalAlignment="Left" Command="{Binding AddDaySettingsCommand}" />
+        <Button Content="{l:Localize Button.AddOverride}" HorizontalAlignment="Left" Command="{Binding AddDaySettingsCommand}" />
         <ItemsControl ItemsSource="{Binding Group.DaySettings}">
             <ItemsControl.ItemTemplate>
                 <DataTemplate DataType="models:DaySettingsOverrideModel">
@@ -30,14 +31,14 @@
                             <StackPanel Spacing="4">
                                 <TextBlock Text="{Binding Name}" FontWeight="SemiBold" />
                                 <TextBlock Foreground="#888" FontSize="12"
-                                           Text="{Binding TargetDays, Converter={StaticResource Join}, StringFormat='Days: {0}'}" />
+                                           Text="{Binding TargetDays, Converter={StaticResource Join}, StringFormat={l:Localize DaySettings.DaysLabel}}" />
                                 <TextBlock Foreground="#888" FontSize="12"
-                                           Text="{Binding TargetTimeRanges, Converter={StaticResource Join}, StringFormat='Times: {0}'}" />
+                                           Text="{Binding TargetTimeRanges, Converter={StaticResource Join}, StringFormat={l:Localize DaySettings.TimesLabel}}" />
                             </StackPanel>
-                            <Button Grid.Column="1" Content="Open" VerticalAlignment="Top" Margin="0,0,6,0"
+                            <Button Grid.Column="1" Content="{l:Localize Button.Open}" VerticalAlignment="Top" Margin="0,0,6,0"
                                     Command="{Binding $parent[ItemsControl].((vme:GroupEditorViewModel)DataContext).OpenDaySettingsCommand}"
                                     CommandParameter="{Binding}" />
-                            <Button Grid.Column="2" Content="Remove" VerticalAlignment="Top"
+                            <Button Grid.Column="2" Content="{l:Localize Button.Remove}" VerticalAlignment="Top"
                                     Command="{Binding $parent[ItemsControl].((vme:GroupEditorViewModel)DataContext).RemoveDaySettingsCommand}"
                                     CommandParameter="{Binding}" />
                         </Grid>

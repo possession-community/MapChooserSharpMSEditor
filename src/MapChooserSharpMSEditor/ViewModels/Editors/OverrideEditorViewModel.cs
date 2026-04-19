@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using MapChooserSharpMSEditor.Models;
+using MapChooserSharpMSEditor.Services;
 
 namespace MapChooserSharpMSEditor.ViewModels.Editors;
 
@@ -37,8 +38,8 @@ public sealed class OverrideEditorViewModel : ViewModelBase
             inheritedStatusKey: "Status.FromOverrideTarget");
         ParentDisplay = parent switch
         {
-            MapEntryModel m => $"Map: {m.MapName}",
-            GroupEntryModel g => $"Group: {g.GroupName}",
+            MapEntryModel m => Localization.Format("Editor.ParentMap", m.MapName),
+            GroupEntryModel g => Localization.Format("Editor.ParentGroup", g.GroupName),
             _ => "",
         };
     }

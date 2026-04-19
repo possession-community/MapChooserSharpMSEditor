@@ -2,6 +2,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vme="using:MapChooserSharpMSEditor.ViewModels.Editors"
              xmlns:models="using:MapChooserSharpMSEditor.Models"
+             xmlns:l="using:MapChooserSharpMSEditor.Services"
              x:Class="MapChooserSharpMSEditor.Views.FileOverviewView"
              x:DataType="vme:FileOverviewViewModel">
     <UserControl.Styles>
@@ -18,14 +19,14 @@
             <TextBlock Text="&#xE8A5;" FontFamily="Segoe Fluent Icons,Segoe MDL2 Assets"
                        FontSize="22" Foreground="#7aa2f7" VerticalAlignment="Center" />
             <TextBlock Text="{Binding File.DisplayName}" FontSize="20" FontWeight="SemiBold" VerticalAlignment="Center" />
-            <Button Content="Open Default Settings" Margin="12,0,0,0" Command="{Binding OpenDefaultCommand}" />
+            <Button Content="{l:Localize Button.OpenDefault}" Margin="12,0,0,0" Command="{Binding OpenDefaultCommand}" />
         </StackPanel>
 
-        <TextBox Watermark="Filter groups and maps..." Text="{Binding Filter, Mode=TwoWay}" Width="360" HorizontalAlignment="Left" />
+        <TextBox Watermark="{l:Localize Watermark.Filter}" Text="{Binding Filter, Mode=TwoWay}" Width="360" HorizontalAlignment="Left" />
 
         <!-- Groups -->
         <StackPanel Spacing="4">
-            <TextBlock FontSize="14" FontWeight="SemiBold" Foreground="#9cdcfe" Text="{Binding File.Groups.Count, StringFormat='Groups ({0})'}" />
+            <TextBlock FontSize="14" FontWeight="SemiBold" Foreground="#9cdcfe" Text="{Binding GroupsHeading}" />
             <Border Background="#1e1e1e" Padding="10" CornerRadius="4">
                 <StackPanel>
                     <ItemsControl ItemsSource="{Binding FilteredGroups}">
@@ -39,13 +40,13 @@
                                                    Foreground="#7aa2f7" VerticalAlignment="Center" />
                                         <TextBlock Text="{Binding GroupName}" FontFamily="Cascadia Mono,Consolas" VerticalAlignment="Center" />
                                         <TextBlock Foreground="#888" FontSize="11" VerticalAlignment="Center"
-                                                   Text="{Binding DaySettings.Count, StringFormat='{}{0} day-settings'}" />
+                                                   Text="{Binding DaySettings.Count, StringFormat={l:Localize Overview.DaySettingsCount}}" />
                                     </StackPanel>
                                 </Button>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
-                    <TextBlock Text="(no groups)" Foreground="#666" FontStyle="Italic"
+                    <TextBlock Text="{l:Localize Overview.NoGroups}" Foreground="#666" FontStyle="Italic"
                                IsVisible="{Binding !FilteredGroups.Count}" />
                 </StackPanel>
             </Border>
@@ -53,7 +54,7 @@
 
         <!-- Maps -->
         <StackPanel Spacing="4">
-            <TextBlock FontSize="14" FontWeight="SemiBold" Foreground="#9cdcfe" Text="{Binding File.Maps.Count, StringFormat='Maps ({0})'}" />
+            <TextBlock FontSize="14" FontWeight="SemiBold" Foreground="#9cdcfe" Text="{Binding MapsHeading}" />
             <Border Background="#1e1e1e" Padding="10" CornerRadius="4">
                 <StackPanel>
                     <ItemsControl ItemsSource="{Binding FilteredMaps}">
@@ -67,16 +68,16 @@
                                                    Foreground="#7aa2f7" VerticalAlignment="Center" />
                                         <TextBlock Text="{Binding MapName}" FontFamily="Cascadia Mono,Consolas" VerticalAlignment="Center" />
                                         <TextBlock Foreground="#888" FontSize="11" VerticalAlignment="Center"
-                                                   Text="{Binding Properties.MapNameAlias, StringFormat='“{0}”'}"
+                                                   Text="{Binding Properties.MapNameAlias, StringFormat={l:Localize Overview.MapAliasFormat}}"
                                                    IsVisible="{Binding Properties.HasMapNameAlias}" />
                                         <TextBlock Foreground="#888" FontSize="11" VerticalAlignment="Center"
-                                                   Text="{Binding DaySettings.Count, StringFormat='{}{0} day-settings'}" />
+                                                   Text="{Binding DaySettings.Count, StringFormat={l:Localize Overview.DaySettingsCount}}" />
                                     </StackPanel>
                                 </Button>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
-                    <TextBlock Text="(no maps)" Foreground="#666" FontStyle="Italic"
+                    <TextBlock Text="{l:Localize Overview.NoMaps}" Foreground="#666" FontStyle="Italic"
                                IsVisible="{Binding !FilteredMaps.Count}" />
                 </StackPanel>
             </Border>

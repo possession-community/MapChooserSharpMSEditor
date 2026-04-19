@@ -1,9 +1,9 @@
+using MapChooserSharpMSEditor.Services;
+
 namespace MapChooserSharpMSEditor.ViewModels.Editors;
 
 public sealed class WelcomeViewModel : ViewModelBase
 {
-    public string Title => "MapChooserSharpMS Config Editor";
-    public string Description =>
-        "File → Open File / Open Folder でTOML設定ファイルを開いてください。\n" +
-        "左ツリーからDefault / Groups / Maps / DaySettingsのセクションを選択して編集できます。";
+    public string Title => Localization.Get("Welcome.Title");
+    public string Description => Localization.Get("Welcome.Description");
 }

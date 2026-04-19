@@ -5,6 +5,7 @@ using System.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MapChooserSharpMSEditor.Models;
+using MapChooserSharpMSEditor.Services;
 
 namespace MapChooserSharpMSEditor.ViewModels.Editors;
 
@@ -23,15 +24,25 @@ public sealed partial class FileOverviewViewModel : ViewModelBase
     public ObservableCollection<GroupEntryModel> FilteredGroups { get; } = new();
     public ObservableCollection<MapEntryModel> FilteredMaps { get; } = new();
 
+    [ObservableProperty] private string _groupsHeading = "";
+    [ObservableProperty] private string _mapsHeading = "";
+
     public FileOverviewViewModel(MapConfigFile file, MainWindowViewModel main)
     {
         File = file;
         _main = main;
         Rebuild();
+        RefreshHeadings();
 
         // Live refresh if the file's groups/maps change (add/rename/remove).
-        File.Groups.CollectionChanged += (_, _) => Rebuild();
-        File.Maps.CollectionChanged += (_, _) => Rebuild();
+        File.Groups.CollectionChanged += (_, _) => { Rebuild(); RefreshHeadings(); };
+        File.Maps.CollectionChanged += (_, _) => { Rebuild(); RefreshHeadings(); };
+    }
+
+    private void RefreshHeadings()
+    {
+        GroupsHeading = Localization.Format("Overview.GroupsCount", File.Groups.Count);
+        MapsHeading = Localization.Format("Overview.MapsCount", File.Maps.Count);
     }
 
     partial void OnFilterChanged(string value) => Rebuild();

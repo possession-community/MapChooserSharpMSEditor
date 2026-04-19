@@ -5,16 +5,14 @@ using System.Globalization;
 namespace MapChooserSharpMSEditor.Services;
 
 /// <summary>
-/// Minimal string catalog used throughout the UI. Keys are dotted namespaces
-/// (e.g. <c>Prop.MaxExtends</c>, <c>Section.Basic</c>, <c>Status.UsingDefault</c>).
+/// Minimal string catalog used throughout the UI. Keys are dotted namespaces.
 ///
-/// To add a locale, add another entry to <see cref="_strings"/>. To translate, fill in
-/// keys that the default locale defines — missing keys fall back to English, which falls
-/// back to the raw key so developers can spot missing entries.
+/// To add a locale, add another entry to <see cref="_strings"/>. Missing keys fall back to
+/// English, which falls back to the raw key so developers can spot missing entries.
 ///
-/// Current limitation: <see cref="CurrentLocale"/> is read at startup and injected into
-/// the markup extension's ProvideValue. Changing it at runtime does not re-resolve
-/// already-rendered strings; a window reload is needed.
+/// Current limitation: <see cref="CurrentLocale"/> is read once at startup and injected into
+/// the markup extension's ProvideValue. Changing it at runtime does not re-resolve already-
+/// rendered strings.
 /// </summary>
 public static class Localization
 {
@@ -40,39 +38,153 @@ public static class Localization
         return fallback ?? key;
     }
 
+    /// <summary>Shortcut for <c>string.Format(Get(key), args)</c>.</summary>
+    public static string Format(string key, params object?[] args) =>
+        string.Format(Get(key), args);
+
     private static readonly Dictionary<string, Dictionary<string, string>> _strings = new()
     {
         ["en"] = new()
         {
-            // Section headers
+            // ===== App =====
+            ["App.Title"] = "MapChooserSharpMS Config Editor",
+
+            // ===== Menu =====
+            ["Menu.File"] = "_File",
+            ["Menu.File.New"] = "_New",
+            ["Menu.File.OpenFile"] = "_Open File...",
+            ["Menu.File.OpenFolder"] = "Open _Folder...",
+            ["Menu.File.Save"] = "_Save",
+            ["Menu.File.SaveAs"] = "Save _As...",
+            ["Menu.File.SaveAll"] = "Save A_ll",
+            ["Menu.File.Close"] = "_Close File",
+            ["Menu.Edit"] = "_Edit",
+            ["Menu.Edit.Undo"] = "_Undo",
+            ["Menu.Edit.Redo"] = "_Redo",
+            ["Menu.Edit.AddMap"] = "Add _Map",
+            ["Menu.Edit.AddGroup"] = "Add _Group",
+
+            // ===== Sidebar =====
+            ["Sidebar.Header"] = "Config Files",
+            ["Sidebar.ToggleResolved"] = "Toggle resolved-values panel",
+
+            // ===== Welcome =====
+            ["Welcome.Title"] = "MapChooserSharpMS Config Editor",
+            ["Welcome.Description"] = "Use File → Open File / Open Folder to load a TOML config.\nSelect Default / Groups / Maps / DaySettings in the left tree to edit.",
+
+            // ===== Section headers =====
             ["Section.Basic"] = "Basic",
             ["Section.ExtendTime"] = "Extend / Time",
             ["Section.Nomination"] = "Nomination / Pick",
             ["Section.Cooldown"] = "Cooldown",
             ["Section.Extra"] = "Extra (external plugin data)",
 
-            // Buttons / actions
+            // ===== Common buttons / actions =====
             ["Button.Reset"] = "Reset",
             ["Button.ResetAll"] = "Reset all",
             ["Button.Add"] = "Add",
+            ["Button.AddEntry"] = "+ Add",
             ["Button.Remove"] = "Remove",
             ["Button.AddSection"] = "Add Section",
             ["Button.RemoveSection"] = "Remove Section",
             ["Button.AddKey"] = "+ key",
+            ["Button.Open"] = "Open",
+            ["Button.OpenDefault"] = "Open Default Settings",
+            ["Button.AddOverride"] = "+ Add Override",
 
-            // Status / inline annotations
+            // ===== Status / inline annotations =====
             ["Status.UsingDefault"] = "using default",
             ["Status.NoInheritance"] = "no inheritance",
             ["Status.NoOverride"] = "no override",
             ["Status.FromOverrideTarget"] = "from override target",
+            ["Status.Ready"] = "Ready",
+
+            // ===== Resolved-panel sources =====
             ["Source.OverrideTargetMap"] = "Override target (Map: {0})",
             ["Source.OverrideTargetGroup"] = "Override target (Group: {0})",
+            ["Source.Unset"] = "(unset)",
 
-            // Tooltips
+            // ===== Tooltips =====
             ["Tip.Reset"] = "Revert to default (removes entry from TOML)",
             ["Tip.ResetAll"] = "Clear all entries and revert to default",
+            ["Tip.UnknownGroup"] = "This group name isn't defined in any loaded file.",
 
-            // Property labels
+            // ===== Watermarks =====
+            ["Watermark.GroupName"] = "group name",
+            ["Watermark.SectionName"] = "section name (e.g. shop)",
+            ["Watermark.TimeRange"] = "HH:mm-HH:mm",
+            ["Watermark.ExtraKey"] = "key",
+            ["Watermark.ExtraValue"] = "value",
+            ["Watermark.Filter"] = "Filter groups and maps...",
+            ["Watermark.Search"] = "Search by name...",
+            ["Watermark.CooldownDateTime"] = "e.g. 2d or 1m",
+
+            // ===== File overview / category list =====
+            ["Overview.GroupsCount"] = "Groups ({0})",
+            ["Overview.MapsCount"] = "Maps ({0})",
+            ["Overview.NoGroups"] = "(no groups)",
+            ["Overview.NoMaps"] = "(no maps)",
+            ["Overview.DaySettingsCount"] = "{0} day-settings",
+            ["Overview.MapAliasFormat"] = "\u201C{0}\u201D",
+
+            ["Category.Maps"] = "Maps",
+            ["Category.Groups"] = "Groups",
+            ["Category.EmptyMaps"] = "No maps are defined in this file yet.",
+            ["Category.EmptyGroups"] = "No groups are defined in this file yet.",
+
+            // ===== File line in editor headers =====
+            ["Label.FilePrefix"] = "File: {0}",
+
+            // ===== Map / Group editor headers =====
+            ["Editor.Map"] = "Map:",
+            ["Editor.Group"] = "Group:",
+            ["Editor.Override"] = "Override:",
+            ["Editor.ParentMap"] = "Map: {0}",
+            ["Editor.ParentGroup"] = "Group: {0}",
+
+            // ===== DaySettings section =====
+            ["DaySettings.Title"] = "DaySettings Overrides",
+            ["DaySettings.GroupTitle"] = "DaySettings Overrides (applies to all maps referencing this group)",
+            ["DaySettings.DaysLabel"] = "Days: {0}",
+            ["DaySettings.TimesLabel"] = "Times: {0}",
+            ["DaySettings.PriorityLabel"] = "Priority: {0}",
+            ["DaySettings.EditHint"] = "To edit a DaySettings override, click its name in the tree under this Map.",
+
+            // ===== Override editor: trigger block =====
+            ["Override.Trigger"] = "Trigger",
+            ["Override.Enabled"] = "Enabled",
+            ["Override.ForceOverride"] = "ForceOverride",
+            ["Override.OverridePriority"] = "OverridePriority",
+            ["Override.TargetDays"] = "TargetDays",
+            ["Override.TargetTimeRanges"] = "TargetTimeRanges",
+            ["Override.SelectedDays"] = "selected: {0}",
+            ["Override.OverriddenProps"] = "Overridden Properties (only checked fields are written)",
+
+            // ===== Default settings header =====
+            ["Default.Title"] = "Default Settings",
+            ["Default.Section"] = "[MapChooserSharpSettings.Default]",
+
+            // ===== Resolved panel =====
+            ["Resolved.Placeholder.Heading"] = "Resolved Values",
+            ["Resolved.Placeholder.Body"] = "Select a map, group or override to preview.",
+            ["Resolved.HeadingDefault"] = "Effective Values \u2014 Default",
+            ["Resolved.HeadingGroup"] = "Effective Values \u2014 Group: {0}",
+            ["Resolved.HeadingMap"] = "Effective Values \u2014 Map: {0}",
+            ["Resolved.HeadingOverride"] = "Effective Values \u2014 Override: {0}",
+
+            // ===== Status bar messages =====
+            ["Status.Loaded"] = "Loaded {0}",
+            ["Status.LoadFailed"] = "Failed to load {0}: {1}",
+            ["Status.OpenedFolder"] = "Opened folder {0}",
+            ["Status.NoTomlFound"] = "No .toml files found under {0}",
+            ["Status.Skipped"] = "Skipped {0}: {1}",
+            ["Status.Saved"] = "Saved {0}",
+            ["Status.SaveFailed"] = "Save failed: {0}",
+
+            // ===== Extra markers =====
+            ["Extra.Prefix"] = "[extra.",
+
+            // ===== Property labels =====
             ["Prop.MapNameAlias"] = "Display Name",
             ["Prop.MapDescription"] = "Description",
             ["Prop.WorkshopId"] = "Workshop ID",
@@ -94,7 +206,7 @@ public static class Localization
             ["Prop.Cooldown"] = "Cooldown (plays)",
             ["Prop.CooldownDateTime"] = "Cooldown (time)",
 
-            // Property descriptions (tooltips)
+            // ===== Property descriptions (tooltips) =====
             ["Prop.MapNameAlias.Desc"] = "Display name shown in place of the raw map name.",
             ["Prop.MapDescription.Desc"] = "Shown after the vote finishes, before the map transition.",
             ["Prop.WorkshopId.Desc"] = "Steam Workshop ID for workshop maps.",
@@ -108,8 +220,8 @@ public static class Localization
             ["Prop.ExtendRoundsPerExtends.Desc"] = "Rounds added per extend (round-based cycle).",
             ["Prop.MapRounds.Desc"] = "Initial mp_maxrounds value.",
             ["Prop.OnlyNomination.Desc"] = "Exclude this map from random vote picks.",
-            ["Prop.MaxPlayers.Desc"] = "Nomination allowed only when player count ≤ this.",
-            ["Prop.MinPlayers.Desc"] = "Nomination allowed only when player count ≥ this.",
+            ["Prop.MaxPlayers.Desc"] = "Nomination allowed only when player count \u2264 this.",
+            ["Prop.MinPlayers.Desc"] = "Nomination allowed only when player count \u2265 this.",
             ["Prop.ProhibitAdminNomination.Desc"] = "Only the server console can nominate.",
             ["Prop.DaysAllowed.Desc"] = "Nomination restricted to these days of week.",
             ["Prop.AllowedTimeRanges.Desc"] = "Nomination restricted to these time windows.",
@@ -118,6 +230,28 @@ public static class Localization
         },
         ["ja"] = new()
         {
+            ["App.Title"] = "MapChooserSharpMS 設定エディタ",
+
+            ["Menu.File"] = "ファイル(_F)",
+            ["Menu.File.New"] = "新規作成(_N)",
+            ["Menu.File.OpenFile"] = "ファイルを開く...(_O)",
+            ["Menu.File.OpenFolder"] = "フォルダを開く...(_F)",
+            ["Menu.File.Save"] = "保存(_S)",
+            ["Menu.File.SaveAs"] = "名前を付けて保存...(_A)",
+            ["Menu.File.SaveAll"] = "すべて保存(_L)",
+            ["Menu.File.Close"] = "ファイルを閉じる(_C)",
+            ["Menu.Edit"] = "編集(_E)",
+            ["Menu.Edit.Undo"] = "元に戻す(_U)",
+            ["Menu.Edit.Redo"] = "やり直し(_R)",
+            ["Menu.Edit.AddMap"] = "マップを追加(_M)",
+            ["Menu.Edit.AddGroup"] = "グループを追加(_G)",
+
+            ["Sidebar.Header"] = "設定ファイル",
+            ["Sidebar.ToggleResolved"] = "Effective Valuesパネルの開閉",
+
+            ["Welcome.Title"] = "MapChooserSharpMS 設定エディタ",
+            ["Welcome.Description"] = "ファイル → ファイルを開く / フォルダを開く で TOML 設定ファイルを読み込みます。\n左ツリーから Default / Groups / Maps / DaySettings を選択して編集してください。",
+
             ["Section.Basic"] = "基本",
             ["Section.ExtendTime"] = "延長 / 時間",
             ["Section.Nomination"] = "推薦 / 選出",
@@ -127,20 +261,93 @@ public static class Localization
             ["Button.Reset"] = "リセット",
             ["Button.ResetAll"] = "全リセット",
             ["Button.Add"] = "追加",
+            ["Button.AddEntry"] = "+ 追加",
             ["Button.Remove"] = "削除",
             ["Button.AddSection"] = "セクション追加",
             ["Button.RemoveSection"] = "セクション削除",
             ["Button.AddKey"] = "+ キー",
+            ["Button.Open"] = "開く",
+            ["Button.OpenDefault"] = "Default設定を開く",
+            ["Button.AddOverride"] = "+ オーバーライド追加",
 
             ["Status.UsingDefault"] = "デフォルトを使用中",
             ["Status.NoInheritance"] = "継承なし",
             ["Status.NoOverride"] = "上書きなし",
             ["Status.FromOverrideTarget"] = "オーバーライド元から継承",
+            ["Status.Ready"] = "準備完了",
+
             ["Source.OverrideTargetMap"] = "オーバーライド元 (Map: {0})",
             ["Source.OverrideTargetGroup"] = "オーバーライド元 (Group: {0})",
+            ["Source.Unset"] = "(未設定)",
 
             ["Tip.Reset"] = "デフォルトに戻す (TOML からこのエントリを削除)",
             ["Tip.ResetAll"] = "全エントリを削除してデフォルトに戻す",
+            ["Tip.UnknownGroup"] = "このグループ名は読み込まれたファイル群の中に存在しません。",
+
+            ["Watermark.GroupName"] = "グループ名",
+            ["Watermark.SectionName"] = "セクション名 (例: shop)",
+            ["Watermark.TimeRange"] = "HH:mm-HH:mm",
+            ["Watermark.ExtraKey"] = "キー",
+            ["Watermark.ExtraValue"] = "値",
+            ["Watermark.Filter"] = "グループ・マップを絞り込み...",
+            ["Watermark.Search"] = "名前で検索...",
+            ["Watermark.CooldownDateTime"] = "例: 2d または 1m",
+
+            ["Overview.GroupsCount"] = "グループ ({0})",
+            ["Overview.MapsCount"] = "マップ ({0})",
+            ["Overview.NoGroups"] = "(グループなし)",
+            ["Overview.NoMaps"] = "(マップなし)",
+            ["Overview.DaySettingsCount"] = "DaySettings {0} 件",
+            ["Overview.MapAliasFormat"] = "\u201C{0}\u201D",
+
+            ["Category.Maps"] = "マップ一覧",
+            ["Category.Groups"] = "グループ一覧",
+            ["Category.EmptyMaps"] = "このファイルにはマップがまだ定義されていません。",
+            ["Category.EmptyGroups"] = "このファイルにはグループがまだ定義されていません。",
+
+            ["Label.FilePrefix"] = "ファイル: {0}",
+
+            ["Editor.Map"] = "Map:",
+            ["Editor.Group"] = "Group:",
+            ["Editor.Override"] = "Override:",
+            ["Editor.ParentMap"] = "Map: {0}",
+            ["Editor.ParentGroup"] = "Group: {0}",
+
+            ["DaySettings.Title"] = "DaySettings オーバーライド",
+            ["DaySettings.GroupTitle"] = "DaySettings オーバーライド (このグループを参照する全マップに適用)",
+            ["DaySettings.DaysLabel"] = "曜日: {0}",
+            ["DaySettings.TimesLabel"] = "時間: {0}",
+            ["DaySettings.PriorityLabel"] = "優先度: {0}",
+            ["DaySettings.EditHint"] = "DaySettings を編集するには、左ツリーのこのマップ配下にあるオーバーライド名をクリックしてください。",
+
+            ["Override.Trigger"] = "トリガー条件",
+            ["Override.Enabled"] = "有効",
+            ["Override.ForceOverride"] = "強制上書き",
+            ["Override.OverridePriority"] = "優先度",
+            ["Override.TargetDays"] = "対象曜日",
+            ["Override.TargetTimeRanges"] = "対象時間帯",
+            ["Override.SelectedDays"] = "選択中: {0}",
+            ["Override.OverriddenProps"] = "上書きプロパティ (チェックが入ったフィールドのみ書き出されます)",
+
+            ["Default.Title"] = "Default 設定",
+            ["Default.Section"] = "[MapChooserSharpSettings.Default]",
+
+            ["Resolved.Placeholder.Heading"] = "Effective Values",
+            ["Resolved.Placeholder.Body"] = "マップ・グループ・オーバーライドのいずれかを選択するとプレビューされます。",
+            ["Resolved.HeadingDefault"] = "Effective Values \u2014 Default",
+            ["Resolved.HeadingGroup"] = "Effective Values \u2014 Group: {0}",
+            ["Resolved.HeadingMap"] = "Effective Values \u2014 Map: {0}",
+            ["Resolved.HeadingOverride"] = "Effective Values \u2014 Override: {0}",
+
+            ["Status.Loaded"] = "{0} を読み込みました",
+            ["Status.LoadFailed"] = "{0} の読み込みに失敗: {1}",
+            ["Status.OpenedFolder"] = "フォルダ {0} を開きました",
+            ["Status.NoTomlFound"] = "{0} 配下に .toml がありません",
+            ["Status.Skipped"] = "{0} をスキップ: {1}",
+            ["Status.Saved"] = "{0} を保存しました",
+            ["Status.SaveFailed"] = "保存失敗: {0}",
+
+            ["Extra.Prefix"] = "[extra.",
 
             ["Prop.MapNameAlias"] = "表示名",
             ["Prop.MapDescription"] = "マップ説明",
