@@ -1,0 +1,34 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:MapChooserSharpMSEditor.ViewModels"
+             xmlns:services="using:MapChooserSharpMSEditor.Services"
+             x:Class="MapChooserSharpMSEditor.Views.ResolvedPropertiesPanel"
+             x:DataType="vm:ResolvedPropertiesViewModel">
+    <DockPanel>
+        <Border DockPanel.Dock="Top" Background="#141414" Padding="10,8">
+            <StackPanel Spacing="2">
+                <TextBlock Text="{Binding Heading}" FontWeight="SemiBold" Foreground="#ddd" />
+                <TextBlock Text="{Binding ContextLine}" Foreground="#888" FontSize="11" />
+            </StackPanel>
+        </Border>
+        <ScrollViewer>
+            <ItemsControl ItemsSource="{Binding Rows}" Padding="4">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate DataType="services:PropertyResolver+ResolvedRow">
+                        <Border Background="#1e1e1e" Margin="2" Padding="6,4" CornerRadius="3">
+                            <StackPanel Spacing="1">
+                                <Grid ColumnDefinitions="*,Auto">
+                                    <TextBlock Text="{Binding Property}" FontWeight="SemiBold" Foreground="#9cdcfe" />
+                                    <TextBlock Grid.Column="1" Text="{Binding Source}" FontSize="10"
+                                               Foreground="#888" VerticalAlignment="Center" />
+                                </Grid>
+                                <TextBlock Text="{Binding DisplayValue}" FontFamily="Cascadia Mono,Consolas"
+                                           FontSize="12" Foreground="#e0e0e0" TextWrapping="Wrap" />
+                            </StackPanel>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+    </DockPanel>
+</UserControl>

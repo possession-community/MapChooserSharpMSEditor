@@ -1,0 +1,370 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vme="using:MapChooserSharpMSEditor.ViewModels.Editors"
+             xmlns:models="using:MapChooserSharpMSEditor.Models"
+             xmlns:sys="using:System"
+             xmlns:l="using:MapChooserSharpMSEditor.Services"
+             x:Class="MapChooserSharpMSEditor.Views.PropertySetView"
+             x:DataType="vme:PropertySetViewModel">
+
+    <UserControl.Styles>
+        <Style Selector="TextBlock.sectionHeader">
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Foreground" Value="#9cdcfe" />
+            <Setter Property="Margin" Value="0,12,0,6" />
+        </Style>
+        <Style Selector="Border.propRow">
+            <Setter Property="Padding" Value="8" />
+            <Setter Property="Margin" Value="0,2" />
+            <Setter Property="CornerRadius" Value="4" />
+            <Setter Property="Background" Value="#252525" />
+        </Style>
+        <Style Selector="Border.propRow.hasOverride">
+            <Setter Property="Background" Value="#2a3148" />
+        </Style>
+        <Style Selector="Button.action">
+            <Setter Property="MinWidth" Value="80" />
+            <Setter Property="Height" Value="32" />
+            <Setter Property="Padding" Value="10,0" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+        </Style>
+        <Style Selector="TextBlock.usingDefault">
+            <Setter Property="Foreground" Value="#888" />
+            <Setter Property="FontStyle" Value="Italic" />
+            <Setter Property="FontSize" Value="11" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+        <!-- Each row shares the same 4-column layout: label | editor | status | action -->
+        <Style Selector="TextBlock.propLabel">
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+    </UserControl.Styles>
+
+    <StackPanel Spacing="4">
+
+        <TextBlock Text="{l:Localize Section.Basic}" Classes="sectionHeader" />
+
+        <Border Classes="propRow" Classes.hasOverride="{Binding Model.HasMapNameAlias}">
+            <Grid ColumnDefinitions="220,*,130,Auto">
+                <TextBlock Grid.Column="0" Classes="propLabel" Text="{l:Localize Prop.MapNameAlias}" ToolTip.Tip="{l:Localize Prop.MapNameAlias.Desc}" />
+                <TextBox Grid.Column="1" Text="{Binding Model.MapNameAlias}" />
+                <TextBlock Grid.Column="2" Text="{l:Localize Status.UsingDefault}" Classes="usingDefault" Margin="8,0" IsVisible="{Binding !Model.HasMapNameAlias}" />
+                <Button Grid.Column="3" Classes="action" Content="{l:Localize Button.Reset}" ToolTip.Tip="{l:Localize Tip.Reset}"
+                        Command="{Binding ClearOverrideCommand}" CommandParameter="MapNameAlias"
+                        IsVisible="{Binding Model.HasMapNameAlias}" />
+            </Grid>
+        </Border>
+
+        <Border Classes="propRow" Classes.hasOverride="{Binding Model.HasMapDescription}">
+            <Grid ColumnDefinitions="220,*,130,Auto">
+                <TextBlock Grid.Column="0" Classes="propLabel" Text="{l:Localize Prop.MapDescription}" ToolTip.Tip="{l:Localize Prop.MapDescription.Desc}" />
+                <TextBox Grid.Column="1" Text="{Binding Model.MapDescription}" />
+                <TextBlock Grid.Column="2" Text="{l:Localize Status.UsingDefault}" Classes="usingDefault" Margin="8,0" IsVisible="{Binding !Model.HasMapDescription}" />
+                <Button Grid.Column="3" Classes="action" Content="{l:Localize Button.Reset}" ToolTip.Tip="{l:Localize Tip.Reset}"
+                        Command="{Binding ClearOverrideCommand}" CommandParameter="MapDescription"
+                        IsVisible="{Binding Model.HasMapDescription}" />
+            </Grid>
+        </Border>
+
+        <Border Classes="propRow" Classes.hasOverride="{Binding Model.HasWorkshopId}">
+            <Grid ColumnDefinitions="220,*,130,Auto">
+                <TextBlock Grid.Column="0" Classes="propLabel" Text="{l:Localize Prop.WorkshopId}" ToolTip.Tip="{l:Localize Prop.WorkshopId.Desc}" />
+                <NumericUpDown Grid.Column="1" Value="{Binding Model.WorkshopId}" FormatString="0" Minimum="0" />
+                <TextBlock Grid.Column="2" Text="{l:Localize Status.UsingDefault}" Classes="usingDefault" Margin="8,0" IsVisible="{Binding !Model.HasWorkshopId}" />
+                <Button Grid.Column="3" Classes="action" Content="{l:Localize Button.Reset}" ToolTip.Tip="{l:Localize Tip.Reset}" Command="{Binding ClearOverrideCommand}" CommandParameter="WorkshopId"
+                        IsVisible="{Binding Model.HasWorkshopId}" />
+            </Grid>
+        </Border>
+
+        <Border Classes="propRow" Classes.hasOverride="{Binding Model.HasIsDisabled}">
+            <Grid ColumnDefinitions="220,*,130,Auto">
+                <TextBlock Grid.Column="0" Classes="propLabel" Text="{l:Localize Prop.IsDisabled}" ToolTip.Tip="{l:Localize Prop.IsDisabled.Desc}" />
+                <CheckBox Grid.Column="1" IsChecked="{Binding Model.IsDisabled}" />
+                <TextBlock Grid.Column="2" Text="{l:Localize Status.UsingDefault}" Classes="usingDefault" Margin="8,0" IsVisible="{Binding !Model.HasIsDisabled}" />
+                <Button Grid.Column="3" Classes="action" Content="{l:Localize Button.Reset}" ToolTip.Tip="{l:Localize Tip.Reset}" Command="{Binding ClearOverrideCommand}" CommandParameter="IsDisabled"
+                        IsVisible="{Binding Model.HasIsDisabled}" />
+            </Grid>
+        </Border>
+
+        <Border Classes="propRow" Classes.hasOverride="{Binding Model.HasGroupSettings}">
+            <StackPanel Spacing="6">
+                <Grid ColumnDefinitions="220,*,130,Auto">
+                    <TextBlock Grid.Column="0" Classes="propLabel" Text="{l:Localize Prop.GroupSettings}" ToolTip.Tip="{l:Localize Prop.GroupSettings.Desc}" />
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6">
+                        <AutoCompleteBox Width="220"
+                                         Text="{Binding NewGroupName, Mode=TwoWay}"
+                                         ItemsSource="{Binding Project.AllGroupNames}"
+                                         FilterMode="ContainsOrdinal"
+                                         Watermark="group name"
+                                         MinimumPrefixLength="0" />
+                        <Button Content="{l:Localize Button.Add}" Command="{Binding AddGroupReferenceCommand}" />
+                    </StackPanel>
+                    <TextBlock Grid.Column="2" Text="{l:Localize Status.NoInheritance}" Classes="usingDefault" Margin="8,0" IsVisible="{Binding !Model.HasGroupSettings}" />
+                    <Button Grid.Column="3" Classes="action" Content="{l:Localize Button.ResetAll}" ToolTip.Tip="{l:Localize Tip.ResetAll}"
+                            Command="{Binding ClearOverrideCommand}" CommandParameter="GroupSettings"
+                            IsVisible="{Binding Model.HasGroupSettings}" />
+                </Grid>
+                <ItemsControl ItemsSource="{Binding GroupReferences}" Margin="24,0,0,0">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate DataType="vme:GroupRefViewModel">
+                            <Grid ColumnDefinitions="Auto,*,Auto" Margin="0,2">
+                                <TextBlock Grid.Column="0" Text="&#xE7BA;"
+                                           FontFamily="Segoe Fluent Icons,Segoe MDL2 Assets"
+                                           Foreground="#f0a33d" Margin="0,0,6,0"
+                                           VerticalAlignment="Center"
+                                           ToolTip.Tip="このグループ名は読み込まれたファイル群の中に存在しません"
+                                           IsVisible="{Binding !IsKnown}" />
+                                <TextBlock Grid.Column="1" Text="{Binding Name}" VerticalAlignment="Center" />
+                                <Button Grid.Column="2" Content="×"
+                                        Command="{Binding $parent[ItemsControl].((vme:PropertySetViewModel)DataContext).RemoveGroupReferenceCommand}"
+                                        CommandParameter="{Binding}" Padding="6,2" />
+                            </Grid>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
+        </Border>
+
+        <Border Classes="propRow" Classes.hasOverride="{Binding Model.HasCooldownOverride}">
+            <Grid ColumnDefinitions="220,*,130,Auto">
+                <TextBlock Grid.Column="0" Classes="propLabel" Text="{l:Localize Prop.CooldownOverride}" ToolTip.Tip="{l:Localize Prop.CooldownOverride.Desc}" />
+                <NumericUpDown Grid.Column="1" Value="{Binding Model.CooldownOverride}" FormatString="0" Minimum="0" />
+                <TextBlock Grid.Column="2" Text="{l:Localize Status.NoOverride}" Classes="usingDefault" Margin="8,0" IsVisible="{Binding !Model.HasCooldownOverride}" />
+                <Button Grid.Column="3" Classes="action" Content="{l:Localize Button.Reset}" ToolTip.Tip="{l:Localize Tip.Reset}" Command="{Binding ClearOverrideCommand}" CommandParameter="CooldownOverride"
+                        IsVisible="{Binding Model.HasCooldownOverride}" />
+            </Grid>
+        </Border>
+
+        <TextBlock Text="{l:Localize Section.ExtendTime}" Classes="sectionHeader" />
+
+        <Border Classes="propRow" Classes.hasOverride="{Binding Model.HasMaxExtends}">
+            <Grid ColumnDefinitions="220,*,130,Auto">
+                <TextBlock Grid.Column="0" Classes="propLabel" Text="{l:Localize Prop.MaxExtends}" ToolTip.Tip="{l:Localize Prop.MaxExtends.Desc}" />
+                <NumericUpDown Grid.Column="1" Value="{Binding Model.MaxExtends}" FormatString="0" Minimum="0" />
+                <TextBlock Grid.Column="2" Text="{l:Localize Status.UsingDefault}" Classes="usingDefault" Margin="8,0" IsVisible="{Binding !Model.HasMaxExtends}" />
+                <Button Grid.Column="3" Classes="action" Content="{l:Localize Button.Reset}" ToolTip.Tip="{l:Localize Tip.Reset}" Command="{Binding ClearOverrideCommand}" CommandParameter="MaxExtends"
+                        IsVisible="{Binding Model.HasMaxExtends}" />
+            </Grid>
+        </Border>
+
+        <Border Classes="propRow" Classes.hasOverride="{Binding Model.HasMaxExtCommandUses}">
+            <Grid ColumnDefinitions="220,*,130,Auto">
+                <TextBlock Grid.Column="0" Classes="propLabel" Text="{l:Localize Prop.MaxExtCommandUses}" ToolTip.Tip="{l:Localize Prop.MaxExtCommandUses.Desc}" />
+                <NumericUpDown Grid.Column="1" Value="{Binding Model.MaxExtCommandUses}" FormatString="0" Minimum="0" />
+                <TextBlock Grid.Column="2" Text="{l:Localize Status.UsingDefault}" Classes="usingDefault" Margin="8,0" IsVisible="{Binding !Model.HasMaxExtCommandUses}" />
+                <Button Grid.Column="3" Classes="action" Content="{l:Localize Button.Reset}" ToolTip.Tip="{l:Localize Tip.Reset}" Command="{Binding ClearOverrideCommand}" CommandParameter="MaxExtCommandUses"
+                        IsVisible="{Binding Model.HasMaxExtCommandUses}" />
+            </Grid>
+        </Border>
+
+        <Border Classes="propRow" Classes.hasOverride="{Binding Model.HasExtendTimePerExtends}">
+            <Grid ColumnDefinitions="220,*,130,Auto">
+                <TextBlock Grid.Column="0" Classes="propLabel" Text="{l:Localize Prop.ExtendTimePerExtends}" ToolTip.Tip="{l:Localize Prop.ExtendTimePerExtends.Desc}" />
+                <NumericUpDown Grid.Column="1" Value="{Binding Model.ExtendTimePerExtends}" FormatString="0" Minimum="0" />
+                <TextBlock Grid.Column="2" Text="{l:Localize Status.UsingDefault}" Classes="usingDefault" Margin="8,0" IsVisible="{Binding !Model.HasExtendTimePerExtends}" />
+                <Button Grid.Column="3" Classes="action" Content="{l:Localize Button.Reset}" ToolTip.Tip="{l:Localize Tip.Reset}" Command="{Binding ClearOverrideCommand}" CommandParameter="ExtendTimePerExtends"
+                        IsVisible="{Binding Model.HasExtendTimePerExtends}" />
+            </Grid>
+        </Border>
+
+        <Border Classes="propRow" Classes.hasOverride="{Binding Model.HasMapTime}">
+            <Grid ColumnDefinitions="220,*,130,Auto">
+                <TextBlock Grid.Column="0" Classes="propLabel" Text="{l:Localize Prop.MapTime}" ToolTip.Tip="{l:Localize Prop.MapTime.Desc}" />
+                <NumericUpDown Grid.Column="1" Value="{Binding Model.MapTime}" FormatString="0" Minimum="0" />
+                <TextBlock Grid.Column="2" Text="{l:Localize Status.UsingDefault}" Classes="usingDefault" Margin="8,0" IsVisible="{Binding !Model.HasMapTime}" />
+                <Button Grid.Column="3" Classes="action" Content="{l:Localize Button.Reset}" ToolTip.Tip="{l:Localize Tip.Reset}" Command="{Binding ClearOverrideCommand}" CommandParameter="MapTime"
+                        IsVisible="{Binding Model.HasMapTime}" />
+            </Grid>
+        </Border>
+
+        <Border Classes="propRow" Classes.hasOverride="{Binding Model.HasExtendRoundsPerExtends}">
+            <Grid ColumnDefinitions="220,*,130,Auto">
+                <TextBlock Grid.Column="0" Classes="propLabel" Text="{l:Localize Prop.ExtendRoundsPerExtends}" ToolTip.Tip="{l:Localize Prop.ExtendRoundsPerExtends.Desc}" />
+                <NumericUpDown Grid.Column="1" Value="{Binding Model.ExtendRoundsPerExtends}" FormatString="0" Minimum="0" />
+                <TextBlock Grid.Column="2" Text="{l:Localize Status.UsingDefault}" Classes="usingDefault" Margin="8,0" IsVisible="{Binding !Model.HasExtendRoundsPerExtends}" />
+                <Button Grid.Column="3" Classes="action" Content="{l:Localize Button.Reset}" ToolTip.Tip="{l:Localize Tip.Reset}" Command="{Binding ClearOverrideCommand}" CommandParameter="ExtendRoundsPerExtends"
+                        IsVisible="{Binding Model.HasExtendRoundsPerExtends}" />
+            </Grid>
+        </Border>
+
+        <Border Classes="propRow" Classes.hasOverride="{Binding Model.HasMapRounds}">
+            <Grid ColumnDefinitions="220,*,130,Auto">
+                <TextBlock Grid.Column="0" Classes="propLabel" Text="{l:Localize Prop.MapRounds}" ToolTip.Tip="{l:Localize Prop.MapRounds.Desc}" />
+                <NumericUpDown Grid.Column="1" Value="{Binding Model.MapRounds}" FormatString="0" Minimum="0" />
+                <TextBlock Grid.Column="2" Text="{l:Localize Status.UsingDefault}" Classes="usingDefault" Margin="8,0" IsVisible="{Binding !Model.HasMapRounds}" />
+                <Button Grid.Column="3" Classes="action" Content="{l:Localize Button.Reset}" ToolTip.Tip="{l:Localize Tip.Reset}" Command="{Binding ClearOverrideCommand}" CommandParameter="MapRounds"
+                        IsVisible="{Binding Model.HasMapRounds}" />
+            </Grid>
+        </Border>
+
+        <TextBlock Text="{l:Localize Section.Nomination}" Classes="sectionHeader" />
+
+        <Border Classes="propRow" Classes.hasOverride="{Binding Model.HasOnlyNomination}">
+            <Grid ColumnDefinitions="220,*,130,Auto">
+                <TextBlock Grid.Column="0" Classes="propLabel" Text="{l:Localize Prop.OnlyNomination}" ToolTip.Tip="{l:Localize Prop.OnlyNomination.Desc}" />
+                <CheckBox Grid.Column="1" IsChecked="{Binding Model.OnlyNomination}" />
+                <TextBlock Grid.Column="2" Text="{l:Localize Status.UsingDefault}" Classes="usingDefault" Margin="8,0" IsVisible="{Binding !Model.HasOnlyNomination}" />
+                <Button Grid.Column="3" Classes="action" Content="{l:Localize Button.Reset}" ToolTip.Tip="{l:Localize Tip.Reset}" Command="{Binding ClearOverrideCommand}" CommandParameter="OnlyNomination"
+                        IsVisible="{Binding Model.HasOnlyNomination}" />
+            </Grid>
+        </Border>
+
+        <Border Classes="propRow" Classes.hasOverride="{Binding Model.HasMaxPlayers}">
+            <Grid ColumnDefinitions="220,*,130,Auto">
+                <TextBlock Grid.Column="0" Classes="propLabel" Text="{l:Localize Prop.MaxPlayers}" ToolTip.Tip="{l:Localize Prop.MaxPlayers.Desc}" />
+                <NumericUpDown Grid.Column="1" Value="{Binding Model.MaxPlayers}" FormatString="0" Minimum="0" />
+                <TextBlock Grid.Column="2" Text="{l:Localize Status.UsingDefault}" Classes="usingDefault" Margin="8,0" IsVisible="{Binding !Model.HasMaxPlayers}" />
+                <Button Grid.Column="3" Classes="action" Content="{l:Localize Button.Reset}" ToolTip.Tip="{l:Localize Tip.Reset}" Command="{Binding ClearOverrideCommand}" CommandParameter="MaxPlayers"
+                        IsVisible="{Binding Model.HasMaxPlayers}" />
+            </Grid>
+        </Border>
+
+        <Border Classes="propRow" Classes.hasOverride="{Binding Model.HasMinPlayers}">
+            <Grid ColumnDefinitions="220,*,130,Auto">
+                <TextBlock Grid.Column="0" Classes="propLabel" Text="{l:Localize Prop.MinPlayers}" ToolTip.Tip="{l:Localize Prop.MinPlayers.Desc}" />
+                <NumericUpDown Grid.Column="1" Value="{Binding Model.MinPlayers}" FormatString="0" Minimum="0" />
+                <TextBlock Grid.Column="2" Text="{l:Localize Status.UsingDefault}" Classes="usingDefault" Margin="8,0" IsVisible="{Binding !Model.HasMinPlayers}" />
+                <Button Grid.Column="3" Classes="action" Content="{l:Localize Button.Reset}" ToolTip.Tip="{l:Localize Tip.Reset}" Command="{Binding ClearOverrideCommand}" CommandParameter="MinPlayers"
+                        IsVisible="{Binding Model.HasMinPlayers}" />
+            </Grid>
+        </Border>
+
+        <Border Classes="propRow" Classes.hasOverride="{Binding Model.HasProhibitAdminNomination}">
+            <Grid ColumnDefinitions="220,*,130,Auto">
+                <TextBlock Grid.Column="0" Classes="propLabel" Text="{l:Localize Prop.ProhibitAdminNomination}" ToolTip.Tip="{l:Localize Prop.ProhibitAdminNomination.Desc}" />
+                <CheckBox Grid.Column="1" IsChecked="{Binding Model.ProhibitAdminNomination}" />
+                <TextBlock Grid.Column="2" Text="{l:Localize Status.UsingDefault}" Classes="usingDefault" Margin="8,0" IsVisible="{Binding !Model.HasProhibitAdminNomination}" />
+                <Button Grid.Column="3" Classes="action" Content="{l:Localize Button.Reset}" ToolTip.Tip="{l:Localize Tip.Reset}" Command="{Binding ClearOverrideCommand}" CommandParameter="ProhibitAdminNomination"
+                        IsVisible="{Binding Model.HasProhibitAdminNomination}" />
+            </Grid>
+        </Border>
+
+        <Border Classes="propRow" Classes.hasOverride="{Binding Model.HasDaysAllowed}">
+            <StackPanel Spacing="4">
+                <Grid ColumnDefinitions="220,*,130,Auto">
+                    <TextBlock Grid.Column="0" Classes="propLabel" Text="{l:Localize Prop.DaysAllowed}" ToolTip.Tip="{l:Localize Prop.DaysAllowed.Desc}" />
+                    <ItemsControl Grid.Column="1" ItemsSource="{x:Static vme:PropertySetViewModel.AllDays}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel Orientation="Horizontal" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="sys:DayOfWeek">
+                                <Button Content="{Binding}" Margin="0,0,4,4" MinWidth="90"
+                                        Command="{Binding $parent[ItemsControl].((vme:PropertySetViewModel)DataContext).ToggleDayCommand}"
+                                        CommandParameter="{Binding}" />
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    <TextBlock Grid.Column="2" Text="{l:Localize Status.UsingDefault}" Classes="usingDefault" Margin="8,0" IsVisible="{Binding !Model.HasDaysAllowed}" />
+                    <Button Grid.Column="3" Classes="action" Content="{l:Localize Button.ResetAll}" ToolTip.Tip="{l:Localize Tip.ResetAll}"
+                            Command="{Binding ClearOverrideCommand}" CommandParameter="DaysAllowed"
+                            IsVisible="{Binding Model.HasDaysAllowed}" />
+                </Grid>
+                <TextBlock Margin="0,0,0,0" Foreground="#888" IsVisible="{Binding Model.HasDaysAllowed}"
+                           Text="{Binding Model.DaysAllowed, StringFormat='selected: {0}'}" />
+            </StackPanel>
+        </Border>
+
+        <Border Classes="propRow" Classes.hasOverride="{Binding Model.HasAllowedTimeRanges}">
+            <StackPanel Spacing="6">
+                <Grid ColumnDefinitions="220,*,130,Auto">
+                    <TextBlock Grid.Column="0" Classes="propLabel" Text="{l:Localize Prop.AllowedTimeRanges}" ToolTip.Tip="{l:Localize Prop.AllowedTimeRanges.Desc}" />
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6">
+                        <TextBox Text="{Binding NewTimeRange}" Width="160" Watermark="HH:mm-HH:mm" />
+                        <Button Content="{l:Localize Button.Add}" Command="{Binding AddTimeRangeCommand}" />
+                    </StackPanel>
+                    <TextBlock Grid.Column="2" Text="{l:Localize Status.UsingDefault}" Classes="usingDefault" Margin="8,0" IsVisible="{Binding !Model.HasAllowedTimeRanges}" />
+                    <Button Grid.Column="3" Classes="action" Content="{l:Localize Button.ResetAll}" ToolTip.Tip="{l:Localize Tip.ResetAll}"
+                            Command="{Binding ClearOverrideCommand}" CommandParameter="AllowedTimeRanges"
+                            IsVisible="{Binding Model.HasAllowedTimeRanges}" />
+                </Grid>
+                <ItemsControl ItemsSource="{Binding Model.AllowedTimeRanges}" Margin="24,0,0,0">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate DataType="models:TimeRangeSpec">
+                            <Grid ColumnDefinitions="*,Auto" Margin="0,2">
+                                <TextBlock Text="{Binding}" VerticalAlignment="Center" />
+                                <Button Grid.Column="1" Content="×" Padding="6,2"
+                                        Command="{Binding $parent[ItemsControl].((vme:PropertySetViewModel)DataContext).RemoveTimeRangeCommand}"
+                                        CommandParameter="{Binding}" />
+                            </Grid>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
+        </Border>
+
+        <TextBlock Text="{l:Localize Section.Cooldown}" Classes="sectionHeader" />
+
+        <Border Classes="propRow" Classes.hasOverride="{Binding Model.HasCooldown}">
+            <Grid ColumnDefinitions="220,*,130,Auto">
+                <TextBlock Grid.Column="0" Classes="propLabel" Text="{l:Localize Prop.Cooldown}" ToolTip.Tip="{l:Localize Prop.Cooldown.Desc}" />
+                <NumericUpDown Grid.Column="1" Value="{Binding Model.Cooldown}" FormatString="0" Minimum="0" />
+                <TextBlock Grid.Column="2" Text="{l:Localize Status.UsingDefault}" Classes="usingDefault" Margin="8,0" IsVisible="{Binding !Model.HasCooldown}" />
+                <Button Grid.Column="3" Classes="action" Content="{l:Localize Button.Reset}" ToolTip.Tip="{l:Localize Tip.Reset}" Command="{Binding ClearOverrideCommand}" CommandParameter="Cooldown"
+                        IsVisible="{Binding Model.HasCooldown}" />
+            </Grid>
+        </Border>
+
+        <Border Classes="propRow" Classes.hasOverride="{Binding Model.HasCooldownDateTime}">
+            <Grid ColumnDefinitions="220,*,130,Auto">
+                <TextBlock Grid.Column="0" Classes="propLabel" Text="{l:Localize Prop.CooldownDateTime}" ToolTip.Tip="{l:Localize Prop.CooldownDateTime.Desc}" />
+                <TextBox Grid.Column="1" Text="{Binding Model.CooldownDateTime}" Watermark="e.g. 2d or 1m" />
+                <TextBlock Grid.Column="2" Text="{l:Localize Status.UsingDefault}" Classes="usingDefault" Margin="8,0" IsVisible="{Binding !Model.HasCooldownDateTime}" />
+                <Button Grid.Column="3" Classes="action" Content="{l:Localize Button.Reset}" ToolTip.Tip="{l:Localize Tip.Reset}" Command="{Binding ClearOverrideCommand}" CommandParameter="CooldownDateTime"
+                        IsVisible="{Binding Model.HasCooldownDateTime}" />
+            </Grid>
+        </Border>
+
+        <TextBlock Text="{l:Localize Section.Extra}" Classes="sectionHeader" />
+        <Border Classes="propRow">
+            <StackPanel Spacing="6">
+                <StackPanel Orientation="Horizontal" Spacing="6">
+                    <TextBox Text="{Binding NewExtraSectionName}" Width="220" Watermark="section name (e.g. shop)" />
+                    <Button Content="{l:Localize Button.AddSection}" Command="{Binding AddExtraSectionCommand}" />
+                </StackPanel>
+                <ItemsControl ItemsSource="{Binding Model.Extras}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate DataType="models:ExtraSection">
+                            <Border Background="#1e1e1e" Padding="8" Margin="0,4" CornerRadius="4">
+                                <StackPanel Spacing="6">
+                                    <Grid ColumnDefinitions="Auto,*,Auto">
+                                        <TextBlock Text="[extra." VerticalAlignment="Center" Foreground="#888" />
+                                        <TextBox Grid.Column="1" Text="{Binding Name}" />
+                                        <Button Grid.Column="2" Content="{l:Localize Button.RemoveSection}" Margin="6,0,0,0"
+                                                Command="{Binding $parent[ItemsControl].((vme:PropertySetViewModel)DataContext).RemoveExtraSectionCommand}"
+                                                CommandParameter="{Binding}" />
+                                    </Grid>
+                                    <ItemsControl ItemsSource="{Binding Entries}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate DataType="models:ExtraKeyValue">
+                                                <Grid ColumnDefinitions="180,120,*,Auto" Margin="0,2">
+                                                    <TextBox Text="{Binding Key}" Watermark="key" />
+                                                    <ComboBox Grid.Column="1" Margin="4,0"
+                                                              SelectedItem="{Binding Kind}">
+                                                        <models:ExtraValueKind>String</models:ExtraValueKind>
+                                                        <models:ExtraValueKind>Integer</models:ExtraValueKind>
+                                                        <models:ExtraValueKind>Float</models:ExtraValueKind>
+                                                        <models:ExtraValueKind>Boolean</models:ExtraValueKind>
+                                                    </ComboBox>
+                                                    <TextBox Grid.Column="2" Text="{Binding Value}" Watermark="value" />
+                                                </Grid>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                    <Button Content="{l:Localize Button.AddKey}" HorizontalAlignment="Left"
+                                            Command="{Binding $parent[ItemsControl].((vme:PropertySetViewModel)DataContext).AddExtraKeyCommand}"
+                                            CommandParameter="{Binding}" />
+                                </StackPanel>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
+        </Border>
+
+    </StackPanel>
+</UserControl>

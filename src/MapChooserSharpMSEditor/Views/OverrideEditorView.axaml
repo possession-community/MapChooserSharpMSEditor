@@ -1,0 +1,77 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vme="using:MapChooserSharpMSEditor.ViewModels.Editors"
+             xmlns:sys="using:System"
+             xmlns:models="using:MapChooserSharpMSEditor.Models"
+             xmlns:views="using:MapChooserSharpMSEditor.Views"
+             x:Class="MapChooserSharpMSEditor.Views.OverrideEditorView"
+             x:DataType="vme:OverrideEditorViewModel">
+    <StackPanel Spacing="10">
+        <StackPanel Orientation="Horizontal" Spacing="10">
+            <TextBlock Text="&#xE787;" FontFamily="Segoe Fluent Icons,Segoe MDL2 Assets"
+                       FontSize="22" Foreground="#7aa2f7" VerticalAlignment="Center" />
+            <TextBlock Text="Override:" FontSize="20" FontWeight="SemiBold" VerticalAlignment="Center" />
+            <TextBox Text="{Binding Override.Name}" Width="300" VerticalAlignment="Center" FontFamily="Cascadia Mono,Consolas" />
+        </StackPanel>
+        <TextBlock Text="{Binding ParentDisplay}" Foreground="#888" FontFamily="Cascadia Mono,Consolas" />
+        <TextBlock Text="{Binding File.DisplayName, StringFormat='File: {0}'}" Foreground="#888" />
+
+        <Separator />
+
+        <!-- Override trigger definition -->
+        <Border Padding="12" Background="#1e1e1e" CornerRadius="4">
+            <StackPanel Spacing="10">
+                <TextBlock Text="Trigger" FontWeight="SemiBold" Foreground="#9cdcfe" />
+                <Grid ColumnDefinitions="200,*" RowDefinitions="Auto,Auto,Auto">
+                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Enabled" VerticalAlignment="Center" />
+                    <CheckBox Grid.Row="0" Grid.Column="1" IsChecked="{Binding Override.Enabled}" />
+
+                    <TextBlock Grid.Row="1" Grid.Column="0" Text="ForceOverride" VerticalAlignment="Center" />
+                    <CheckBox Grid.Row="1" Grid.Column="1" IsChecked="{Binding Override.ForceOverride}" />
+
+                    <TextBlock Grid.Row="2" Grid.Column="0" Text="OverridePriority" VerticalAlignment="Center" />
+                    <NumericUpDown Grid.Row="2" Grid.Column="1" Value="{Binding Override.OverridePriority}" FormatString="0" />
+                </Grid>
+
+                <TextBlock Text="TargetDays" FontWeight="SemiBold" Foreground="#9cdcfe" Margin="0,8,0,0" />
+                <ItemsControl ItemsSource="{x:Static vme:PropertySetViewModel.AllDays}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel Orientation="Horizontal" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="sys:DayOfWeek">
+                            <Button Content="{Binding}" MinWidth="90" Margin="0,0,4,4"
+                                    Tag="{Binding}"
+                                    Click="OnToggleTargetDay" />
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+                <TextBlock Foreground="#888" FontSize="12"
+                           Text="{Binding Override.TargetDays, StringFormat='selected: {0}'}" />
+
+                <TextBlock Text="TargetTimeRanges" FontWeight="SemiBold" Foreground="#9cdcfe" Margin="0,8,0,0" />
+                <StackPanel Orientation="Horizontal" Spacing="6">
+                    <TextBox x:Name="NewRangeBox" Width="180" Watermark="HH:mm-HH:mm" />
+                    <Button Content="Add" Click="OnAddTargetTimeRange" />
+                </StackPanel>
+                <ItemsControl ItemsSource="{Binding Override.TargetTimeRanges}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate DataType="models:TimeRangeSpec">
+                            <Grid ColumnDefinitions="*,Auto" Margin="0,2">
+                                <TextBlock Text="{Binding}" VerticalAlignment="Center" />
+                                <Button Grid.Column="1" Content="×" Padding="6,2"
+                                        Tag="{Binding}" Click="OnRemoveTargetTimeRange" />
+                            </Grid>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
+        </Border>
+
+        <TextBlock Text="Overridden Properties (only checked fields are written)"
+                   FontSize="14" FontWeight="SemiBold" Foreground="#9cdcfe" Margin="0,16,0,0" />
+        <views:PropertySetView DataContext="{Binding Properties}" />
+    </StackPanel>
+</UserControl>

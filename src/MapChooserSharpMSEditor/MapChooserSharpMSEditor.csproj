@@ -1,0 +1,39 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>WinExe</OutputType>
+        <TargetFramework>net10.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <LangVersion>13</LangVersion>
+        <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
+        <ApplicationManifest>app.manifest</ApplicationManifest>
+        <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+        <RootNamespace>MapChooserSharpMSEditor</RootNamespace>
+        <AssemblyName>MapChooserSharpMSEditor</AssemblyName>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Avalonia" Version="11.2.3" />
+        <PackageReference Include="Avalonia.Desktop" Version="11.2.3" />
+        <PackageReference Include="Avalonia.Themes.Fluent" Version="11.2.3" />
+        <PackageReference Include="Avalonia.Fonts.Inter" Version="11.2.3" />
+        <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="11.2.3" />
+        <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+        <PackageReference Include="CsToml" Version="1.5.1" />
+        <PackageReference Include="CsToml.Extensions" Version="1.5.1" />
+    </ItemGroup>
+
+    <!--
+      Config schema interfaces live in MapChooserSharpMS.Shared.
+      Using a ProjectReference for now; swap to a PackageReference once Shared is
+      published to NuGet (e.g. <PackageReference Include="MapChooserSharpMS.Shared" Version="x.y.z" />).
+    -->
+    <ItemGroup>
+        <ProjectReference Include="..\..\..\MapChooserSharpMS\MapChooserSharpMS.Shared\MapChooserSharpMS.Shared.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <AvaloniaResource Include="Assets\**" />
+    </ItemGroup>
+
+</Project>

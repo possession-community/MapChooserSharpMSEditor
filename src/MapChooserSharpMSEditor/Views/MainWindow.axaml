@@ -1,0 +1,163 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="using:MapChooserSharpMSEditor.ViewModels"
+        xmlns:vme="using:MapChooserSharpMSEditor.ViewModels.Editors"
+        xmlns:vmt="using:MapChooserSharpMSEditor.ViewModels.TreeNodes"
+        xmlns:views="using:MapChooserSharpMSEditor.Views"
+        mc:Ignorable="d" d:DesignWidth="1280" d:DesignHeight="800"
+        x:Class="MapChooserSharpMSEditor.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Title="MapChooserSharpMS Config Editor"
+        Width="1280" Height="800"
+        MinWidth="900" MinHeight="600">
+
+    <Window.KeyBindings>
+        <KeyBinding Gesture="Ctrl+Z" Command="{Binding UndoActionCommand}" />
+        <KeyBinding Gesture="Ctrl+Y" Command="{Binding RedoActionCommand}" />
+        <KeyBinding Gesture="Ctrl+Shift+Z" Command="{Binding RedoActionCommand}" />
+        <KeyBinding Gesture="Ctrl+S" Command="{Binding SaveCommand}" />
+    </Window.KeyBindings>
+
+    <Window.Resources>
+        <!-- Editor DataTemplates: render the active editor VM by its type. -->
+        <DataTemplate x:Key="WelcomeTemplate" DataType="vme:WelcomeViewModel">
+            <views:WelcomeView />
+        </DataTemplate>
+        <DataTemplate x:Key="DefaultTemplate" DataType="vme:DefaultSettingsViewModel">
+            <views:DefaultSettingsView />
+        </DataTemplate>
+        <DataTemplate x:Key="MapTemplate" DataType="vme:MapEditorViewModel">
+            <views:MapEditorView />
+        </DataTemplate>
+        <DataTemplate x:Key="GroupTemplate" DataType="vme:GroupEditorViewModel">
+            <views:GroupEditorView />
+        </DataTemplate>
+        <DataTemplate x:Key="OverrideTemplate" DataType="vme:OverrideEditorViewModel">
+            <views:OverrideEditorView />
+        </DataTemplate>
+    </Window.Resources>
+
+    <Window.DataTemplates>
+        <DataTemplate DataType="vme:WelcomeViewModel">
+            <views:WelcomeView />
+        </DataTemplate>
+        <DataTemplate DataType="vme:DefaultSettingsViewModel">
+            <views:DefaultSettingsView />
+        </DataTemplate>
+        <DataTemplate DataType="vme:MapEditorViewModel">
+            <views:MapEditorView />
+        </DataTemplate>
+        <DataTemplate DataType="vme:GroupEditorViewModel">
+            <views:GroupEditorView />
+        </DataTemplate>
+        <DataTemplate DataType="vme:OverrideEditorViewModel">
+            <views:OverrideEditorView />
+        </DataTemplate>
+        <DataTemplate DataType="vme:FileOverviewViewModel">
+            <views:FileOverviewView />
+        </DataTemplate>
+        <DataTemplate DataType="vme:CategoryListViewModel">
+            <views:CategoryListView />
+        </DataTemplate>
+    </Window.DataTemplates>
+
+    <DockPanel>
+        <!-- Menu bar -->
+        <Menu DockPanel.Dock="Top">
+            <MenuItem Header="_File">
+                <MenuItem Header="_New" Command="{Binding NewFileCommand}" InputGesture="Ctrl+N" />
+                <MenuItem Header="_Open File..." Command="{Binding OpenFileCommand}" InputGesture="Ctrl+O" />
+                <MenuItem Header="Open _Folder..." Command="{Binding OpenFolderCommand}" />
+                <Separator />
+                <MenuItem Header="_Save" Command="{Binding SaveCommand}" InputGesture="Ctrl+S" />
+                <MenuItem Header="Save _As..." Command="{Binding SaveAsCommand}" InputGesture="Ctrl+Shift+S" />
+                <MenuItem Header="Save A_ll" Command="{Binding SaveAllCommand}" />
+                <Separator />
+                <MenuItem Header="_Close File" Command="{Binding CloseFileCommand}" />
+            </MenuItem>
+            <MenuItem Header="_Edit">
+                <MenuItem Header="_Undo" Command="{Binding UndoActionCommand}" InputGesture="Ctrl+Z" />
+                <MenuItem Header="_Redo" Command="{Binding RedoActionCommand}" InputGesture="Ctrl+Y" />
+                <Separator />
+                <MenuItem Header="Add _Map" Command="{Binding AddMapCommand}" />
+                <MenuItem Header="Add _Group" Command="{Binding AddGroupCommand}" />
+            </MenuItem>
+        </Menu>
+
+        <!-- Status bar -->
+        <Border DockPanel.Dock="Bottom" Background="#1f1f1f" Padding="8,3">
+            <TextBlock Text="{Binding StatusText}" Foreground="#bbb" FontSize="12" />
+        </Border>
+
+        <!-- Sidebar + content -->
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="320" MinWidth="200" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <!-- Left sidebar -->
+            <Border Grid.Column="0" Background="#181818" BorderBrush="#2a2a2a" BorderThickness="0,0,1,0">
+                <DockPanel>
+                    <Border DockPanel.Dock="Top" Padding="10,8" Background="#141414">
+                        <TextBlock Text="Config Files" FontWeight="SemiBold" Foreground="#ddd" />
+                    </Border>
+                    <TreeView ItemsSource="{Binding Tree}"
+                              SelectedItem="{Binding SelectedNode, Mode=TwoWay}">
+                        <TreeView.ItemTemplate>
+                            <TreeDataTemplate DataType="vmt:TreeNodeBase" ItemsSource="{Binding Children}">
+                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                    <TextBlock Text="{Binding Icon}"
+                                               FontFamily="Segoe Fluent Icons,Segoe MDL2 Assets"
+                                               FontSize="14"
+                                               Foreground="#7aa2f7"
+                                               VerticalAlignment="Center" />
+                                    <TextBlock Text="{Binding Title}"
+                                               VerticalAlignment="Center" />
+                                </StackPanel>
+                            </TreeDataTemplate>
+                        </TreeView.ItemTemplate>
+                    </TreeView>
+                </DockPanel>
+            </Border>
+
+            <GridSplitter Grid.Column="1" Width="3" Background="#2a2a2a" ResizeDirection="Columns" />
+
+            <!-- Middle: editor, with optional right-hand Resolved panel docked inside. -->
+            <DockPanel Grid.Column="2">
+                <!-- Thin toggle strip on the right edge, always present so the panel can be
+                     reopened after collapsing. -->
+                <Border DockPanel.Dock="Right" Width="24" Background="#151515"
+                        BorderBrush="#2a2a2a" BorderThickness="1,0,0,0">
+                    <Button Command="{Binding ToggleResolvedPanelCommand}"
+                            Padding="0" Background="Transparent" BorderThickness="0"
+                            VerticalAlignment="Top" Margin="0,6,0,0"
+                            ToolTip.Tip="Toggle resolved-values panel">
+                        <TextBlock Text="{Binding IsResolvedPanelVisible, Converter={x:Static views:BoolToArrowConverter.Instance}}"
+                                   FontFamily="Segoe Fluent Icons,Segoe MDL2 Assets"
+                                   FontSize="14" Foreground="#bbb"
+                                   HorizontalAlignment="Center" />
+                    </Button>
+                </Border>
+
+                <Border DockPanel.Dock="Right" Width="340" Background="#1a1a1a"
+                        BorderBrush="#2a2a2a" BorderThickness="1,0,0,0"
+                        IsVisible="{Binding IsResolvedPanelVisible}">
+                    <views:ResolvedPropertiesPanel DataContext="{Binding Resolved}" />
+                </Border>
+
+                <GridSplitter DockPanel.Dock="Right" Width="3" Background="#2a2a2a"
+                              ResizeDirection="Columns" IsVisible="{Binding IsResolvedPanelVisible}" />
+
+                <Border Background="#1c1c1c">
+                    <ScrollViewer>
+                        <ContentControl Content="{Binding CurrentEditor}" Margin="20" />
+                    </ScrollViewer>
+                </Border>
+            </DockPanel>
+        </Grid>
+    </DockPanel>
+</Window>

@@ -1,0 +1,24 @@
+# .NET build outputs
+bin/
+obj/
+out/
+*.user
+*.suo
+
+# IDE
+.vs/
+.idea/
+.vscode/
+*.DotSettings.user
+
+# Editor backups / swap
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Rider / dotCover
+_ReSharper.Caches/
