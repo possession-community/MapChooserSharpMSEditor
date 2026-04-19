@@ -19,7 +19,16 @@ public sealed class OverrideEditorViewModel : ViewModelBase
         File = file;
         Parent = parent;
         Override = ov;
-        Properties = new PropertySetViewModel(ov.Properties, project);
+        // Override inherits the scope of its parent so the UI hides the same rows as the
+        // parent editor; a GroupDaySettings override can't set MapNameAlias any more than
+        // the group itself can.
+        var scope = parent switch
+        {
+            MapEntryModel => PropertyScope.Map,
+            GroupEntryModel => PropertyScope.Group,
+            _ => PropertyScope.Default,
+        };
+        Properties = new PropertySetViewModel(ov.Properties, scope, project);
         ParentDisplay = parent switch
         {
             MapEntryModel m => $"Map: {m.MapName}",

@@ -11,6 +11,6 @@ public sealed class DefaultSettingsViewModel : ViewModelBase
     {
         File = file;
         file.DefaultSettings ??= new PropertySet();
-        Properties = new PropertySetViewModel(file.DefaultSettings, project);
+        Properties = new PropertySetViewModel(file.DefaultSettings, PropertyScope.Default, project);
     }
 }

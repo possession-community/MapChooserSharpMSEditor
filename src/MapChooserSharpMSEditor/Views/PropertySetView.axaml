@@ -46,7 +46,7 @@
 
         <TextBlock Text="{l:Localize Section.Basic}" Classes="sectionHeader" />
 
-        <Border Classes="propRow" Classes.hasOverride="{Binding Model.HasMapNameAlias}">
+        <Border Classes="propRow" Classes.hasOverride="{Binding Model.HasMapNameAlias}" IsVisible="{Binding ShowMapNameAlias}">
             <Grid ColumnDefinitions="220,*,130,Auto">
                 <TextBlock Grid.Column="0" Classes="propLabel" Text="{l:Localize Prop.MapNameAlias}" ToolTip.Tip="{l:Localize Prop.MapNameAlias.Desc}" />
                 <TextBox Grid.Column="1" Text="{Binding Model.MapNameAlias}" />
@@ -57,7 +57,7 @@
             </Grid>
         </Border>
 
-        <Border Classes="propRow" Classes.hasOverride="{Binding Model.HasMapDescription}">
+        <Border Classes="propRow" Classes.hasOverride="{Binding Model.HasMapDescription}" IsVisible="{Binding ShowMapDescription}">
             <Grid ColumnDefinitions="220,*,130,Auto">
                 <TextBlock Grid.Column="0" Classes="propLabel" Text="{l:Localize Prop.MapDescription}" ToolTip.Tip="{l:Localize Prop.MapDescription.Desc}" />
                 <TextBox Grid.Column="1" Text="{Binding Model.MapDescription}" />
@@ -68,7 +68,7 @@
             </Grid>
         </Border>
 
-        <Border Classes="propRow" Classes.hasOverride="{Binding Model.HasWorkshopId}">
+        <Border Classes="propRow" Classes.hasOverride="{Binding Model.HasWorkshopId}" IsVisible="{Binding ShowWorkshopId}">
             <Grid ColumnDefinitions="220,*,130,Auto">
                 <TextBlock Grid.Column="0" Classes="propLabel" Text="{l:Localize Prop.WorkshopId}" ToolTip.Tip="{l:Localize Prop.WorkshopId.Desc}" />
                 <NumericUpDown Grid.Column="1" Value="{Binding Model.WorkshopId}" FormatString="0" Minimum="0" />
@@ -88,7 +88,7 @@
             </Grid>
         </Border>
 
-        <Border Classes="propRow" Classes.hasOverride="{Binding Model.HasGroupSettings}">
+        <Border Classes="propRow" Classes.hasOverride="{Binding Model.HasGroupSettings}" IsVisible="{Binding ShowGroupSettings}">
             <StackPanel Spacing="6">
                 <Grid ColumnDefinitions="220,*,130,Auto">
                     <TextBlock Grid.Column="0" Classes="propLabel" Text="{l:Localize Prop.GroupSettings}" ToolTip.Tip="{l:Localize Prop.GroupSettings.Desc}" />
@@ -127,7 +127,7 @@
             </StackPanel>
         </Border>
 
-        <Border Classes="propRow" Classes.hasOverride="{Binding Model.HasCooldownOverride}">
+        <Border Classes="propRow" Classes.hasOverride="{Binding Model.HasCooldownOverride}" IsVisible="{Binding ShowCooldownOverride}">
             <Grid ColumnDefinitions="220,*,130,Auto">
                 <TextBlock Grid.Column="0" Classes="propLabel" Text="{l:Localize Prop.CooldownOverride}" ToolTip.Tip="{l:Localize Prop.CooldownOverride.Desc}" />
                 <NumericUpDown Grid.Column="1" Value="{Binding Model.CooldownOverride}" FormatString="0" Minimum="0" />

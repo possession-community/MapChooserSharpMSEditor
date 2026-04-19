@@ -13,7 +13,7 @@ public sealed partial class GroupEditorViewModel : ViewModelBase
     {
         File = file;
         Group = group;
-        Properties = new PropertySetViewModel(group.Properties, project);
+        Properties = new PropertySetViewModel(group.Properties, PropertyScope.Group, project);
     }
 
     [RelayCommand]

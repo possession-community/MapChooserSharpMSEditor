@@ -32,7 +32,7 @@ public static class TomlConfigWriter
         if (file.DefaultSettings is not null)
         {
             sb.AppendLine("[MapChooserSharpSettings.Default]");
-            WriteProperties(sb, file.DefaultSettings);
+            WriteProperties(sb, file.DefaultSettings, PropertyScope.Default);
             WriteExtras(sb, "MapChooserSharpSettings.Default", file.DefaultSettings);
             sb.AppendLine();
         }
@@ -41,7 +41,7 @@ public static class TomlConfigWriter
         {
             var header = $"MapChooserSharpSettings.Groups.{g.GroupName}";
             sb.Append('[').Append(header).AppendLine("]");
-            WriteProperties(sb, g.Properties);
+            WriteProperties(sb, g.Properties, PropertyScope.Group);
             WriteExtras(sb, header, g.Properties);
             sb.AppendLine();
 
@@ -49,7 +49,7 @@ public static class TomlConfigWriter
             {
                 var ovHeader = $"{header}.DaySettings.{ov.Name}";
                 sb.Append('[').Append(ovHeader).AppendLine("]");
-                WriteOverrideProperties(sb, ov);
+                WriteOverrideProperties(sb, ov, PropertyScope.Group);
                 WriteExtras(sb, ovHeader, ov.Properties);
                 sb.AppendLine();
             }
@@ -58,7 +58,7 @@ public static class TomlConfigWriter
         foreach (var m in file.Maps)
         {
             sb.Append('[').Append(m.MapName).AppendLine("]");
-            WriteProperties(sb, m.Properties);
+            WriteProperties(sb, m.Properties, PropertyScope.Map);
             WriteExtras(sb, m.MapName, m.Properties);
             sb.AppendLine();
 
@@ -66,7 +66,7 @@ public static class TomlConfigWriter
             {
                 var ovHeader = $"{m.MapName}.DaySettings.{ov.Name}";
                 sb.Append('[').Append(ovHeader).AppendLine("]");
-                WriteOverrideProperties(sb, ov);
+                WriteOverrideProperties(sb, ov, PropertyScope.Map);
                 WriteExtras(sb, ovHeader, ov.Properties);
                 sb.AppendLine();
             }
@@ -75,14 +75,19 @@ public static class TomlConfigWriter
         return sb.ToString();
     }
 
-    private static void WriteProperties(StringBuilder sb, PropertySet p)
+    private static void WriteProperties(StringBuilder sb, PropertySet p, PropertyScope scope)
     {
-        if (p.HasMapNameAlias) sb.Append("MapNameAlias = ").AppendLine(Quote(p.MapNameAlias));
-        if (p.HasMapDescription) sb.Append("MapDescription = ").AppendLine(Quote(p.MapDescription));
-        if (p.HasWorkshopId) sb.Append("WorkshopId = ").AppendLine(p.WorkshopId.ToString(CultureInfo.InvariantCulture));
+        // Map-only keys: groups reject MapNameAlias/MapDescription/WorkshopId/GroupSettings.
+        var allowMapOnly = scope is PropertyScope.Default or PropertyScope.Map;
+        // Group-only key: maps reject CooldownOverride.
+        var allowGroupOnly = scope is PropertyScope.Default or PropertyScope.Group;
+
+        if (allowMapOnly && p.HasMapNameAlias) sb.Append("MapNameAlias = ").AppendLine(Quote(p.MapNameAlias));
+        if (allowMapOnly && p.HasMapDescription) sb.Append("MapDescription = ").AppendLine(Quote(p.MapDescription));
+        if (allowMapOnly && p.HasWorkshopId) sb.Append("WorkshopId = ").AppendLine(p.WorkshopId.ToString(CultureInfo.InvariantCulture));
         if (p.HasIsDisabled) sb.Append("IsDisabled = ").AppendLine(p.IsDisabled ? "true" : "false");
-        if (p.HasGroupSettings) sb.Append("GroupSettings = ").AppendLine(FormatStringArray(p.GroupSettings));
-        if (p.HasCooldownOverride) sb.Append("CooldownOverride = ").AppendLine(p.CooldownOverride.ToString(CultureInfo.InvariantCulture));
+        if (allowMapOnly && p.HasGroupSettings) sb.Append("GroupSettings = ").AppendLine(FormatStringArray(p.GroupSettings));
+        if (allowGroupOnly && p.HasCooldownOverride) sb.Append("CooldownOverride = ").AppendLine(p.CooldownOverride.ToString(CultureInfo.InvariantCulture));
         if (p.HasMaxExtends) sb.Append("MaxExtends = ").AppendLine(p.MaxExtends.ToString(CultureInfo.InvariantCulture));
         if (p.HasMaxExtCommandUses) sb.Append("MaxExtCommandUses = ").AppendLine(p.MaxExtCommandUses.ToString(CultureInfo.InvariantCulture));
         if (p.HasExtendTimePerExtends) sb.Append("ExtendTimePerExtends = ").AppendLine(p.ExtendTimePerExtends.ToString(CultureInfo.InvariantCulture));
@@ -99,7 +104,7 @@ public static class TomlConfigWriter
         if (p.HasCooldownDateTime) sb.Append("CooldownDateTime = ").AppendLine(Quote(p.CooldownDateTime));
     }
 
-    private static void WriteOverrideProperties(StringBuilder sb, DaySettingsOverrideModel ov)
+    private static void WriteOverrideProperties(StringBuilder sb, DaySettingsOverrideModel ov, PropertyScope scope)
     {
         sb.Append("Enabled = ").AppendLine(ov.Enabled ? "true" : "false");
         sb.Append("ForceOverride = ").AppendLine(ov.ForceOverride ? "true" : "false");
@@ -107,7 +112,7 @@ public static class TomlConfigWriter
         sb.Append("TargetDays = ").AppendLine(FormatDayArray(ov.TargetDays));
         if (ov.TargetTimeRanges.Count > 0)
             sb.Append("TargetTimeRanges = ").AppendLine(FormatTimeRangeArray(ov.TargetTimeRanges));
-        WriteProperties(sb, ov.Properties);
+        WriteProperties(sb, ov.Properties, scope);
     }
 
     private static void WriteExtras(StringBuilder sb, string parentHeader, PropertySet p)

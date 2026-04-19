@@ -13,7 +13,7 @@ public sealed partial class MapEditorViewModel : ViewModelBase
     {
         File = file;
         Map = map;
-        Properties = new PropertySetViewModel(map.Properties, project);
+        Properties = new PropertySetViewModel(map.Properties, PropertyScope.Map, project);
     }
 
     [RelayCommand]

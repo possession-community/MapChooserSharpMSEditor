@@ -44,11 +44,25 @@ public partial class PropertySetViewModel : ViewModelBase
     /// <summary>Project-wide context for cross-file concerns like group-name autocomplete.</summary>
     public ProjectContext? Project { get; }
 
+    /// <summary>
+    /// Scope of this property set. Drives per-row visibility: hides group-only fields in
+    /// map contexts and vice versa so the UI matches the server's accepted schema.
+    /// </summary>
+    public PropertyScope Scope { get; }
+
     public ObservableCollection<GroupRefViewModel> GroupReferences { get; } = new();
 
-    public PropertySetViewModel(PropertySet model, ProjectContext? project = null)
+    // Row visibility bindings. Default is permissive (useful as a project-wide fallback).
+    public bool ShowMapNameAlias => Scope is PropertyScope.Default or PropertyScope.Map;
+    public bool ShowMapDescription => Scope is PropertyScope.Default or PropertyScope.Map;
+    public bool ShowWorkshopId => Scope is PropertyScope.Default or PropertyScope.Map;
+    public bool ShowGroupSettings => Scope is PropertyScope.Default or PropertyScope.Map;
+    public bool ShowCooldownOverride => Scope is PropertyScope.Default or PropertyScope.Group;
+
+    public PropertySetViewModel(PropertySet model, PropertyScope scope = PropertyScope.Default, ProjectContext? project = null)
     {
         Model = model;
+        Scope = scope;
         Project = project;
 
         RebuildGroupReferences();
