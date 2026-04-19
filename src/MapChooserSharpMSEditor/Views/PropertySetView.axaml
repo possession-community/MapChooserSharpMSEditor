@@ -113,7 +113,12 @@
                 <ItemsControl ItemsSource="{Binding GroupReferences}" Margin="24,0,0,0">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate DataType="vme:GroupRefViewModel">
-                            <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto" Margin="0,2">
+                            <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto" Margin="0,2"
+                                  Background="#00000001"
+                                  DragDrop.AllowDrop="True"
+                                  PointerPressed="OnGroupRefPointerPressed"
+                                  DragDrop.DragOver="OnGroupRefDragOver"
+                                  DragDrop.Drop="OnGroupRefDrop">
                                 <TextBlock Grid.Column="0" Text="&#xE7BA;"
                                            FontFamily="Segoe Fluent Icons,Segoe MDL2 Assets"
                                            Foreground="#f0a33d" Margin="0,0,6,0"
@@ -297,7 +302,12 @@
                 <ItemsControl ItemsSource="{Binding Model.AllowedTimeRanges}" Margin="24,0,0,0">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate DataType="models:TimeRangeSpec">
-                            <Grid ColumnDefinitions="*,Auto,Auto,Auto" Margin="0,2">
+                            <Grid ColumnDefinitions="*,Auto,Auto,Auto" Margin="0,2"
+                                  Background="#00000001"
+                                  DragDrop.AllowDrop="True"
+                                  PointerPressed="OnTimeRangePointerPressed"
+                                  DragDrop.DragOver="OnTimeRangeDragOver"
+                                  DragDrop.Drop="OnTimeRangeDrop">
                                 <TextBlock Text="{Binding}" VerticalAlignment="Center" />
                                 <Button Grid.Column="1" Content="▲" Padding="6,2" Margin="0,0,2,0"
                                         ToolTip.Tip="Move up"
