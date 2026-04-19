@@ -5,6 +5,9 @@
              xmlns:views="using:MapChooserSharpMSEditor.Views"
              x:Class="MapChooserSharpMSEditor.Views.MapEditorView"
              x:DataType="vme:MapEditorViewModel">
+    <UserControl.Resources>
+        <views:CollectionJoinConverter x:Key="Join" />
+    </UserControl.Resources>
     <StackPanel Spacing="10">
         <StackPanel Orientation="Horizontal" Spacing="10">
             <TextBlock Text="&#xE707;" FontFamily="Segoe Fluent Icons,Segoe MDL2 Assets"
@@ -24,17 +27,20 @@
             <ItemsControl.ItemTemplate>
                 <DataTemplate DataType="models:DaySettingsOverrideModel">
                     <Border Background="#252525" Padding="8" Margin="0,4" CornerRadius="4">
-                        <Grid ColumnDefinitions="*,Auto">
+                        <Grid ColumnDefinitions="*,Auto,Auto">
                             <StackPanel Spacing="4">
                                 <TextBlock Text="{Binding Name}" FontWeight="SemiBold" />
                                 <TextBlock Foreground="#888" FontSize="12"
-                                           Text="{Binding TargetDays, StringFormat='Days: {0}'}" />
+                                           Text="{Binding TargetDays, Converter={StaticResource Join}, StringFormat='Days: {0}'}" />
                                 <TextBlock Foreground="#888" FontSize="12"
-                                           Text="{Binding TargetTimeRanges, StringFormat='Times: {0}'}" />
+                                           Text="{Binding TargetTimeRanges, Converter={StaticResource Join}, StringFormat='Times: {0}'}" />
                                 <TextBlock Foreground="#888" FontSize="12"
                                            Text="{Binding OverridePriority, StringFormat='Priority: {0}'}" />
                             </StackPanel>
-                            <Button Grid.Column="1" Content="Remove" VerticalAlignment="Top"
+                            <Button Grid.Column="1" Content="Open" VerticalAlignment="Top" Margin="0,0,6,0"
+                                    Command="{Binding $parent[ItemsControl].((vme:MapEditorViewModel)DataContext).OpenDaySettingsCommand}"
+                                    CommandParameter="{Binding}" />
+                            <Button Grid.Column="2" Content="Remove" VerticalAlignment="Top"
                                     Command="{Binding $parent[ItemsControl].((vme:MapEditorViewModel)DataContext).RemoveDaySettingsCommand}"
                                     CommandParameter="{Binding}" />
                         </Grid>

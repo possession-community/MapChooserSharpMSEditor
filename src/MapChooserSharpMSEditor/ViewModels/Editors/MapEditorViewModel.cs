@@ -9,11 +9,13 @@ public sealed partial class MapEditorViewModel : ViewModelBase
     public MapConfigFile File { get; }
     public MapEntryModel Map { get; }
     public PropertySetViewModel Properties { get; }
+    private readonly MainWindowViewModel? _main;
 
-    public MapEditorViewModel(MapConfigFile file, MapEntryModel map, ProjectContext? project = null)
+    public MapEditorViewModel(MapConfigFile file, MapEntryModel map, ProjectContext? project = null, MainWindowViewModel? main = null)
     {
         File = file;
         Map = map;
+        _main = main;
         // Map inherits: referenced groups (in order) → default. Computed lazily so it
         // reflects the current GroupSettings list at Reset time rather than at VM construction.
         Properties = new PropertySetViewModel(map.Properties, PropertyScope.Map, project,
@@ -53,6 +55,9 @@ public sealed partial class MapEditorViewModel : ViewModelBase
 
     [RelayCommand]
     private void RemoveDaySettings(DaySettingsOverrideModel ov) => Map.DaySettings.Remove(ov);
+
+    [RelayCommand]
+    private void OpenDaySettings(DaySettingsOverrideModel? ov) { if (ov is not null) _main?.NavigateToOverride(ov); }
 
     private string GenerateUniqueName()
     {

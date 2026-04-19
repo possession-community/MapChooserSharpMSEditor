@@ -87,6 +87,12 @@ public sealed partial class MainWindowViewModel : ViewModelBase
             if (node is DefaultSettingsNode dn && dn.File == file) { SelectedNode = dn; return; }
     }
 
+    public void NavigateToOverride(DaySettingsOverrideModel ov)
+    {
+        foreach (var node in EnumerateAllNodes(Tree))
+            if (node is OverrideNode on && on.Override == ov) { SelectedNode = on; return; }
+    }
+
     private static IEnumerable<TreeNodeBase> EnumerateAllNodes(IEnumerable<TreeNodeBase> roots)
     {
         foreach (var n in roots)
@@ -104,8 +110,8 @@ public sealed partial class MainWindowViewModel : ViewModelBase
             FileNode fn => new FileOverviewViewModel(fn.File, this),
             DefaultSettingsNode dn => new DefaultSettingsViewModel(dn.File, Project),
             CategoryNode cn => new CategoryListViewModel(cn.File, cn.Kind, this),
-            MapNode mn => new MapEditorViewModel(mn.File, mn.Map, Project),
-            GroupNode gn => new GroupEditorViewModel(gn.File, gn.Group, Project),
+            MapNode mn => new MapEditorViewModel(mn.File, mn.Map, Project, this),
+            GroupNode gn => new GroupEditorViewModel(gn.File, gn.Group, Project, this),
             OverrideNode on => new OverrideEditorViewModel(on.File, on.Parent, on.Override, Project),
             _ => new WelcomeViewModel(),
         };

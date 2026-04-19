@@ -9,11 +9,13 @@ public sealed partial class GroupEditorViewModel : ViewModelBase
     public MapConfigFile File { get; }
     public GroupEntryModel Group { get; }
     public PropertySetViewModel Properties { get; }
+    private readonly MainWindowViewModel? _main;
 
-    public GroupEditorViewModel(MapConfigFile file, GroupEntryModel group, ProjectContext? project = null)
+    public GroupEditorViewModel(MapConfigFile file, GroupEntryModel group, ProjectContext? project = null, MainWindowViewModel? main = null)
     {
         File = file;
         Group = group;
+        _main = main;
         // Group inherits from Default only.
         Properties = new PropertySetViewModel(group.Properties, PropertyScope.Group, project,
             inheritanceChain: () =>
@@ -48,4 +50,7 @@ public sealed partial class GroupEditorViewModel : ViewModelBase
 
     [RelayCommand]
     private void RemoveDaySettings(DaySettingsOverrideModel ov) => Group.DaySettings.Remove(ov);
+
+    [RelayCommand]
+    private void OpenDaySettings(DaySettingsOverrideModel? ov) { if (ov is not null) _main?.NavigateToOverride(ov); }
 }

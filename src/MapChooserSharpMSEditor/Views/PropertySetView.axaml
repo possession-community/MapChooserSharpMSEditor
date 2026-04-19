@@ -4,8 +4,12 @@
              xmlns:models="using:MapChooserSharpMSEditor.Models"
              xmlns:sys="using:System"
              xmlns:l="using:MapChooserSharpMSEditor.Services"
+             xmlns:views="using:MapChooserSharpMSEditor.Views"
              x:Class="MapChooserSharpMSEditor.Views.PropertySetView"
              x:DataType="vme:PropertySetViewModel">
+    <UserControl.Resources>
+        <views:CollectionJoinConverter x:Key="Join" />
+    </UserControl.Resources>
 
     <UserControl.Styles>
         <Style Selector="TextBlock.sectionHeader">
@@ -265,7 +269,7 @@
                             IsVisible="{Binding Model.HasDaysAllowed}" />
                 </Grid>
                 <TextBlock Margin="0,0,0,0" Foreground="#888" IsVisible="{Binding Model.HasDaysAllowed}"
-                           Text="{Binding Model.DaysAllowed, StringFormat='selected: {0}'}" />
+                           Text="{Binding Model.DaysAllowed, Converter={StaticResource Join}, StringFormat='selected: {0}'}" />
             </StackPanel>
         </Border>
 
