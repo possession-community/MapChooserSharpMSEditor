@@ -1,0 +1,75 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:MapChooserSharpMSEditor.ViewModels"
+             xmlns:models="using:MapChooserSharpMSEditor.Models"
+             xmlns:l="using:MapChooserSharpMSEditor.Services"
+             x:Class="MapChooserSharpMSEditor.Views.SearchBar"
+             x:DataType="vm:SearchViewModel">
+    <UserControl.Styles>
+        <Style Selector="CheckBox.chip">
+            <Setter Property="Padding" Value="6,2" />
+            <Setter Property="FontSize" Value="11" />
+        </Style>
+        <Style Selector="Button.result">
+            <Setter Property="HorizontalContentAlignment" Value="Left" />
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+            <Setter Property="Padding" Value="8,4" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+        </Style>
+        <Style Selector="Button.result:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="#2a3148" />
+        </Style>
+    </UserControl.Styles>
+
+    <DockPanel LastChildFill="True">
+        <!-- Results list drops ABOVE the query input (DockPanel.Dock=Top so the box stays at the bottom) -->
+        <Border DockPanel.Dock="Top" Background="#1a1a1a" BorderBrush="#2a2a2a" BorderThickness="0,0,0,1"
+                IsVisible="{Binding HasResults}" MaxHeight="240">
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <ItemsControl ItemsSource="{Binding Results}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate DataType="models:SearchResult">
+                            <Button Classes="result"
+                                    Command="{Binding $parent[ItemsControl].((vm:SearchViewModel)DataContext).OpenCommand}"
+                                    CommandParameter="{Binding}">
+                                <Grid ColumnDefinitions="Auto,*,Auto">
+                                    <Border Grid.Column="0" Background="#2a3148" CornerRadius="3"
+                                            Padding="4,1" Margin="0,0,6,0" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding Kind}" FontSize="10" Foreground="#9cdcfe" />
+                                    </Border>
+                                    <TextBlock Grid.Column="1" Text="{Binding Label}"
+                                               FontFamily="Cascadia Mono,Consolas" VerticalAlignment="Center" />
+                                    <TextBlock Grid.Column="2" Text="{Binding FileName}" FontSize="10"
+                                               Foreground="#666" VerticalAlignment="Center" />
+                                </Grid>
+                            </Button>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+        </Border>
+
+        <Border DockPanel.Dock="Top" Padding="8,4" IsVisible="{Binding ShowNoResults}">
+            <TextBlock Text="{l:Localize Search.NoResults}" Foreground="#666" FontStyle="Italic" FontSize="11" />
+        </Border>
+
+        <!-- Filter chips + query box stay pinned at the bottom -->
+        <Border Background="#141414" Padding="8">
+            <StackPanel Spacing="6">
+                <WrapPanel>
+                    <CheckBox Classes="chip" Content="{l:Localize Search.Filter.Defaults}" IsChecked="{Binding IncludeDefaults, Mode=TwoWay}" Margin="0,0,6,0" />
+                    <CheckBox Classes="chip" Content="{l:Localize Search.Filter.Groups}" IsChecked="{Binding IncludeGroups, Mode=TwoWay}" Margin="0,0,6,0" />
+                    <CheckBox Classes="chip" Content="{l:Localize Search.Filter.Maps}" IsChecked="{Binding IncludeMaps, Mode=TwoWay}" Margin="0,0,6,0" />
+                    <CheckBox Classes="chip" Content="{l:Localize Search.Filter.Overrides}" IsChecked="{Binding IncludeOverrides, Mode=TwoWay}" />
+                </WrapPanel>
+                <TextBox Text="{Binding Query, Mode=TwoWay}"
+                         Watermark="{l:Localize Search.Watermark}">
+                    <TextBox.KeyBindings>
+                        <KeyBinding Gesture="Enter" Command="{Binding OpenTopCommand}" />
+                    </TextBox.KeyBindings>
+                </TextBox>
+            </StackPanel>
+        </Border>
+    </DockPanel>
+</UserControl>

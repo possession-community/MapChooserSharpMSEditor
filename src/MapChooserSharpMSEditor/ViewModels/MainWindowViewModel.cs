@@ -32,6 +32,8 @@ public sealed partial class MainWindowViewModel : ViewModelBase
     /// <summary>Undo history (owned by Project so every VM that receives Project has access).</summary>
     public UndoManager Undo => Project.Undo;
 
+    public SearchViewModel Search { get; }
+
     [ObservableProperty] private TreeNodeBase? _selectedNode;
     [ObservableProperty] private ViewModelBase _currentEditor;
     [ObservableProperty] private string _statusText = Localization.Get("Status.Ready");
@@ -45,6 +47,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase
     public MainWindowViewModel()
     {
         _currentEditor = new WelcomeViewModel();
+        Search = new SearchViewModel(this);
         Undo.PropertyChanged += (_, e) =>
         {
             if (e.PropertyName == nameof(UndoManager.CanUndo))
@@ -107,30 +110,57 @@ public sealed partial class MainWindowViewModel : ViewModelBase
 
     /// <summary>
     /// Programmatic tree navigation: used by overview/list views to jump to a specific map or
-    /// group via a button click. Walks the whole tree so folder hierarchies are supported.
+    /// group via a button click. Walks the whole tree so folder hierarchies are supported,
+    /// and auto-expands every ancestor so the selection is actually visible.
     /// </summary>
-    public void NavigateToMap(MapEntryModel map)
+    public void NavigateToMap(MapEntryModel map) =>
+        SelectAndExpand(n => n is MapNode mn && mn.Map == map);
+
+    public void NavigateToGroup(GroupEntryModel group) =>
+        SelectAndExpand(n => n is GroupNode gn && gn.Group == group);
+
+    public void NavigateToDefault(MapConfigFile file) =>
+        SelectAndExpand(n => n is DefaultSettingsNode dn && dn.File == file);
+
+    public void NavigateToOverride(DaySettingsOverrideModel ov) =>
+        SelectAndExpand(n => n is OverrideNode on && on.Override == ov);
+
+    public void NavigateToSearchResult(SearchResult r)
     {
-        foreach (var node in EnumerateAllNodes(Tree))
-            if (node is MapNode mn && mn.Map == map) { SelectedNode = mn; return; }
+        switch (r.Kind)
+        {
+            case SearchResultKind.Default: NavigateToDefault(r.File); break;
+            case SearchResultKind.Group when r.Target is GroupEntryModel g: NavigateToGroup(g); break;
+            case SearchResultKind.Map when r.Target is MapEntryModel m: NavigateToMap(m); break;
+            case SearchResultKind.Override when r.Target is DaySettingsOverrideModel ov: NavigateToOverride(ov); break;
+        }
     }
 
-    public void NavigateToGroup(GroupEntryModel group)
+    /// <summary>
+    /// Finds the first node matching <paramref name="match"/>, then expands every ancestor
+    /// so the selection is scrolled into view rather than hidden behind a collapsed folder.
+    /// </summary>
+    private void SelectAndExpand(Func<TreeNodeBase, bool> match)
     {
-        foreach (var node in EnumerateAllNodes(Tree))
-            if (node is GroupNode gn && gn.Group == group) { SelectedNode = gn; return; }
+        var path = FindPath(Tree, match);
+        if (path is null) return;
+        for (var i = 0; i < path.Count - 1; i++) path[i].IsExpanded = true;
+        SelectedNode = path[^1];
     }
 
-    public void NavigateToDefault(MapConfigFile file)
+    private static List<TreeNodeBase>? FindPath(IEnumerable<TreeNodeBase> roots, Func<TreeNodeBase, bool> match)
     {
-        foreach (var node in EnumerateAllNodes(Tree))
-            if (node is DefaultSettingsNode dn && dn.File == file) { SelectedNode = dn; return; }
-    }
-
-    public void NavigateToOverride(DaySettingsOverrideModel ov)
-    {
-        foreach (var node in EnumerateAllNodes(Tree))
-            if (node is OverrideNode on && on.Override == ov) { SelectedNode = on; return; }
+        foreach (var n in roots)
+        {
+            if (match(n)) return new List<TreeNodeBase> { n };
+            var sub = FindPath(n.Children, match);
+            if (sub is not null)
+            {
+                sub.Insert(0, n);
+                return sub;
+            }
+        }
+        return null;
     }
 
     private static IEnumerable<TreeNodeBase> EnumerateAllNodes(IEnumerable<TreeNodeBase> roots)

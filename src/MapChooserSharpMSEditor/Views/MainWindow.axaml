@@ -118,6 +118,7 @@
                     <Border DockPanel.Dock="Top" Padding="10,8" Background="#141414">
                         <TextBlock Text="{l:Localize Sidebar.Header}" FontWeight="SemiBold" Foreground="#ddd" />
                     </Border>
+                    <views:SearchBar DockPanel.Dock="Bottom" DataContext="{Binding Search}" />
                     <TreeView ItemsSource="{Binding Tree}"
                               SelectedItem="{Binding SelectedNode, Mode=TwoWay}">
                         <TreeView.ItemTemplate>

@@ -89,6 +89,18 @@ public static class Localization
             ["Sidebar.Header"] = "Config Files",
             ["Sidebar.ToggleResolved"] = "Toggle resolved-values panel",
 
+            // ===== Search =====
+            ["Search.Watermark"] = "Search maps, groups, overrides...",
+            ["Search.NoResults"] = "No matches",
+            ["Search.Filter.Maps"] = "Maps",
+            ["Search.Filter.Groups"] = "Groups",
+            ["Search.Filter.Overrides"] = "Overrides",
+            ["Search.Filter.Defaults"] = "Defaults",
+            ["Search.Kind.Default"] = "Default",
+            ["Search.Kind.Group"] = "Group",
+            ["Search.Kind.Map"] = "Map",
+            ["Search.Kind.Override"] = "Override",
+
             // ===== Welcome =====
             ["Welcome.Title"] = "MapChooserSharpMS Config Editor",
             ["Welcome.Description"] = "Use File → Open File / Open Folder to load a TOML config.\nSelect Default / Groups / Maps / DaySettings in the left tree to edit.",
@@ -282,6 +294,17 @@ public static class Localization
 
             ["Sidebar.Header"] = "設定ファイル",
             ["Sidebar.ToggleResolved"] = "Effective Valuesパネルの開閉",
+
+            ["Search.Watermark"] = "Map・Group・Override を検索...",
+            ["Search.NoResults"] = "一致なし",
+            ["Search.Filter.Maps"] = "Map",
+            ["Search.Filter.Groups"] = "Group",
+            ["Search.Filter.Overrides"] = "Override",
+            ["Search.Filter.Defaults"] = "Default",
+            ["Search.Kind.Default"] = "Default",
+            ["Search.Kind.Group"] = "Group",
+            ["Search.Kind.Map"] = "Map",
+            ["Search.Kind.Override"] = "Override",
 
             ["Welcome.Title"] = "MapChooserSharpMS 設定エディタ",
             ["Welcome.Description"] = "ファイル → ファイルを開く / フォルダを開く で TOML 設定ファイルを読み込みます。\n左ツリーから Default / Groups / Maps / DaySettings を選択して編集してください。",
