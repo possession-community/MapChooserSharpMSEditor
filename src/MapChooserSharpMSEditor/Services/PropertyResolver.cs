@@ -70,11 +70,23 @@ public static class PropertyResolver
     public static List<ResolvedRow> ResolveMapOverride(
         DaySettingsOverrideModel ov, MapEntryModel map, MapConfigFile file, ProjectContext project)
     {
+        // The parent map is the "override target" — label it explicitly so users reading
+        // the pane can see at a glance that unset rows inherit from that map, not Default.
         var chain = new List<(PropertySet Set, string Source)>
         {
             (ov.Properties, $"Override: {ov.Name}"),
+            (map.Properties, string.Format(Localization.Get("Source.OverrideTargetMap"), map.MapName)),
         };
-        chain.AddRange(BuildMapChain(map, file, project));
+        if (map.Properties.HasGroupSettings)
+        {
+            foreach (var gn in map.Properties.GroupSettings)
+            {
+                var g = FindGroup(gn, project);
+                if (g is not null) chain.Add((g.Properties, $"Group: {g.GroupName}"));
+            }
+        }
+        chain.AddRange(BuildDefaultSources(file, project));
+
         var cdOverride = FindGroupCooldownOverride(map, project);
         var rows = new List<ResolvedRow>(PropertyNames.Length);
         foreach (var name in PropertyNames)
@@ -88,7 +100,7 @@ public static class PropertyResolver
         var chain = new List<(PropertySet Set, string Source)>
         {
             (ov.Properties, $"Override: {ov.Name}"),
-            (group.Properties, $"Group: {group.GroupName}"),
+            (group.Properties, string.Format(Localization.Get("Source.OverrideTargetGroup"), group.GroupName)),
         };
         chain.AddRange(BuildDefaultSources(file, project));
         var rows = new List<ResolvedRow>(PropertyNames.Length);

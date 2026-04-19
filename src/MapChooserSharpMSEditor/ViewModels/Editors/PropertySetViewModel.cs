@@ -8,6 +8,7 @@ using System.Reflection;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MapChooserSharpMSEditor.Models;
+using MapChooserSharpMSEditor.Services;
 
 namespace MapChooserSharpMSEditor.ViewModels.Editors;
 
@@ -68,16 +69,25 @@ public partial class PropertySetViewModel : ViewModelBase
     public bool ShowGroupSettings => Scope is PropertyScope.Default or PropertyScope.Map;
     public bool ShowCooldownOverride => Scope is PropertyScope.Default or PropertyScope.Group;
 
+    /// <summary>
+    /// Localized phrase shown where a row has no override. Override editors pass a
+    /// "from override target" variant so the user isn't misled into thinking the base
+    /// map/group values are being ignored.
+    /// </summary>
+    public string InheritedStatusText { get; }
+
     public PropertySetViewModel(
         PropertySet model,
         PropertyScope scope = PropertyScope.Default,
         ProjectContext? project = null,
-        Func<IReadOnlyList<PropertySet>>? inheritanceChain = null)
+        Func<IReadOnlyList<PropertySet>>? inheritanceChain = null,
+        string inheritedStatusKey = "Status.UsingDefault")
     {
         Model = model;
         Scope = scope;
         Project = project;
         _inheritanceChain = inheritanceChain;
+        InheritedStatusText = Localization.Get(inheritedStatusKey);
 
         RebuildGroupReferences();
         // The Has* auto-set now lives on PropertySet itself so that, from the undo system's

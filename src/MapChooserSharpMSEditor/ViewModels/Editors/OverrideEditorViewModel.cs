@@ -33,7 +33,8 @@ public sealed class OverrideEditorViewModel : ViewModelBase
         //   map-override  → [map, groups..., default]
         //   group-override → [group, default]
         Properties = new PropertySetViewModel(ov.Properties, scope, project,
-            inheritanceChain: () => BuildOverrideChain(file, parent, project));
+            inheritanceChain: () => BuildOverrideChain(file, parent, project),
+            inheritedStatusKey: "Status.FromOverrideTarget");
         ParentDisplay = parent switch
         {
             MapEntryModel m => $"Map: {m.MapName}",

@@ -64,6 +64,9 @@ public static class Localization
             ["Status.UsingDefault"] = "using default",
             ["Status.NoInheritance"] = "no inheritance",
             ["Status.NoOverride"] = "no override",
+            ["Status.FromOverrideTarget"] = "from override target",
+            ["Source.OverrideTargetMap"] = "Override target (Map: {0})",
+            ["Source.OverrideTargetGroup"] = "Override target (Group: {0})",
 
             // Tooltips
             ["Tip.Reset"] = "Revert to default (removes entry from TOML)",
@@ -132,6 +135,9 @@ public static class Localization
             ["Status.UsingDefault"] = "デフォルトを使用中",
             ["Status.NoInheritance"] = "継承なし",
             ["Status.NoOverride"] = "上書きなし",
+            ["Status.FromOverrideTarget"] = "オーバーライド元から継承",
+            ["Source.OverrideTargetMap"] = "オーバーライド元 (Map: {0})",
+            ["Source.OverrideTargetGroup"] = "オーバーライド元 (Group: {0})",
 
             ["Tip.Reset"] = "デフォルトに戻す (TOML からこのエントリを削除)",
             ["Tip.ResetAll"] = "全エントリを削除してデフォルトに戻す",

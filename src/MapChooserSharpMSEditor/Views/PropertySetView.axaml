@@ -50,7 +50,7 @@
             <Grid ColumnDefinitions="220,*,130,Auto">
                 <TextBlock Grid.Column="0" Classes="propLabel" Text="{l:Localize Prop.MapNameAlias}" ToolTip.Tip="{l:Localize Prop.MapNameAlias.Desc}" />
                 <TextBox Grid.Column="1" Text="{Binding Model.MapNameAlias}" />
-                <TextBlock Grid.Column="2" Text="{l:Localize Status.UsingDefault}" Classes="usingDefault" Margin="8,0" IsVisible="{Binding !Model.HasMapNameAlias}" />
+                <TextBlock Grid.Column="2" Text="{Binding InheritedStatusText}" Classes="usingDefault" Margin="8,0" IsVisible="{Binding !Model.HasMapNameAlias}" />
                 <Button Grid.Column="3" Classes="action" Content="{l:Localize Button.Reset}" ToolTip.Tip="{l:Localize Tip.Reset}"
                         Command="{Binding ClearOverrideCommand}" CommandParameter="MapNameAlias"
                         IsVisible="{Binding Model.HasMapNameAlias}" />
@@ -61,7 +61,7 @@
             <Grid ColumnDefinitions="220,*,130,Auto">
                 <TextBlock Grid.Column="0" Classes="propLabel" Text="{l:Localize Prop.MapDescription}" ToolTip.Tip="{l:Localize Prop.MapDescription.Desc}" />
                 <TextBox Grid.Column="1" Text="{Binding Model.MapDescription}" />
-                <TextBlock Grid.Column="2" Text="{l:Localize Status.UsingDefault}" Classes="usingDefault" Margin="8,0" IsVisible="{Binding !Model.HasMapDescription}" />
+                <TextBlock Grid.Column="2" Text="{Binding InheritedStatusText}" Classes="usingDefault" Margin="8,0" IsVisible="{Binding !Model.HasMapDescription}" />
                 <Button Grid.Column="3" Classes="action" Content="{l:Localize Button.Reset}" ToolTip.Tip="{l:Localize Tip.Reset}"
                         Command="{Binding ClearOverrideCommand}" CommandParameter="MapDescription"
                         IsVisible="{Binding Model.HasMapDescription}" />
@@ -72,7 +72,7 @@
             <Grid ColumnDefinitions="220,*,130,Auto">
                 <TextBlock Grid.Column="0" Classes="propLabel" Text="{l:Localize Prop.WorkshopId}" ToolTip.Tip="{l:Localize Prop.WorkshopId.Desc}" />
                 <NumericUpDown Grid.Column="1" Value="{Binding Model.WorkshopId}" FormatString="0" Minimum="0" />
-                <TextBlock Grid.Column="2" Text="{l:Localize Status.UsingDefault}" Classes="usingDefault" Margin="8,0" IsVisible="{Binding !Model.HasWorkshopId}" />
+                <TextBlock Grid.Column="2" Text="{Binding InheritedStatusText}" Classes="usingDefault" Margin="8,0" IsVisible="{Binding !Model.HasWorkshopId}" />
                 <Button Grid.Column="3" Classes="action" Content="{l:Localize Button.Reset}" ToolTip.Tip="{l:Localize Tip.Reset}" Command="{Binding ClearOverrideCommand}" CommandParameter="WorkshopId"
                         IsVisible="{Binding Model.HasWorkshopId}" />
             </Grid>
@@ -82,7 +82,7 @@
             <Grid ColumnDefinitions="220,*,130,Auto">
                 <TextBlock Grid.Column="0" Classes="propLabel" Text="{l:Localize Prop.IsDisabled}" ToolTip.Tip="{l:Localize Prop.IsDisabled.Desc}" />
                 <CheckBox Grid.Column="1" IsChecked="{Binding Model.IsDisabled}" />
-                <TextBlock Grid.Column="2" Text="{l:Localize Status.UsingDefault}" Classes="usingDefault" Margin="8,0" IsVisible="{Binding !Model.HasIsDisabled}" />
+                <TextBlock Grid.Column="2" Text="{Binding InheritedStatusText}" Classes="usingDefault" Margin="8,0" IsVisible="{Binding !Model.HasIsDisabled}" />
                 <Button Grid.Column="3" Classes="action" Content="{l:Localize Button.Reset}" ToolTip.Tip="{l:Localize Tip.Reset}" Command="{Binding ClearOverrideCommand}" CommandParameter="IsDisabled"
                         IsVisible="{Binding Model.HasIsDisabled}" />
             </Grid>
@@ -143,7 +143,7 @@
             <Grid ColumnDefinitions="220,*,130,Auto">
                 <TextBlock Grid.Column="0" Classes="propLabel" Text="{l:Localize Prop.MaxExtends}" ToolTip.Tip="{l:Localize Prop.MaxExtends.Desc}" />
                 <NumericUpDown Grid.Column="1" Value="{Binding Model.MaxExtends}" FormatString="0" Minimum="0" />
-                <TextBlock Grid.Column="2" Text="{l:Localize Status.UsingDefault}" Classes="usingDefault" Margin="8,0" IsVisible="{Binding !Model.HasMaxExtends}" />
+                <TextBlock Grid.Column="2" Text="{Binding InheritedStatusText}" Classes="usingDefault" Margin="8,0" IsVisible="{Binding !Model.HasMaxExtends}" />
                 <Button Grid.Column="3" Classes="action" Content="{l:Localize Button.Reset}" ToolTip.Tip="{l:Localize Tip.Reset}" Command="{Binding ClearOverrideCommand}" CommandParameter="MaxExtends"
                         IsVisible="{Binding Model.HasMaxExtends}" />
             </Grid>
@@ -153,7 +153,7 @@
             <Grid ColumnDefinitions="220,*,130,Auto">
                 <TextBlock Grid.Column="0" Classes="propLabel" Text="{l:Localize Prop.MaxExtCommandUses}" ToolTip.Tip="{l:Localize Prop.MaxExtCommandUses.Desc}" />
                 <NumericUpDown Grid.Column="1" Value="{Binding Model.MaxExtCommandUses}" FormatString="0" Minimum="0" />
-                <TextBlock Grid.Column="2" Text="{l:Localize Status.UsingDefault}" Classes="usingDefault" Margin="8,0" IsVisible="{Binding !Model.HasMaxExtCommandUses}" />
+                <TextBlock Grid.Column="2" Text="{Binding InheritedStatusText}" Classes="usingDefault" Margin="8,0" IsVisible="{Binding !Model.HasMaxExtCommandUses}" />
                 <Button Grid.Column="3" Classes="action" Content="{l:Localize Button.Reset}" ToolTip.Tip="{l:Localize Tip.Reset}" Command="{Binding ClearOverrideCommand}" CommandParameter="MaxExtCommandUses"
                         IsVisible="{Binding Model.HasMaxExtCommandUses}" />
             </Grid>
@@ -163,7 +163,7 @@
             <Grid ColumnDefinitions="220,*,130,Auto">
                 <TextBlock Grid.Column="0" Classes="propLabel" Text="{l:Localize Prop.ExtendTimePerExtends}" ToolTip.Tip="{l:Localize Prop.ExtendTimePerExtends.Desc}" />
                 <NumericUpDown Grid.Column="1" Value="{Binding Model.ExtendTimePerExtends}" FormatString="0" Minimum="0" />
-                <TextBlock Grid.Column="2" Text="{l:Localize Status.UsingDefault}" Classes="usingDefault" Margin="8,0" IsVisible="{Binding !Model.HasExtendTimePerExtends}" />
+                <TextBlock Grid.Column="2" Text="{Binding InheritedStatusText}" Classes="usingDefault" Margin="8,0" IsVisible="{Binding !Model.HasExtendTimePerExtends}" />
                 <Button Grid.Column="3" Classes="action" Content="{l:Localize Button.Reset}" ToolTip.Tip="{l:Localize Tip.Reset}" Command="{Binding ClearOverrideCommand}" CommandParameter="ExtendTimePerExtends"
                         IsVisible="{Binding Model.HasExtendTimePerExtends}" />
             </Grid>
@@ -173,7 +173,7 @@
             <Grid ColumnDefinitions="220,*,130,Auto">
                 <TextBlock Grid.Column="0" Classes="propLabel" Text="{l:Localize Prop.MapTime}" ToolTip.Tip="{l:Localize Prop.MapTime.Desc}" />
                 <NumericUpDown Grid.Column="1" Value="{Binding Model.MapTime}" FormatString="0" Minimum="0" />
-                <TextBlock Grid.Column="2" Text="{l:Localize Status.UsingDefault}" Classes="usingDefault" Margin="8,0" IsVisible="{Binding !Model.HasMapTime}" />
+                <TextBlock Grid.Column="2" Text="{Binding InheritedStatusText}" Classes="usingDefault" Margin="8,0" IsVisible="{Binding !Model.HasMapTime}" />
                 <Button Grid.Column="3" Classes="action" Content="{l:Localize Button.Reset}" ToolTip.Tip="{l:Localize Tip.Reset}" Command="{Binding ClearOverrideCommand}" CommandParameter="MapTime"
                         IsVisible="{Binding Model.HasMapTime}" />
             </Grid>
@@ -183,7 +183,7 @@
             <Grid ColumnDefinitions="220,*,130,Auto">
                 <TextBlock Grid.Column="0" Classes="propLabel" Text="{l:Localize Prop.ExtendRoundsPerExtends}" ToolTip.Tip="{l:Localize Prop.ExtendRoundsPerExtends.Desc}" />
                 <NumericUpDown Grid.Column="1" Value="{Binding Model.ExtendRoundsPerExtends}" FormatString="0" Minimum="0" />
-                <TextBlock Grid.Column="2" Text="{l:Localize Status.UsingDefault}" Classes="usingDefault" Margin="8,0" IsVisible="{Binding !Model.HasExtendRoundsPerExtends}" />
+                <TextBlock Grid.Column="2" Text="{Binding InheritedStatusText}" Classes="usingDefault" Margin="8,0" IsVisible="{Binding !Model.HasExtendRoundsPerExtends}" />
                 <Button Grid.Column="3" Classes="action" Content="{l:Localize Button.Reset}" ToolTip.Tip="{l:Localize Tip.Reset}" Command="{Binding ClearOverrideCommand}" CommandParameter="ExtendRoundsPerExtends"
                         IsVisible="{Binding Model.HasExtendRoundsPerExtends}" />
             </Grid>
@@ -193,7 +193,7 @@
             <Grid ColumnDefinitions="220,*,130,Auto">
                 <TextBlock Grid.Column="0" Classes="propLabel" Text="{l:Localize Prop.MapRounds}" ToolTip.Tip="{l:Localize Prop.MapRounds.Desc}" />
                 <NumericUpDown Grid.Column="1" Value="{Binding Model.MapRounds}" FormatString="0" Minimum="0" />
-                <TextBlock Grid.Column="2" Text="{l:Localize Status.UsingDefault}" Classes="usingDefault" Margin="8,0" IsVisible="{Binding !Model.HasMapRounds}" />
+                <TextBlock Grid.Column="2" Text="{Binding InheritedStatusText}" Classes="usingDefault" Margin="8,0" IsVisible="{Binding !Model.HasMapRounds}" />
                 <Button Grid.Column="3" Classes="action" Content="{l:Localize Button.Reset}" ToolTip.Tip="{l:Localize Tip.Reset}" Command="{Binding ClearOverrideCommand}" CommandParameter="MapRounds"
                         IsVisible="{Binding Model.HasMapRounds}" />
             </Grid>
@@ -205,7 +205,7 @@
             <Grid ColumnDefinitions="220,*,130,Auto">
                 <TextBlock Grid.Column="0" Classes="propLabel" Text="{l:Localize Prop.OnlyNomination}" ToolTip.Tip="{l:Localize Prop.OnlyNomination.Desc}" />
                 <CheckBox Grid.Column="1" IsChecked="{Binding Model.OnlyNomination}" />
-                <TextBlock Grid.Column="2" Text="{l:Localize Status.UsingDefault}" Classes="usingDefault" Margin="8,0" IsVisible="{Binding !Model.HasOnlyNomination}" />
+                <TextBlock Grid.Column="2" Text="{Binding InheritedStatusText}" Classes="usingDefault" Margin="8,0" IsVisible="{Binding !Model.HasOnlyNomination}" />
                 <Button Grid.Column="3" Classes="action" Content="{l:Localize Button.Reset}" ToolTip.Tip="{l:Localize Tip.Reset}" Command="{Binding ClearOverrideCommand}" CommandParameter="OnlyNomination"
                         IsVisible="{Binding Model.HasOnlyNomination}" />
             </Grid>
@@ -215,7 +215,7 @@
             <Grid ColumnDefinitions="220,*,130,Auto">
                 <TextBlock Grid.Column="0" Classes="propLabel" Text="{l:Localize Prop.MaxPlayers}" ToolTip.Tip="{l:Localize Prop.MaxPlayers.Desc}" />
                 <NumericUpDown Grid.Column="1" Value="{Binding Model.MaxPlayers}" FormatString="0" Minimum="0" />
-                <TextBlock Grid.Column="2" Text="{l:Localize Status.UsingDefault}" Classes="usingDefault" Margin="8,0" IsVisible="{Binding !Model.HasMaxPlayers}" />
+                <TextBlock Grid.Column="2" Text="{Binding InheritedStatusText}" Classes="usingDefault" Margin="8,0" IsVisible="{Binding !Model.HasMaxPlayers}" />
                 <Button Grid.Column="3" Classes="action" Content="{l:Localize Button.Reset}" ToolTip.Tip="{l:Localize Tip.Reset}" Command="{Binding ClearOverrideCommand}" CommandParameter="MaxPlayers"
                         IsVisible="{Binding Model.HasMaxPlayers}" />
             </Grid>
@@ -225,7 +225,7 @@
             <Grid ColumnDefinitions="220,*,130,Auto">
                 <TextBlock Grid.Column="0" Classes="propLabel" Text="{l:Localize Prop.MinPlayers}" ToolTip.Tip="{l:Localize Prop.MinPlayers.Desc}" />
                 <NumericUpDown Grid.Column="1" Value="{Binding Model.MinPlayers}" FormatString="0" Minimum="0" />
-                <TextBlock Grid.Column="2" Text="{l:Localize Status.UsingDefault}" Classes="usingDefault" Margin="8,0" IsVisible="{Binding !Model.HasMinPlayers}" />
+                <TextBlock Grid.Column="2" Text="{Binding InheritedStatusText}" Classes="usingDefault" Margin="8,0" IsVisible="{Binding !Model.HasMinPlayers}" />
                 <Button Grid.Column="3" Classes="action" Content="{l:Localize Button.Reset}" ToolTip.Tip="{l:Localize Tip.Reset}" Command="{Binding ClearOverrideCommand}" CommandParameter="MinPlayers"
                         IsVisible="{Binding Model.HasMinPlayers}" />
             </Grid>
@@ -235,7 +235,7 @@
             <Grid ColumnDefinitions="220,*,130,Auto">
                 <TextBlock Grid.Column="0" Classes="propLabel" Text="{l:Localize Prop.ProhibitAdminNomination}" ToolTip.Tip="{l:Localize Prop.ProhibitAdminNomination.Desc}" />
                 <CheckBox Grid.Column="1" IsChecked="{Binding Model.ProhibitAdminNomination}" />
-                <TextBlock Grid.Column="2" Text="{l:Localize Status.UsingDefault}" Classes="usingDefault" Margin="8,0" IsVisible="{Binding !Model.HasProhibitAdminNomination}" />
+                <TextBlock Grid.Column="2" Text="{Binding InheritedStatusText}" Classes="usingDefault" Margin="8,0" IsVisible="{Binding !Model.HasProhibitAdminNomination}" />
                 <Button Grid.Column="3" Classes="action" Content="{l:Localize Button.Reset}" ToolTip.Tip="{l:Localize Tip.Reset}" Command="{Binding ClearOverrideCommand}" CommandParameter="ProhibitAdminNomination"
                         IsVisible="{Binding Model.HasProhibitAdminNomination}" />
             </Grid>
@@ -259,7 +259,7 @@
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
-                    <TextBlock Grid.Column="2" Text="{l:Localize Status.UsingDefault}" Classes="usingDefault" Margin="8,0" IsVisible="{Binding !Model.HasDaysAllowed}" />
+                    <TextBlock Grid.Column="2" Text="{Binding InheritedStatusText}" Classes="usingDefault" Margin="8,0" IsVisible="{Binding !Model.HasDaysAllowed}" />
                     <Button Grid.Column="3" Classes="action" Content="{l:Localize Button.ResetAll}" ToolTip.Tip="{l:Localize Tip.ResetAll}"
                             Command="{Binding ClearOverrideCommand}" CommandParameter="DaysAllowed"
                             IsVisible="{Binding Model.HasDaysAllowed}" />
@@ -277,7 +277,7 @@
                         <TextBox Text="{Binding NewTimeRange}" Width="160" Watermark="HH:mm-HH:mm" />
                         <Button Content="{l:Localize Button.Add}" Command="{Binding AddTimeRangeCommand}" />
                     </StackPanel>
-                    <TextBlock Grid.Column="2" Text="{l:Localize Status.UsingDefault}" Classes="usingDefault" Margin="8,0" IsVisible="{Binding !Model.HasAllowedTimeRanges}" />
+                    <TextBlock Grid.Column="2" Text="{Binding InheritedStatusText}" Classes="usingDefault" Margin="8,0" IsVisible="{Binding !Model.HasAllowedTimeRanges}" />
                     <Button Grid.Column="3" Classes="action" Content="{l:Localize Button.ResetAll}" ToolTip.Tip="{l:Localize Tip.ResetAll}"
                             Command="{Binding ClearOverrideCommand}" CommandParameter="AllowedTimeRanges"
                             IsVisible="{Binding Model.HasAllowedTimeRanges}" />
@@ -303,7 +303,7 @@
             <Grid ColumnDefinitions="220,*,130,Auto">
                 <TextBlock Grid.Column="0" Classes="propLabel" Text="{l:Localize Prop.Cooldown}" ToolTip.Tip="{l:Localize Prop.Cooldown.Desc}" />
                 <NumericUpDown Grid.Column="1" Value="{Binding Model.Cooldown}" FormatString="0" Minimum="0" />
-                <TextBlock Grid.Column="2" Text="{l:Localize Status.UsingDefault}" Classes="usingDefault" Margin="8,0" IsVisible="{Binding !Model.HasCooldown}" />
+                <TextBlock Grid.Column="2" Text="{Binding InheritedStatusText}" Classes="usingDefault" Margin="8,0" IsVisible="{Binding !Model.HasCooldown}" />
                 <Button Grid.Column="3" Classes="action" Content="{l:Localize Button.Reset}" ToolTip.Tip="{l:Localize Tip.Reset}" Command="{Binding ClearOverrideCommand}" CommandParameter="Cooldown"
                         IsVisible="{Binding Model.HasCooldown}" />
             </Grid>
@@ -313,7 +313,7 @@
             <Grid ColumnDefinitions="220,*,130,Auto">
                 <TextBlock Grid.Column="0" Classes="propLabel" Text="{l:Localize Prop.CooldownDateTime}" ToolTip.Tip="{l:Localize Prop.CooldownDateTime.Desc}" />
                 <TextBox Grid.Column="1" Text="{Binding Model.CooldownDateTime}" Watermark="e.g. 2d or 1m" />
-                <TextBlock Grid.Column="2" Text="{l:Localize Status.UsingDefault}" Classes="usingDefault" Margin="8,0" IsVisible="{Binding !Model.HasCooldownDateTime}" />
+                <TextBlock Grid.Column="2" Text="{Binding InheritedStatusText}" Classes="usingDefault" Margin="8,0" IsVisible="{Binding !Model.HasCooldownDateTime}" />
                 <Button Grid.Column="3" Classes="action" Content="{l:Localize Button.Reset}" ToolTip.Tip="{l:Localize Tip.Reset}" Command="{Binding ClearOverrideCommand}" CommandParameter="CooldownDateTime"
                         IsVisible="{Binding Model.HasCooldownDateTime}" />
             </Grid>
