@@ -87,15 +87,14 @@
                 <MenuItem Header="{l:Localize Menu.Edit.AddGroup}" Command="{Binding AddGroupCommand}" />
             </MenuItem>
             <MenuItem Header="{l:Localize Menu.View}">
-                <MenuItem Header="{l:Localize Menu.View.Language}"
-                          ItemsSource="{Binding AvailableLocales}">
-                    <MenuItem.ItemTemplate>
-                        <DataTemplate DataType="svc:LocaleOption">
-                            <MenuItem Header="{Binding NativeName}"
-                                      Command="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).SelectLanguageCommand}"
-                                      CommandParameter="{Binding Id}" />
-                        </DataTemplate>
-                    </MenuItem.ItemTemplate>
+                <!-- Locales are listed explicitly because MenuItem's ItemTemplate nests a
+                     second MenuItem inside the generated container, which swallows clicks.
+                     New locale = one more line here + one entry in Localization.cs. -->
+                <MenuItem Header="{l:Localize Menu.View.Language}">
+                    <MenuItem Header="English"
+                              Command="{Binding SelectLanguageCommand}" CommandParameter="en" />
+                    <MenuItem Header="日本語"
+                              Command="{Binding SelectLanguageCommand}" CommandParameter="ja" />
                 </MenuItem>
             </MenuItem>
         </Menu>
