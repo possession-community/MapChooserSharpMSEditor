@@ -18,13 +18,11 @@ public partial class PropertySetView : UserControl
     public PropertySetView() => InitializeComponent();
 
     /// <summary>
-    /// Starts a drag for a GroupReferences row. Ignores presses whose source is a Button so
-    /// the existing ▲/▼/× controls still fire cleanly; buttons get their click before any
-    /// drag has a chance to kick in.
+    /// Starts a drag for a GroupReferences row. <paramref name="sender"/> is the ☰ handle
+    /// Border; its DataContext is inherited from the row template.
     /// </summary>
     private async void OnGroupRefPointerPressed(object? sender, PointerPressedEventArgs e)
     {
-        if (IsInsideButton(e.Source as Visual, sender as Visual)) return;
         if (sender is not Control c || c.DataContext is not GroupRefViewModel gr) return;
         if (!e.GetCurrentPoint(c).Properties.IsLeftButtonPressed) return;
 
@@ -61,7 +59,6 @@ public partial class PropertySetView : UserControl
 
     private async void OnTimeRangePointerPressed(object? sender, PointerPressedEventArgs e)
     {
-        if (IsInsideButton(e.Source as Visual, sender as Visual)) return;
         if (sender is not Control c || c.DataContext is not TimeRangeSpec spec) return;
         if (!e.GetCurrentPoint(c).Properties.IsLeftButtonPressed) return;
 
@@ -105,20 +102,5 @@ public partial class PropertySetView : UserControl
             if (coll[i].Equals(target))
                 return i;
         return -1;
-    }
-
-    /// <summary>
-    /// Walks from the click source up to the row root; returns true if a Button sits in
-    /// between, meaning we should treat this click as a Button press, not a drag initiation.
-    /// </summary>
-    private static bool IsInsideButton(Visual? source, Visual? stopAt)
-    {
-        var cur = source;
-        while (cur is not null && cur != stopAt)
-        {
-            if (cur is Button) return true;
-            cur = cur.GetVisualParent();
-        }
-        return false;
     }
 }
