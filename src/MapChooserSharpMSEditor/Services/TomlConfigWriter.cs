@@ -23,6 +23,8 @@ public static class TomlConfigWriter
         var content = Serialize(file);
         File.WriteAllText(file.FilePath, content, new UTF8Encoding(false));
         file.IsDirty = false;
+        Log.Debug("Writer",
+            $"Wrote {file.FilePath} ({content.Length} bytes, groups={file.Groups.Count}, maps={file.Maps.Count})");
     }
 
     public static string Serialize(MapConfigFile file)

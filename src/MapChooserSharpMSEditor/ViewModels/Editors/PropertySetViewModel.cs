@@ -97,6 +97,15 @@ public partial class PropertySetViewModel : ViewModelBase
 
         if (Project is not null)
             Project.AllGroupNames.CollectionChanged += (_, _) => RefreshGroupRefValidity();
+
+        DaysAllowedToggles = BuildDayToggles(Model.DaysAllowed);
+    }
+
+    private static IReadOnlyList<DayToggleViewModel> BuildDayToggles(ObservableCollection<DayOfWeek> target)
+    {
+        var list = new List<DayToggleViewModel>(AllDays.Length);
+        foreach (var d in AllDays) list.Add(new DayToggleViewModel(d, target));
+        return list;
     }
 
     private void RebuildGroupReferences()
@@ -118,7 +127,25 @@ public partial class PropertySetViewModel : ViewModelBase
         DayOfWeek.Thursday, DayOfWeek.Friday, DayOfWeek.Saturday,
     };
 
+    /// <summary>
+    /// One chip per day bound to <see cref="PropertySet.DaysAllowed"/>. The UI binds each
+    /// ToggleButton's <c>IsChecked</c> to the chip's <c>IsSelected</c>, giving the "selected
+    /// days are blue" treatment without needing a multi-binding converter.
+    /// </summary>
+    public IReadOnlyList<DayToggleViewModel> DaysAllowedToggles { get; }
+
     [ObservableProperty] private string _newTimeRange = string.Empty;
+
+    /// <summary>
+    /// True when <see cref="NewTimeRange"/> is empty or parses as <c>HH:mm-HH:mm</c>.
+    /// Used by the TextBox to paint its border red on invalid input — server would fail
+    /// the whole config load on a bad time range, so flagging early saves a save-then-
+    /// restart debug cycle.
+    /// </summary>
+    public bool IsNewTimeRangeValid =>
+        string.IsNullOrWhiteSpace(NewTimeRange) || TimeRangeSpec.TryParse(NewTimeRange, out _);
+
+    partial void OnNewTimeRangeChanged(string value) => OnPropertyChanged(nameof(IsNewTimeRangeValid));
     [ObservableProperty] private string _newGroupName = string.Empty;
     [ObservableProperty] private string _newExtraSectionName = string.Empty;
 

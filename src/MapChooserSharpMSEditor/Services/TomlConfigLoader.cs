@@ -18,6 +18,7 @@ public static class TomlConfigLoader
 {
     public static MapConfigFile LoadFile(string path)
     {
+        Log.Debug("Loader", $"LoadFile {path}");
         var file = new MapConfigFile
         {
             FilePath = path,
@@ -26,6 +27,8 @@ public static class TomlConfigLoader
 
         var doc = CsTomlFileSerializer.Deserialize<TomlDocument>(path);
         Populate(file, doc);
+        Log.Info("Loader",
+            $"Loaded {file.DisplayName}: groups={file.Groups.Count}, maps={file.Maps.Count}, hasDefault={file.DefaultSettings is not null}");
         return file;
     }
 

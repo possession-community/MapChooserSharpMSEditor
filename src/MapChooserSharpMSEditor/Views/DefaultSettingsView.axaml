@@ -1,6 +1,7 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vme="using:MapChooserSharpMSEditor.ViewModels.Editors"
+             xmlns:models="using:MapChooserSharpMSEditor.Models"
              xmlns:views="using:MapChooserSharpMSEditor.Views"
              xmlns:l="using:MapChooserSharpMSEditor.Services"
              x:Class="MapChooserSharpMSEditor.Views.DefaultSettingsView"
@@ -13,8 +14,66 @@
             <TextBlock Text="{l:Localize Default.Section}" Foreground="#888" FontFamily="Cascadia Mono,Consolas"
                        VerticalAlignment="Center" />
         </StackPanel>
-        <TextBlock Text="{Binding File.DisplayName, StringFormat={l:Localize Label.FilePrefix}}" Foreground="#888" />
-        <Separator />
-        <views:PropertySetView DataContext="{Binding Properties}" />
+
+        <!-- Multiple-owners warning: the server's TOML parser rejects duplicate sections,
+             so this config won't load until the user removes one. -->
+        <Border Background="#3a1e1e" BorderBrush="#a33" BorderThickness="1" CornerRadius="3"
+                Padding="10,8" IsVisible="{Binding HasMultipleOwners}">
+            <StackPanel Spacing="4">
+                <TextBlock Text="{l:Localize Default.MultipleWarning.Title}"
+                           FontWeight="SemiBold" Foreground="#fbb" />
+                <TextBlock Text="{l:Localize Default.MultipleWarning.Body}"
+                           Foreground="#fbb" TextWrapping="Wrap" />
+                <ItemsControl ItemsSource="{Binding Owners}" Margin="0,4,0,0">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate DataType="models:MapConfigFile">
+                            <TextBlock Text="{Binding DisplayName}"
+                                       FontFamily="Cascadia Mono,Consolas" Foreground="#fdd" Margin="8,0,0,0" />
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
+        </Border>
+
+        <!-- Owner present: normal editor surface. -->
+        <StackPanel IsVisible="{Binding HasOwner}" Spacing="10">
+            <StackPanel Orientation="Horizontal" Spacing="10">
+                <TextBlock Text="{Binding Owner.DisplayName, StringFormat={l:Localize Default.OwnerLabel}}"
+                           Foreground="#bbb" />
+                <Button Content="{l:Localize Default.RemoveOwner}"
+                        Command="{Binding UnassignCommand}"
+                        Padding="8,2" FontSize="12"
+                        ToolTip.Tip="{l:Localize Default.RemoveOwner.Tip}" />
+            </StackPanel>
+            <Separator />
+            <views:PropertySetView DataContext="{Binding Properties}" />
+        </StackPanel>
+
+        <!-- No owner: picker + Assign button. Attaches a fresh PropertySet to the picked
+             file so it becomes the Default owner on save. -->
+        <Border IsVisible="{Binding HasNoOwner}"
+                Background="#252525" BorderBrush="#3a3a3a" BorderThickness="1"
+                CornerRadius="3" Padding="14,12">
+            <StackPanel Spacing="10">
+                <TextBlock Text="{l:Localize Default.NoOwner.Title}"
+                           FontWeight="SemiBold" Foreground="#ddd" />
+                <TextBlock Text="{l:Localize Default.NoOwner.Body}"
+                           Foreground="#aaa" TextWrapping="Wrap" />
+                <StackPanel Orientation="Horizontal" Spacing="10">
+                    <ComboBox ItemsSource="{Binding AssignableFiles}"
+                              SelectedItem="{Binding AssignTarget, Mode=TwoWay}"
+                              MinWidth="260">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate DataType="models:MapConfigFile">
+                                <TextBlock Text="{Binding DisplayName}" />
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                    <Button Content="{l:Localize Default.Assign}"
+                            Command="{Binding AssignCommand}"
+                            Padding="12,4" />
+                </StackPanel>
+            </StackPanel>
+        </Border>
     </StackPanel>
 </UserControl>

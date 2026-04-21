@@ -44,6 +44,13 @@ public sealed partial class MainWindowViewModel : ViewModelBase
     /// </summary>
     [ObservableProperty] private bool _isResolvedPanelVisible = true;
 
+    /// <summary>Debug console panel along the bottom edge. Off by default — flipped on
+    /// via View → Debug Console when the user wants to see internal operation traces.</summary>
+    [ObservableProperty] private bool _isDebugConsoleVisible;
+
+    [RelayCommand]
+    private void ToggleDebugConsole() => IsDebugConsoleVisible = !IsDebugConsoleVisible;
+
     public MainWindowViewModel()
     {
         _currentEditor = new WelcomeViewModel();
@@ -55,6 +62,30 @@ public sealed partial class MainWindowViewModel : ViewModelBase
             else if (e.PropertyName == nameof(UndoManager.CanRedo))
                 RedoActionCommand.NotifyCanExecuteChanged();
         };
+        Project.Files.CollectionChanged += (_, _) => SyncProjectDefaultNode();
+    }
+
+    private ProjectDefaultNode? _projectDefaultNode;
+
+    /// <summary>
+    /// Keeps exactly one <see cref="ProjectDefaultNode"/> pinned at the top of the tree
+    /// whenever the project has at least one file, and removes it when the workspace
+    /// empties. It deliberately sits above the file/folder roots since the Default is a
+    /// project-wide concept rather than a per-file one.
+    /// </summary>
+    private void SyncProjectDefaultNode()
+    {
+        var shouldHave = Project.Files.Count > 0;
+        if (shouldHave && _projectDefaultNode is null)
+        {
+            _projectDefaultNode = new ProjectDefaultNode();
+            Tree.Insert(0, _projectDefaultNode);
+        }
+        else if (!shouldHave && _projectDefaultNode is not null)
+        {
+            Tree.Remove(_projectDefaultNode);
+            _projectDefaultNode = null;
+        }
     }
 
     [RelayCommand]
@@ -65,6 +96,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase
     [RelayCommand]
     private void OpenSearch()
     {
+        Log.Debug("Search", "OpenSearch window");
         if (_searchWindow is { IsVisible: true })
         {
             _searchWindow.Activate();
@@ -81,6 +113,26 @@ public sealed partial class MainWindowViewModel : ViewModelBase
     }
 
     public void CloseSearchWindow() => _searchWindow?.Close();
+
+    /// <summary>
+    /// Opens the Workshop-check dialog so the user can bulk-query every loaded map's
+    /// WorkshopId against Steam and pick which private/deleted items to mark Disabled.
+    /// Result count is surfaced via StatusText after the dialog closes.
+    /// </summary>
+    [RelayCommand]
+    private async Task OpenWorkshopCheckAsync()
+    {
+        Log.Debug("Workshop", "OpenWorkshopCheck window");
+        if (GetTopLevel() is not Window owner) return;
+        var vm = new WorkshopCheckViewModel(Project);
+        var dlg = new WorkshopCheckWindow { DataContext = vm };
+        await dlg.ShowDialog(owner);
+        if (dlg.Tag is int applied && applied > 0)
+        {
+            Log.Info("Workshop", $"Applied Disabled=true to {applied} map(s)");
+            StatusText = Localization.Format("WorkshopCheck.Applied", applied);
+        }
+    }
 
     /// <summary>Available languages for the View → Language submenu.</summary>
     public LocaleOption[] AvailableLocales => Localization.AvailableLocales;
@@ -142,13 +194,17 @@ public sealed partial class MainWindowViewModel : ViewModelBase
         SelectAndExpand(n => n is GroupNode gn && gn.Group == group);
 
     public void NavigateToDefault(MapConfigFile file) =>
-        SelectAndExpand(n => n is DefaultSettingsNode dn && dn.File == file);
+        // There's only one Default node for the whole project now; the file argument is
+        // ignored (search results still carry a file reference, but the node itself is
+        // project-scoped). Kept for API compatibility with NavigateToSearchResult.
+        SelectAndExpand(n => n is ProjectDefaultNode);
 
     public void NavigateToOverride(DaySettingsOverrideModel ov) =>
         SelectAndExpand(n => n is OverrideNode on && on.Override == ov);
 
     public void NavigateToSearchResult(SearchResult r)
     {
+        Log.Debug("Navigate", $"Search result → {r.Kind}: {r.Label} ({r.FileName})");
         switch (r.Kind)
         {
             case SearchResultKind.Default: NavigateToDefault(r.File); break;
@@ -200,7 +256,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase
         CurrentEditor = value switch
         {
             FileNode fn => new FileOverviewViewModel(fn.File, this),
-            DefaultSettingsNode dn => new DefaultSettingsViewModel(dn.File, Project),
+            ProjectDefaultNode => new DefaultSettingsViewModel(Project),
             CategoryNode cn => new CategoryListViewModel(cn.File, cn.Kind, this),
             MapNode mn => new MapEditorViewModel(mn.File, mn.Map, Project, this),
             GroupNode gn => new GroupEditorViewModel(gn.File, gn.Group, Project, this),
@@ -213,6 +269,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase
     [RelayCommand]
     private async Task OpenFileAsync()
     {
+        Log.Debug("File", "OpenFile picker invoked");
         var top = GetTopLevel();
         if (top is null) return;
         var files = await top.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
@@ -226,7 +283,10 @@ public sealed partial class MainWindowViewModel : ViewModelBase
         {
             var path = f.TryGetLocalPath();
             if (!string.IsNullOrEmpty(path) && File.Exists(path))
+            {
+                Log.Info("File", $"Opening {path}");
                 OpenPath(path);
+            }
         }
     }
 
@@ -245,21 +305,82 @@ public sealed partial class MainWindowViewModel : ViewModelBase
         var folderPath = folder.TryGetLocalPath();
         if (string.IsNullOrEmpty(folderPath) || !Directory.Exists(folderPath)) return;
 
+        // Enforce single-root-folder policy: opening a second folder while one is already
+        // loaded made per-file origin tracking ambiguous (nested roots, duplicate files,
+        // edits silently landing in only one of the two trees). Close the previous root
+        // before loading the new one so the workspace always has exactly one loaded folder.
+        var existingRoot = Tree.OfType<FolderNode>().FirstOrDefault(n => n.IsRoot);
+        if (existingRoot is not null || _pinnedMapsTomlNode is not null)
+        {
+            var filesInside = new List<FileNode>();
+            if (existingRoot is not null)
+                filesInside.AddRange(EnumerateFileNodes(new[] { (TreeNodeBase)existingRoot }));
+            // The pinned maps.toml lives at the top of Tree, so it isn't picked up by the
+            // folder-tree walk above. Add it explicitly so the discard-confirm sees it too.
+            if (_pinnedMapsTomlNode is not null)
+                filesInside.Add(_pinnedMapsTomlNode);
+
+            if (!await ConfirmDiscardIfDirtyAsync(filesInside)) return;
+            foreach (var f in filesInside) RemoveFileNodeFromTree(f);
+            if (existingRoot is not null) DetachFolderIfStillAttached(existingRoot);
+            _pinnedMapsTomlNode = null;
+        }
+
         OpenFolder(folderPath);
     }
 
+    /// <summary>
+    /// If the folder's root contains <c>maps.toml</c>, the server uses that file exclusively
+    /// and ignores the rest. We mirror that distinction visually: the maps.toml file is
+    /// pinned as its own top-level Explorer entry (separate from the folder tree) so it's
+    /// obvious which file is "the" config, while sub-folder .toml files remain in the
+    /// directory-mirrored tree for reference / migration.
+    /// </summary>
+    private FileNode? _pinnedMapsTomlNode;
+
     public void OpenFolder(string folderPath)
     {
+        Log.Info("File", $"OpenFolder({folderPath})");
         try
         {
-            var rootNode = BuildFolderNode(folderPath, isRoot: true);
-            if (rootNode.Children.Count == 0)
+            var skip = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            FileNode? mapsNode = null;
+
+            var mapsTomlPath = Path.Combine(folderPath, "maps.toml");
+            if (File.Exists(mapsTomlPath))
+            {
+                Log.Debug("File", "Root maps.toml detected — pinning as top-level entry");
+                try
+                {
+                    var file = TomlConfigLoader.LoadFile(mapsTomlPath);
+                    AttachDirtyTracking(file);
+                    Project.Add(file);
+                    mapsNode = BuildFileNode(file);
+                    skip.Add(mapsTomlPath);
+                }
+                catch (Exception ex)
+                {
+                    StatusText = Localization.Format("Status.Skipped", mapsTomlPath, ex.Message);
+                }
+            }
+
+            var rootNode = BuildFolderNode(folderPath, isRoot: true, skip);
+
+            if (mapsNode is null && rootNode.Children.Count == 0)
             {
                 StatusText = Localization.Format("Status.NoTomlFound", folderPath);
                 return;
             }
-            Tree.Add(rootNode);
-            SelectedNode = rootNode.Children.FirstOrDefault() ?? (TreeNodeBase)rootNode;
+
+            // Pin maps.toml above the folder tree so it's the first thing the user sees.
+            if (mapsNode is not null)
+            {
+                Tree.Add(mapsNode);
+                _pinnedMapsTomlNode = mapsNode;
+            }
+            if (rootNode.Children.Count > 0) Tree.Add(rootNode);
+
+            SelectedNode = mapsNode ?? rootNode.Children.FirstOrDefault() ?? (TreeNodeBase)rootNode;
             StatusText = Localization.Format("Status.OpenedFolder", folderPath);
         }
         catch (Exception ex)
@@ -271,20 +392,23 @@ public sealed partial class MainWindowViewModel : ViewModelBase
     /// <summary>
     /// Mirrors the on-disk directory layout: subfolders first (sorted), then *.toml files (sorted).
     /// Folders with no .toml anywhere in their subtree are pruned so the user sees only relevant paths.
+    /// <paramref name="skipPaths"/> is used to exclude files that should be presented elsewhere
+    /// (maps.toml gets pulled out by OpenFolder so it doesn't appear twice).
     /// </summary>
-    private FolderNode BuildFolderNode(string path, bool isRoot)
+    private FolderNode BuildFolderNode(string path, bool isRoot, HashSet<string>? skipPaths = null)
     {
         var node = new FolderNode(path, isRoot);
 
         foreach (var dir in Directory.GetDirectories(path).OrderBy(d => d, StringComparer.OrdinalIgnoreCase))
         {
-            var child = BuildFolderNode(dir, isRoot: false);
+            var child = BuildFolderNode(dir, isRoot: false, skipPaths);
             if (child.Children.Count > 0)
                 node.Children.Add(child);
         }
 
         foreach (var f in Directory.GetFiles(path, "*.toml").OrderBy(f => f, StringComparer.OrdinalIgnoreCase))
         {
+            if (skipPaths is not null && skipPaths.Contains(f)) continue;
             try
             {
                 var file = TomlConfigLoader.LoadFile(f);
@@ -326,14 +450,16 @@ public sealed partial class MainWindowViewModel : ViewModelBase
         if (SelectedNode is null) return;
         var file = GetFileForNode(SelectedNode);
         if (file is null) return;
+        Log.Debug("File", $"Save invoked for {file.DisplayName}");
         SaveFile(file);
     }
 
     [RelayCommand]
     private void SaveAll()
     {
-        foreach (var fn in EnumerateFileNodes(Tree))
-            SaveFile(fn.File);
+        var count = 0;
+        foreach (var fn in EnumerateFileNodes(Tree)) { SaveFile(fn.File); count++; }
+        Log.Info("File", $"SaveAll: {count} files");
     }
 
     private static IEnumerable<FileNode> EnumerateFileNodes(IEnumerable<TreeNodeBase> nodes)
@@ -394,21 +520,154 @@ public sealed partial class MainWindowViewModel : ViewModelBase
     [RelayCommand]
     private void NewFile()
     {
+        Log.Info("File", "NewFile (untitled)");
+        var (_, node) = CreateUntitledFile();
+        SelectedNode = node;
+    }
+
+    /// <summary>
+    /// Spawns an in-memory untitled file with its tree node already wired up. Returns both
+    /// so callers that wanted the file for a follow-up action (e.g. Add Map into a new file
+    /// from the AddEntry dialog) can use it without re-walking the tree.
+    /// </summary>
+    private (MapConfigFile File, TreeNodeBase Node) CreateUntitledFile()
+    {
         var file = new MapConfigFile
         {
             DisplayName = "untitled.toml",
-            DefaultSettings = new PropertySet(),
+            // DefaultSettings deliberately null: the project has at most one Default section
+            // across every loaded file (the server's TOML parser rejects duplicates), so we
+            // only attach a PropertySet when the user explicitly promotes a file to own it.
         };
         AttachDirtyTracking(file);
         Project.Add(file);
         file.IsDirty = true;
         var node = BuildFileNode(file);
         Tree.Add(node);
-        SelectedNode = node;
+        return (file, node);
+    }
+
+    /// <summary>
+    /// Creates a new file destined for <paramref name="path"/> and inserts its tree node
+    /// into the right spot: if the path lives under an already-loaded root folder the file
+    /// appears inside the matching folder hierarchy (creating missing intermediate folder
+    /// nodes as needed), otherwise it's added at the tree root like an ad-hoc open.
+    /// </summary>
+    private (MapConfigFile File, FileNode Node) CreateFileAtPath(string path)
+    {
+        Log.Info("File", $"CreateFileAtPath({path})");
+        var file = new MapConfigFile
+        {
+            FilePath = path,
+            DisplayName = Path.GetFileName(path),
+            // See CreateUntitledFile: only the one "owner" file carries DefaultSettings.
+        };
+        AttachDirtyTracking(file);
+        Project.Add(file);
+        file.IsDirty = true;
+        var node = BuildFileNode(file);
+
+        var folder = FindOrCreateFolderFor(path);
+        if (folder is not null)
+        {
+            InsertFileSorted(folder, node);
+            folder.IsExpanded = true;
+        }
+        else
+        {
+            Tree.Add(node);
+        }
+
+        return (file, node);
+    }
+
+    /// <summary>
+    /// Walks the loaded root folders looking for one that is an ancestor of
+    /// <paramref name="filePath"/>. If found, descends into (or creates) the subfolder
+    /// chain that ends at the file's directory and returns that leaf folder. Returns
+    /// null when the path isn't under any loaded root — the caller should place the
+    /// file at the tree root in that case.
+    /// </summary>
+    private FolderNode? FindOrCreateFolderFor(string filePath)
+    {
+        var fullFilePath = Path.GetFullPath(filePath);
+        var targetDir = Path.GetDirectoryName(fullFilePath);
+        if (string.IsNullOrEmpty(targetDir)) return null;
+
+        foreach (var root in Tree.OfType<FolderNode>().Where(n => n.IsRoot))
+        {
+            var rootPath = Path.GetFullPath(root.FolderPath);
+            if (!IsPathUnderFolder(fullFilePath, rootPath)) continue;
+
+            if (string.Equals(rootPath, targetDir, StringComparison.OrdinalIgnoreCase))
+                return root;
+
+            var rel = Path.GetRelativePath(rootPath, targetDir);
+            var segments = rel.Split(
+                new[] { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar },
+                StringSplitOptions.RemoveEmptyEntries);
+
+            var current = root;
+            var currentPath = rootPath;
+            foreach (var seg in segments)
+            {
+                currentPath = Path.Combine(currentPath, seg);
+                var child = current.Children
+                    .OfType<FolderNode>()
+                    .FirstOrDefault(f => string.Equals(Path.GetFullPath(f.FolderPath), currentPath, StringComparison.OrdinalIgnoreCase));
+                if (child is null)
+                {
+                    child = new FolderNode(currentPath, isRoot: false);
+                    InsertFolderSorted(current, child);
+                }
+                current.IsExpanded = true;
+                current = child;
+            }
+            return current;
+        }
+        return null;
+    }
+
+    private static bool IsPathUnderFolder(string fullFilePath, string fullFolderPath)
+    {
+        var normalized = fullFolderPath.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
+            + Path.DirectorySeparatorChar;
+        return fullFilePath.StartsWith(normalized, StringComparison.OrdinalIgnoreCase);
+    }
+
+    /// <summary>Inserts <paramref name="newChild"/> into the folder's child list keeping
+    /// "folders first (alpha), then files (alpha)" ordering used by <see cref="BuildFolderNode"/>.</summary>
+    private static void InsertFolderSorted(FolderNode parent, FolderNode newChild)
+    {
+        var idx = 0;
+        foreach (var c in parent.Children)
+        {
+            if (c is not FolderNode existing) break;
+            if (StringComparer.OrdinalIgnoreCase.Compare(existing.FolderPath, newChild.FolderPath) > 0) break;
+            idx++;
+        }
+        parent.Children.Insert(idx, newChild);
+    }
+
+    private static void InsertFileSorted(FolderNode parent, FileNode newFile)
+    {
+        var idx = 0;
+        foreach (var c in parent.Children)
+        {
+            if (c is FolderNode) { idx++; continue; }
+            if (c is FileNode existing
+                && StringComparer.OrdinalIgnoreCase.Compare(existing.File.DisplayName, newFile.File.DisplayName) <= 0)
+            {
+                idx++;
+                continue;
+            }
+            break;
+        }
+        parent.Children.Insert(idx, newFile);
     }
 
     [RelayCommand]
-    private void CloseFile()
+    private async Task CloseFileAsync()
     {
         if (SelectedNode is null) return;
         var file = GetFileForNode(SelectedNode);
@@ -417,8 +676,53 @@ public sealed partial class MainWindowViewModel : ViewModelBase
         var fileNode = EnumerateFileNodes(Tree).FirstOrDefault(n => n.File == file);
         if (fileNode is null) return;
 
-        Project.Remove(file);
+        if (!await ConfirmDiscardIfDirtyAsync(new[] { fileNode })) return;
+        RemoveFileNodeFromTree(fileNode);
+        ResetIfEmpty();
+    }
+
+    /// <summary>
+    /// Right-click action on any tree row: close the file / folder from the workspace
+    /// without touching the disk. Files behave like "Close file"; folders close every
+    /// file beneath them and drop the folder node itself.
+    /// </summary>
+    [RelayCommand]
+    private async Task RemoveFromViewAsync(TreeNodeBase? node)
+    {
+        if (node is null) return;
+
+        switch (node)
+        {
+            case FileNode fn:
+                if (!await ConfirmDiscardIfDirtyAsync(new[] { fn })) return;
+                RemoveFileNodeFromTree(fn);
+                break;
+
+            case FolderNode fld:
+                var filesInside = EnumerateFileNodes(new[] { (TreeNodeBase)fld }).ToList();
+                if (!await ConfirmDiscardIfDirtyAsync(filesInside)) return;
+                foreach (var f in filesInside) RemoveFileNodeFromTree(f);
+                // RemoveFileNodeFromTree's empty-folder unwind only fires for folders that
+                // actually held files; a folder containing only empty subfolders (or an
+                // already-empty root) still needs an explicit detach.
+                DetachFolderIfStillAttached(fld);
+                break;
+
+            // Other node kinds (Default / Category / Map / Group / Override) aren't
+            // meaningful to "remove from view" — they're structural, not user-visible files.
+            default:
+                return;
+        }
+
+        ResetIfEmpty();
+    }
+
+    private void RemoveFileNodeFromTree(FileNode fileNode)
+    {
+        Log.Info("Tree", $"Remove {fileNode.File.DisplayName} from workspace");
+        Project.Remove(fileNode.File);
         Undo.Clear();
+        if (_pinnedMapsTomlNode == fileNode) _pinnedMapsTomlNode = null;
         var parent = FindParentFolder(fileNode);
         if (parent is not null)
         {
@@ -443,12 +747,39 @@ public sealed partial class MainWindowViewModel : ViewModelBase
         {
             Tree.Remove(fileNode);
         }
+    }
 
-        if (Tree.Count == 0)
-        {
-            SelectedNode = null;
-            CurrentEditor = new WelcomeViewModel();
-        }
+    private void DetachFolderIfStillAttached(FolderNode fld)
+    {
+        if (Tree.Contains(fld)) { Tree.Remove(fld); return; }
+        var parent = FindParentFolderOfFolder(fld);
+        parent?.Children.Remove(fld);
+    }
+
+    private void ResetIfEmpty()
+    {
+        if (Tree.Count != 0) return;
+        SelectedNode = null;
+        CurrentEditor = new WelcomeViewModel();
+    }
+
+    /// <summary>
+    /// Prompt once if any of the candidate files have unsaved changes. Returns false only
+    /// if the user explicitly backs out, so clean-state paths skip the dialog entirely.
+    /// </summary>
+    private async Task<bool> ConfirmDiscardIfDirtyAsync(IEnumerable<FileNode> candidates)
+    {
+        var dirty = candidates.Where(n => n.File.IsDirty).Select(n => n.File.DisplayName).ToList();
+        if (dirty.Count == 0) return true;
+        if (GetTopLevel() is not Window owner) return true;
+
+        var message = string.Format(Localization.Get("Confirm.DiscardDirty.Message"), string.Join("\n  • ", dirty));
+        return await ConfirmDialog.ShowAsync(
+            owner,
+            Localization.Get("Confirm.DiscardDirty.Title"),
+            message,
+            Localization.Get("Confirm.DiscardDirty.Yes"),
+            Localization.Get("Confirm.DiscardDirty.No"));
     }
 
     private FolderNode? FindParentFolderOfFolder(FolderNode target) =>
@@ -469,27 +800,71 @@ public sealed partial class MainWindowViewModel : ViewModelBase
     }
 
     [RelayCommand]
-    private void AddMap()
-    {
-        if (SelectedNode is null) return;
-        var file = GetFileForNode(SelectedNode);
-        if (file is null) return;
-
-        var name = UniqueName("new_map", n => file.Maps.Any(m => m.MapName == n));
-        var map = new MapEntryModel { MapName = name };
-        file.Maps.Add(map);
-    }
+    private Task AddMapAsync() => AddEntryAsync(AddEntryKind.Map);
 
     [RelayCommand]
-    private void AddGroup()
-    {
-        if (SelectedNode is null) return;
-        var file = GetFileForNode(SelectedNode);
-        if (file is null) return;
+    private Task AddGroupAsync() => AddEntryAsync(AddEntryKind.Group);
 
-        var name = UniqueName("NewGroup", n => file.Groups.Any(g => g.GroupName == n));
-        var group = new GroupEntryModel { GroupName = name };
-        file.Groups.Add(group);
+    /// <summary>
+    /// Shared entry point for "Add Map" and "Add Group". Pops the dialog, which lets the
+    /// user pick between the current file, any other loaded file, or spawning a fresh
+    /// untitled file, then appends the new entry to whichever target they chose and
+    /// navigates to it.
+    /// </summary>
+    private async Task AddEntryAsync(AddEntryKind kind)
+    {
+        if (GetTopLevel() is not Window owner) return;
+
+        var current = SelectedNode is not null ? GetFileForNode(SelectedNode) : null;
+        // Fall back to the first loaded file when the selection doesn't own one (e.g. FolderNode).
+        current ??= Project.Files.FirstOrDefault();
+
+        var defaultName = kind == AddEntryKind.Map
+            ? UniqueName("new_map", n => Project.Files.Any(f => f.Maps.Any(m => m.MapName == n)))
+            : UniqueName("NewGroup", n => Project.Files.Any(f => f.Groups.Any(g => g.GroupName == n)));
+
+        var result = await AddEntryDialog.ShowAsync(
+            owner,
+            kind,
+            Project.Files.ToList(),
+            current,
+            defaultName,
+            async () =>
+            {
+                // Ask for the save path up front — picking at creation time avoids silently
+                // writing "untitled.toml" to some directory on first save, and lets the user
+                // place the new config next to their other TOMLs.
+                var picked = await owner.StorageProvider.SaveFilePickerAsync(new FilePickerSaveOptions
+                {
+                    Title = Localization.Get("AddEntry.NewFile.PickerTitle"),
+                    SuggestedFileName = "new.toml",
+                    DefaultExtension = "toml",
+                    FileTypeChoices = new[] { new FilePickerFileType("TOML") { Patterns = new[] { "*.toml" } } },
+                });
+                if (picked is null) return null;
+                var path = picked.TryGetLocalPath();
+                if (string.IsNullOrEmpty(path)) return null;
+
+                var (file, _) = CreateFileAtPath(path);
+                return file;
+            });
+
+        if (result is null) return;
+
+        if (kind == AddEntryKind.Map)
+        {
+            var map = new MapEntryModel { MapName = result.Name };
+            result.Target.Maps.Add(map);
+            Log.Info("Tree", $"Added Map '{result.Name}' → {result.Target.DisplayName}");
+            NavigateToMap(map);
+        }
+        else
+        {
+            var group = new GroupEntryModel { GroupName = result.Name };
+            result.Target.Groups.Add(group);
+            Log.Info("Tree", $"Added Group '{result.Name}' → {result.Target.DisplayName}");
+            NavigateToGroup(group);
+        }
     }
 
     private static string UniqueName(string baseName, Func<string, bool> exists)
@@ -506,12 +881,12 @@ public sealed partial class MainWindowViewModel : ViewModelBase
     private static MapConfigFile? GetFileForNode(TreeNodeBase node) => node switch
     {
         FileNode f => f.File,
-        DefaultSettingsNode d => d.File,
         CategoryNode c => c.File,
         MapNode m => m.File,
         GroupNode g => g.File,
         OverrideNode o => o.File,
         FolderNode => null,
+        ProjectDefaultNode => null,
         _ => null,
     };
 
@@ -521,15 +896,17 @@ public sealed partial class MainWindowViewModel : ViewModelBase
         {
             if (string.IsNullOrEmpty(file.FilePath))
             {
-                // Trigger Save-As instead.
+                Log.Debug("File", $"Save: no path yet for {file.DisplayName}, falling back to Save-As");
                 _ = SaveAsAsync();
                 return;
             }
             TomlConfigWriter.SaveFile(file);
+            Log.Info("File", $"Saved {file.FilePath}");
             StatusText = Localization.Format("Status.Saved", file.FilePath);
         }
         catch (Exception ex)
         {
+            Log.Error("File", $"Save failed for {file.DisplayName}: {ex.Message}");
             StatusText = Localization.Format("Status.SaveFailed", ex.Message);
         }
     }
@@ -538,9 +915,8 @@ public sealed partial class MainWindowViewModel : ViewModelBase
     {
         var root = new FileNode(file);
 
-        var defaultNode = new DefaultSettingsNode(file);
-        root.Children.Add(defaultNode);
-
+        // No per-file Default node — the project has exactly one Default, exposed via the
+        // ProjectDefaultNode at the top of Tree (see EnsureProjectDefaultNode).
         var groupsNode = new CategoryNode(file, CategoryKind.Groups);
         foreach (var g in file.Groups)
             groupsNode.Children.Add(BuildGroupNode(file, g));

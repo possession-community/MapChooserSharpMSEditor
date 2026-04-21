@@ -1,13 +1,16 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:sys="using:System"
+        xmlns:svc="using:MapChooserSharpMSEditor.Services"
         xmlns:vm="using:MapChooserSharpMSEditor.ViewModels"
         xmlns:models="using:MapChooserSharpMSEditor.Models"
+        xmlns:views="using:MapChooserSharpMSEditor.Views"
         xmlns:l="using:MapChooserSharpMSEditor.Services"
         x:Class="MapChooserSharpMSEditor.Views.SearchWindow"
         x:DataType="vm:SearchViewModel"
         Title="{l:Localize Search.Title}"
-        Width="640" Height="520"
-        MinWidth="480" MinHeight="320"
+        Width="820" Height="680"
+        MinWidth="600" MinHeight="440"
         Background="#1c1c1c"
         WindowStartupLocation="CenterOwner">
 
@@ -31,27 +34,132 @@
         <Style Selector="Button.result:pointerover /template/ ContentPresenter">
             <Setter Property="Background" Value="#2a3148" />
         </Style>
+        <Style Selector="Button.link">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="Foreground" Value="#7aa2f7" />
+            <Setter Property="Cursor" Value="Hand" />
+        </Style>
+        <Style Selector="TextBlock.advancedLabel">
+            <Setter Property="Foreground" Value="#bbb" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="Margin" Value="0,0,8,0" />
+        </Style>
     </Window.Styles>
 
     <DockPanel LastChildFill="True">
 
-        <!-- Header: query input + filter chips -->
+        <!-- Header: query input + filter chips + advanced toggle -->
         <Border DockPanel.Dock="Top" Background="#141414" Padding="12,10" BorderBrush="#2a2a2a" BorderThickness="0,0,0,1">
             <StackPanel Spacing="8">
                 <TextBox x:Name="QueryBox"
                          Text="{Binding Query, Mode=TwoWay}"
                          Watermark="{l:Localize Search.Watermark}"
+                         FontFamily="Cascadia Mono,Consolas"
                          FontSize="14" />
-                <WrapPanel>
-                    <CheckBox Classes="chip" Content="{l:Localize Search.Filter.Defaults}"
-                              IsChecked="{Binding IncludeDefaults, Mode=TwoWay}" Margin="0,0,10,0" />
-                    <CheckBox Classes="chip" Content="{l:Localize Search.Filter.Groups}"
-                              IsChecked="{Binding IncludeGroups, Mode=TwoWay}" Margin="0,0,10,0" />
-                    <CheckBox Classes="chip" Content="{l:Localize Search.Filter.Maps}"
-                              IsChecked="{Binding IncludeMaps, Mode=TwoWay}" Margin="0,0,10,0" />
-                    <CheckBox Classes="chip" Content="{l:Localize Search.Filter.Overrides}"
-                              IsChecked="{Binding IncludeOverrides, Mode=TwoWay}" />
-                </WrapPanel>
+
+                <DockPanel>
+                    <Button DockPanel.Dock="Right" Classes="link"
+                            Command="{Binding ToggleAdvancedCommand}"
+                            FontSize="12"
+                            VerticalAlignment="Center">
+                        <TextBlock>
+                            <Run Text="{l:Localize Search.AdvancedToggle}" />
+                            <Run Text=" " />
+                            <Run Text="{Binding IsAdvancedOpen, Converter={x:Static views:BoolToChevronConverter.Instance}}" />
+                        </TextBlock>
+                    </Button>
+                    <WrapPanel>
+                        <CheckBox Classes="chip" Content="{l:Localize Search.Filter.Defaults}"
+                                  IsChecked="{Binding IncludeDefaults, Mode=TwoWay}" Margin="0,0,10,0" />
+                        <CheckBox Classes="chip" Content="{l:Localize Search.Filter.Groups}"
+                                  IsChecked="{Binding IncludeGroups, Mode=TwoWay}" Margin="0,0,10,0" />
+                        <CheckBox Classes="chip" Content="{l:Localize Search.Filter.Maps}"
+                                  IsChecked="{Binding IncludeMaps, Mode=TwoWay}" Margin="0,0,10,0" />
+                        <CheckBox Classes="chip" Content="{l:Localize Search.Filter.Overrides}"
+                                  IsChecked="{Binding IncludeOverrides, Mode=TwoWay}" />
+                    </WrapPanel>
+                </DockPanel>
+
+                <!-- Advanced filters: collapsible form with one input per typed predicate.
+                     Each row is label + editor(s); empty/Any inputs self-skip so users only
+                     pay for what they fill in. Reset button wipes the form in one click. -->
+                <Border Background="#101010" BorderBrush="#2a2a2a" BorderThickness="1"
+                        CornerRadius="3" Padding="12,10"
+                        IsVisible="{Binding IsAdvancedOpen}">
+                    <StackPanel Spacing="8">
+                        <DockPanel>
+                            <Button DockPanel.Dock="Right" Content="{l:Localize Search.Advanced.Reset}"
+                                    Command="{Binding ResetAdvancedCommand}" FontSize="11" Padding="8,2" />
+                            <TextBlock Text="{l:Localize Search.Advanced.Intro}" Foreground="#888"
+                                       FontSize="11" FontStyle="Italic" TextWrapping="Wrap"
+                                       VerticalAlignment="Center" />
+                        </DockPanel>
+
+                        <!-- Text filters -->
+                        <Grid ColumnDefinitions="100,*,100,*" RowDefinitions="Auto,Auto" Margin="0,4,0,0">
+                            <TextBlock Grid.Row="0" Grid.Column="0" Classes="advancedLabel" Text="{l:Localize Search.Advanced.Group}" />
+                            <TextBox   Grid.Row="0" Grid.Column="1" Text="{Binding GroupFilter, Mode=TwoWay}" Margin="0,2" />
+                            <TextBlock Grid.Row="0" Grid.Column="2" Classes="advancedLabel" Margin="10,0,8,0" Text="{l:Localize Search.Advanced.File}" />
+                            <TextBox   Grid.Row="0" Grid.Column="3" Text="{Binding FileNameFilter, Mode=TwoWay}" Margin="0,2" />
+
+                            <TextBlock Grid.Row="1" Grid.Column="0" Classes="advancedLabel" Text="{l:Localize Search.Advanced.Alias}" />
+                            <TextBox   Grid.Row="1" Grid.Column="1" Text="{Binding AliasFilter, Mode=TwoWay}" Margin="0,2" />
+                            <TextBlock Grid.Row="1" Grid.Column="2" Classes="advancedLabel" Margin="10,0,8,0" Text="{l:Localize Search.Advanced.Desc}" />
+                            <TextBox   Grid.Row="1" Grid.Column="3" Text="{Binding DescriptionFilter, Mode=TwoWay}" Margin="0,2" />
+                        </Grid>
+
+                        <!-- Numeric filters: op dropdown + value textbox -->
+                        <Grid ColumnDefinitions="100,70,*,100,70,*"
+                              RowDefinitions="Auto,Auto,Auto" Margin="0,4,0,0">
+                            <TextBlock Grid.Row="0" Grid.Column="0" Classes="advancedLabel" Text="{l:Localize Search.Advanced.Cooldown}" />
+                            <ComboBox  Grid.Row="0" Grid.Column="1" ItemsSource="{x:Static vm:SearchViewModel.AllNumericOps}" SelectedItem="{Binding CooldownOp, Mode=TwoWay}" Margin="0,2" />
+                            <TextBox   Grid.Row="0" Grid.Column="2" Text="{Binding CooldownValue, Mode=TwoWay}" Margin="4,2,0,2" />
+                            <TextBlock Grid.Row="0" Grid.Column="3" Classes="advancedLabel" Margin="10,0,8,0" Text="{l:Localize Search.Advanced.Workshop}" />
+                            <TextBox   Grid.Row="0" Grid.Column="4" Grid.ColumnSpan="2" Text="{Binding WorkshopIdFilter, Mode=TwoWay}" Margin="0,2" />
+
+                            <TextBlock Grid.Row="1" Grid.Column="0" Classes="advancedLabel" Text="{l:Localize Search.Advanced.MaxPlayers}" />
+                            <ComboBox  Grid.Row="1" Grid.Column="1" ItemsSource="{x:Static vm:SearchViewModel.AllNumericOps}" SelectedItem="{Binding MaxPlayersOp, Mode=TwoWay}" Margin="0,2" />
+                            <TextBox   Grid.Row="1" Grid.Column="2" Text="{Binding MaxPlayersValue, Mode=TwoWay}" Margin="4,2,0,2" />
+                            <TextBlock Grid.Row="1" Grid.Column="3" Classes="advancedLabel" Margin="10,0,8,0" Text="{l:Localize Search.Advanced.MinPlayers}" />
+                            <ComboBox  Grid.Row="1" Grid.Column="4" ItemsSource="{x:Static vm:SearchViewModel.AllNumericOps}" SelectedItem="{Binding MinPlayersOp, Mode=TwoWay}" Margin="0,2" />
+                            <TextBox   Grid.Row="1" Grid.Column="5" Text="{Binding MinPlayersValue, Mode=TwoWay}" Margin="4,2,0,2" />
+
+                            <TextBlock Grid.Row="2" Grid.Column="0" Classes="advancedLabel" Text="{l:Localize Search.Advanced.MapTime}" />
+                            <ComboBox  Grid.Row="2" Grid.Column="1" ItemsSource="{x:Static vm:SearchViewModel.AllNumericOps}" SelectedItem="{Binding MapTimeOp, Mode=TwoWay}" Margin="0,2" />
+                            <TextBox   Grid.Row="2" Grid.Column="2" Text="{Binding MapTimeValue, Mode=TwoWay}" Margin="4,2,0,2" />
+                            <TextBlock Grid.Row="2" Grid.Column="3" Classes="advancedLabel" Margin="10,0,8,0" Text="{l:Localize Search.Advanced.MapRounds}" />
+                            <ComboBox  Grid.Row="2" Grid.Column="4" ItemsSource="{x:Static vm:SearchViewModel.AllNumericOps}" SelectedItem="{Binding MapRoundsOp, Mode=TwoWay}" Margin="0,2" />
+                            <TextBox   Grid.Row="2" Grid.Column="5" Text="{Binding MapRoundsValue, Mode=TwoWay}" Margin="4,2,0,2" />
+                        </Grid>
+
+                        <!-- Tri-state flags + day dropdown -->
+                        <Grid ColumnDefinitions="100,130,100,130,100,*" RowDefinitions="Auto,Auto" Margin="0,4,0,0">
+                            <TextBlock Grid.Row="0" Grid.Column="0" Classes="advancedLabel" Text="{l:Localize Search.Advanced.Disabled}" />
+                            <ComboBox  Grid.Row="0" Grid.Column="1" ItemsSource="{x:Static vm:SearchViewModel.AllTriStates}" SelectedItem="{Binding DisabledFilter, Mode=TwoWay}" Margin="0,2" />
+                            <TextBlock Grid.Row="0" Grid.Column="2" Classes="advancedLabel" Margin="10,0,8,0" Text="{l:Localize Search.Advanced.OnlyNom}" />
+                            <ComboBox  Grid.Row="0" Grid.Column="3" ItemsSource="{x:Static vm:SearchViewModel.AllTriStates}" SelectedItem="{Binding OnlyNominationFilter, Mode=TwoWay}" Margin="0,2" />
+                            <TextBlock Grid.Row="0" Grid.Column="4" Classes="advancedLabel" Margin="10,0,8,0" Text="{l:Localize Search.Advanced.ProhibitAdmin}" />
+                            <ComboBox  Grid.Row="0" Grid.Column="5" ItemsSource="{x:Static vm:SearchViewModel.AllTriStates}" SelectedItem="{Binding ProhibitAdminFilter, Mode=TwoWay}" Margin="0,2" HorizontalAlignment="Stretch" />
+
+                            <TextBlock Grid.Row="1" Grid.Column="0" Classes="advancedLabel" Text="{l:Localize Search.Advanced.Day}" />
+                            <ComboBox  Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="5"
+                                       ItemsSource="{x:Static vm:SearchViewModel.AllDayOptions}"
+                                       SelectedItem="{Binding DayFilter, Mode=TwoWay}"
+                                       Margin="0,2" HorizontalAlignment="Left" MinWidth="150" />
+                        </Grid>
+
+                        <!-- Extras key/value -->
+                        <Grid ColumnDefinitions="100,*,100,*" Margin="0,4,0,0">
+                            <TextBlock Grid.Column="0" Classes="advancedLabel" Text="{l:Localize Search.Advanced.ExtrasKey}" />
+                            <TextBox   Grid.Column="1" Text="{Binding ExtrasKeyFilter, Mode=TwoWay}" Margin="0,2" />
+                            <TextBlock Grid.Column="2" Classes="advancedLabel" Margin="10,0,8,0" Text="{l:Localize Search.Advanced.ExtrasValue}" />
+                            <TextBox   Grid.Column="3" Text="{Binding ExtrasValueFilter, Mode=TwoWay}" Margin="0,2" />
+                        </Grid>
+                    </StackPanel>
+                </Border>
             </StackPanel>
         </Border>
 

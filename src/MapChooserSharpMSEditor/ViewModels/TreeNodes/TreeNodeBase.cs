@@ -11,7 +11,9 @@ public abstract partial class TreeNodeBase : ObservableObject
 {
     [ObservableProperty] private string _title = string.Empty;
     [ObservableProperty] private string _icon = string.Empty;
-    [ObservableProperty] private bool _isExpanded = true;
+    // Collapsed by default so the user sees a clean file list on load; search navigation
+    // and the FileLoader explicitly expand paths they want visible.
+    [ObservableProperty] private bool _isExpanded;
 
     public ObservableCollection<TreeNodeBase> Children { get; } = new();
 }

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using MapChooserSharpMSEditor.Models;
 using MapChooserSharpMSEditor.Services;
@@ -9,6 +10,13 @@ public sealed class OverrideEditorViewModel : ViewModelBase
     public MapConfigFile File { get; }
     public DaySettingsOverrideModel Override { get; }
     public PropertySetViewModel Properties { get; }
+
+    /// <summary>
+    /// One chip per day-of-week mirroring <see cref="DaySettingsOverrideModel.TargetDays"/>.
+    /// Lets the view drive the selected-day styling the same way <see cref="PropertySetViewModel.DaysAllowedToggles"/>
+    /// does for DaysAllowed.
+    /// </summary>
+    public IReadOnlyList<DayToggleViewModel> TargetDayToggles { get; }
 
     /// <summary>
     /// Parent map or group (used for a breadcrumb in the view).
@@ -42,6 +50,11 @@ public sealed class OverrideEditorViewModel : ViewModelBase
             GroupEntryModel g => Localization.Format("Editor.ParentGroup", g.GroupName),
             _ => "",
         };
+
+        var toggles = new List<DayToggleViewModel>(PropertySetViewModel.AllDays.Length);
+        foreach (var d in PropertySetViewModel.AllDays)
+            toggles.Add(new DayToggleViewModel(d, ov.TargetDays));
+        TargetDayToggles = toggles;
     }
 
     private static IReadOnlyList<PropertySet> BuildOverrideChain(MapConfigFile file, object parent, ProjectContext? project)

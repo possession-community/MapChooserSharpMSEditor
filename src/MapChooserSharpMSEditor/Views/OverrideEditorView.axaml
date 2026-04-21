@@ -10,6 +10,18 @@
     <UserControl.Resources>
         <views:CollectionJoinConverter x:Key="Join" />
     </UserControl.Resources>
+    <UserControl.Styles>
+        <!-- Same "selected day" blue treatment as the PropertySetView DaysAllowed chips
+             so the override's trigger block visually matches. -->
+        <Style Selector="ToggleButton.dayChip:checked">
+            <Setter Property="Background" Value="#2a5fa8" />
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="BorderBrush" Value="#3c7bd4" />
+        </Style>
+        <Style Selector="ToggleButton.dayChip:checked:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="#3470c8" />
+        </Style>
+    </UserControl.Styles>
     <StackPanel Spacing="10">
         <StackPanel Orientation="Horizontal" Spacing="10">
             <TextBlock Text="&#xE787;" FontFamily="Segoe Fluent Icons,Segoe MDL2 Assets"
@@ -38,17 +50,17 @@
                 </Grid>
 
                 <TextBlock Text="{l:Localize Override.TargetDays}" FontWeight="SemiBold" Foreground="#9cdcfe" Margin="0,8,0,0" />
-                <ItemsControl ItemsSource="{x:Static vme:PropertySetViewModel.AllDays}">
+                <ItemsControl ItemsSource="{Binding TargetDayToggles}">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
                             <WrapPanel Orientation="Horizontal" />
                         </ItemsPanelTemplate>
                     </ItemsControl.ItemsPanel>
                     <ItemsControl.ItemTemplate>
-                        <DataTemplate x:DataType="sys:DayOfWeek">
-                            <Button Content="{Binding}" MinWidth="90" Margin="0,0,4,4"
-                                    Tag="{Binding}"
-                                    Click="OnToggleTargetDay" />
+                        <DataTemplate x:DataType="vme:DayToggleViewModel">
+                            <ToggleButton Classes="dayChip" Content="{Binding Day}"
+                                          IsChecked="{Binding IsSelected, Mode=TwoWay}"
+                                          MinWidth="90" Margin="0,0,4,4" />
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
@@ -57,7 +69,8 @@
 
                 <TextBlock Text="{l:Localize Override.TargetTimeRanges}" FontWeight="SemiBold" Foreground="#9cdcfe" Margin="0,8,0,0" />
                 <StackPanel Orientation="Horizontal" Spacing="6">
-                    <TextBox x:Name="NewRangeBox" Width="180" Watermark="{l:Localize Watermark.TimeRange}" />
+                    <TextBox x:Name="NewRangeBox" Width="180" Watermark="{l:Localize Watermark.TimeRange}"
+                             TextChanged="OnNewRangeTextChanged" />
                     <Button Content="{l:Localize Button.Add}" Click="OnAddTargetTimeRange" />
                 </StackPanel>
                 <ItemsControl ItemsSource="{Binding Override.TargetTimeRanges}">

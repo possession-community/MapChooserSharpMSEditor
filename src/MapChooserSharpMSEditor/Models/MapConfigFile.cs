@@ -26,4 +26,8 @@ public partial class MapConfigFile : ObservableObject
 
     public ObservableCollection<GroupEntryModel> Groups { get; } = new();
     public ObservableCollection<MapEntryModel> Maps { get; } = new();
+
+    // Used by CollectionJoinConverter so workspace warning banners (e.g. "duplicate section
+    // Foo → A.toml, B.toml") print filenames rather than the type name.
+    public override string ToString() => DisplayName;
 }

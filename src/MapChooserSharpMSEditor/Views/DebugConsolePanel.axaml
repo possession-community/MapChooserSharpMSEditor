@@ -1,0 +1,52 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:svc="using:MapChooserSharpMSEditor.Services"
+             xmlns:views="using:MapChooserSharpMSEditor.Views"
+             xmlns:l="using:MapChooserSharpMSEditor.Services"
+             x:Class="MapChooserSharpMSEditor.Views.DebugConsolePanel">
+    <UserControl.Styles>
+        <!-- Color-code the level badge to make error lines jump out while DBG rows stay grey. -->
+        <Style Selector="TextBlock.level">
+            <Setter Property="FontFamily" Value="Cascadia Mono,Consolas" />
+            <Setter Property="FontSize" Value="10" />
+            <Setter Property="Padding" Value="4,1" />
+            <Setter Property="Margin" Value="0,0,6,0" />
+            <Setter Property="Foreground" Value="#9cdcfe" />
+            <Setter Property="Background" Value="#252a33" />
+        </Style>
+    </UserControl.Styles>
+
+    <DockPanel>
+        <Border DockPanel.Dock="Top" Background="#141414" Padding="8,4"
+                BorderBrush="#2a2a2a" BorderThickness="0,0,0,1">
+            <DockPanel>
+                <Button DockPanel.Dock="Right" Content="{l:Localize Debug.Clear}"
+                        Click="OnClearClick" Padding="10,2" FontSize="11" />
+                <TextBlock Text="{l:Localize Debug.Header}" FontWeight="SemiBold" Foreground="#ddd"
+                           VerticalAlignment="Center" FontSize="12" />
+            </DockPanel>
+        </Border>
+        <ScrollViewer x:Name="Scroll" HorizontalScrollBarVisibility="Auto"
+                      VerticalScrollBarVisibility="Auto" Background="#101010">
+            <ItemsControl ItemsSource="{x:Static svc:Log.Entries}" Padding="4">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate DataType="svc:LogEntry">
+                        <Grid ColumnDefinitions="74,40,110,*" Margin="0,0,0,1">
+                            <TextBlock Grid.Column="0" Text="{Binding TimestampText}"
+                                       FontFamily="Cascadia Mono,Consolas" FontSize="10"
+                                       Foreground="#666" VerticalAlignment="Center" Margin="4,0,6,0" />
+                            <TextBlock Grid.Column="1" Classes="level" Text="{Binding LevelText}" />
+                            <TextBlock Grid.Column="2" Text="{Binding Source}"
+                                       FontFamily="Cascadia Mono,Consolas" FontSize="11"
+                                       Foreground="#c586c0" VerticalAlignment="Center" Margin="0,0,8,0" />
+                            <TextBlock Grid.Column="3" Text="{Binding Message}"
+                                       FontFamily="Cascadia Mono,Consolas" FontSize="11"
+                                       Foreground="#d0d0d0" VerticalAlignment="Center"
+                                       TextWrapping="Wrap" />
+                        </Grid>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+    </DockPanel>
+</UserControl>

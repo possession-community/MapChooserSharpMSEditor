@@ -12,8 +12,8 @@
         x:Class="MapChooserSharpMSEditor.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         Title="{l:Localize App.Title}"
-        Width="1280" Height="800"
-        MinWidth="1407" MinHeight="600">
+        Width="1640" Height="800"
+        MinWidth="1640" MinHeight="600">
 
     <Window.KeyBindings>
         <KeyBinding Gesture="Ctrl+Z" Command="{Binding UndoActionCommand}" />
@@ -89,6 +89,10 @@
                 <MenuItem Header="{l:Localize Menu.Edit.AddMap}" Command="{Binding AddMapCommand}" />
                 <MenuItem Header="{l:Localize Menu.Edit.AddGroup}" Command="{Binding AddGroupCommand}" />
             </MenuItem>
+            <MenuItem Header="{l:Localize Menu.Tools}">
+                <MenuItem Header="{l:Localize Menu.Tools.WorkshopCheck}"
+                          Command="{Binding OpenWorkshopCheckCommand}" />
+            </MenuItem>
             <MenuItem Header="{l:Localize Menu.View}">
                 <!-- Locales are listed explicitly because MenuItem's ItemTemplate nests a
                      second MenuItem inside the generated container, which swallows clicks.
@@ -99,12 +103,43 @@
                     <MenuItem Header="日本語"
                               Command="{Binding SelectLanguageCommand}" CommandParameter="ja" />
                 </MenuItem>
+                <MenuItem Header="{l:Localize Menu.View.DebugConsole}"
+                          Command="{Binding ToggleDebugConsoleCommand}" />
             </MenuItem>
         </Menu>
 
         <!-- Status bar -->
         <Border DockPanel.Dock="Bottom" Background="#1f1f1f" Padding="8,3">
             <TextBlock Text="{Binding StatusText}" Foreground="#bbb" FontSize="12" />
+        </Border>
+
+        <!-- Debug console: toggleable via View → Debug Console. Sits above the status bar
+             so it doesn't eat into the main editor area unless the user opens it. -->
+        <Border DockPanel.Dock="Bottom" Height="200" BorderBrush="#2a2a2a"
+                BorderThickness="0,1,0,0" IsVisible="{Binding IsDebugConsoleVisible}">
+            <views:DebugConsolePanel />
+        </Border>
+
+        <!-- Section-collision banner: shows above the status bar whenever any section path
+             exists in more than one loaded file. Server would reject this on concat-parse. -->
+        <Border DockPanel.Dock="Bottom" Background="#3a1e1e" BorderBrush="#a33"
+                BorderThickness="0,1,0,1" Padding="12,6"
+                IsVisible="{Binding Project.HasSectionCollisions}">
+            <StackPanel Spacing="4">
+                <TextBlock Text="{l:Localize Banner.SectionCollisions}" FontWeight="SemiBold" Foreground="#fbb" />
+                <ItemsControl ItemsSource="{Binding Project.SectionCollisions}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock FontSize="11" Foreground="#fdd" FontFamily="Cascadia Mono,Consolas">
+                                <Run Text="[" /><Run Text="{Binding Path}" /><Run Text="] " />
+                                <Run Text="→" Foreground="#fbb" />
+                                <Run Text=" " />
+                                <Run Text="{Binding Owners, Converter={x:Static views:CollectionJoinConverter.Instance}}" />
+                            </TextBlock>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
         </Border>
 
         <!-- Sidebar + content -->
@@ -121,11 +156,35 @@
                     <Border DockPanel.Dock="Top" Padding="10,8" Background="#141414">
                         <TextBlock Text="{l:Localize Sidebar.Header}" FontWeight="SemiBold" Foreground="#ddd" />
                     </Border>
-                    <TreeView ItemsSource="{Binding Tree}"
-                              SelectedItem="{Binding SelectedNode, Mode=TwoWay}">
+                    <TreeView x:Name="MainTree"
+                              ItemsSource="{Binding Tree}"
+                              SelectedItem="{Binding SelectedNode, Mode=TwoWay}"
+                              SelectionChanged="OnTreeSelectionChanged">
+                        <!-- Binds each TreeViewItem's IsExpanded to the VM node's flag so
+                             programmatic expansion (e.g. search navigation) actually shows. -->
+                        <TreeView.Styles>
+                            <Style Selector="TreeViewItem" x:DataType="vmt:TreeNodeBase">
+                                <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
+                            </Style>
+                        </TreeView.Styles>
                         <TreeView.ItemTemplate>
                             <TreeDataTemplate DataType="vmt:TreeNodeBase" ItemsSource="{Binding Children}">
                                 <StackPanel Orientation="Horizontal" Spacing="6">
+                                    <!-- Right-click: "Remove from view". The command lives on
+                                         MainWindowViewModel so we reach it via the TreeView's
+                                         ancestor DataContext; CommandParameter is the node
+                                         itself so the handler knows whether it's a file or
+                                         folder. MenuItem is hidden for the structural nodes
+                                         (Default/Category/Map/Group/Override) since removing
+                                         those from view doesn't correspond to a real action. -->
+                                    <StackPanel.ContextMenu>
+                                        <ContextMenu>
+                                            <MenuItem Header="{l:Localize ContextMenu.RemoveFromView}"
+                                                      Command="{Binding $parent[TreeView].((vm:MainWindowViewModel)DataContext).RemoveFromViewCommand}"
+                                                      CommandParameter="{Binding}"
+                                                      IsVisible="{Binding Converter={x:Static views:IsFileOrFolderNodeConverter.Instance}}" />
+                                        </ContextMenu>
+                                    </StackPanel.ContextMenu>
                                     <TextBlock Text="{Binding Icon}"
                                                FontFamily="Segoe Fluent Icons,Segoe MDL2 Assets"
                                                FontSize="14"
@@ -159,7 +218,7 @@
                     </Button>
                 </Border>
 
-                <Border DockPanel.Dock="Right" Width="340" MinWidth="340" Background="#1a1a1a"
+                <Border DockPanel.Dock="Right" Width="440" MinWidth="440" Background="#1a1a1a"
                         BorderBrush="#2a2a2a" BorderThickness="1,0,0,0"
                         IsVisible="{Binding IsResolvedPanelVisible}">
                     <views:ResolvedPropertiesPanel DataContext="{Binding Resolved}" />

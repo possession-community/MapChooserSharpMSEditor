@@ -43,13 +43,16 @@ public sealed class FileNode : TreeNodeBase
     }
 }
 
-public sealed class DefaultSettingsNode : TreeNodeBase
+/// <summary>
+/// Project-level "Default Settings" node: shown once at the top of the tree (independent
+/// of any single file) because the effective Default is a project-wide singleton — only
+/// one of the loaded files actually persists the section on disk, and the rest simply
+/// inherit from it at runtime.
+/// </summary>
+public sealed class ProjectDefaultNode : TreeNodeBase
 {
-    public MapConfigFile File { get; }
-
-    public DefaultSettingsNode(MapConfigFile file)
+    public ProjectDefaultNode()
     {
-        File = file;
         Icon = "\uE713";
         Title = "Default Settings";
     }

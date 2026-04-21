@@ -2,6 +2,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:MapChooserSharpMSEditor.ViewModels"
              xmlns:services="using:MapChooserSharpMSEditor.Services"
+             xmlns:l="using:MapChooserSharpMSEditor.Services"
              x:Class="MapChooserSharpMSEditor.Views.ResolvedPropertiesPanel"
              x:DataType="vm:ResolvedPropertiesViewModel">
     <DockPanel>
@@ -12,27 +13,116 @@
             </StackPanel>
         </Border>
         <ScrollViewer>
-            <ItemsControl ItemsSource="{Binding Rows}" Padding="4">
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate DataType="services:PropertyResolver+ResolvedRow">
-                        <Border Background="#1e1e1e" Margin="2" Padding="6,4" CornerRadius="3">
-                            <StackPanel Spacing="1">
-                                <Grid ColumnDefinitions="*,Auto">
-                                    <StackPanel Orientation="Horizontal" Spacing="6">
-                                        <TextBlock Text="{Binding Label}" FontWeight="SemiBold" Foreground="#9cdcfe" />
-                                        <TextBlock Text="{Binding Property}" Foreground="#666" FontSize="10"
-                                                   FontFamily="Cascadia Mono,Consolas" VerticalAlignment="Bottom" />
+            <StackPanel>
+                <!-- Scalar/collection property rows (unchanged) -->
+                <ItemsControl ItemsSource="{Binding Rows}" Padding="4">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate DataType="services:PropertyResolver+ResolvedRow">
+                            <Border Background="#1e1e1e" Margin="2" Padding="6,4" CornerRadius="3">
+                                <StackPanel Spacing="1">
+                                    <Grid ColumnDefinitions="*,Auto">
+                                        <StackPanel Orientation="Horizontal" Spacing="6">
+                                            <TextBlock Text="{Binding Label}" FontWeight="SemiBold" Foreground="#9cdcfe" />
+                                            <TextBlock Text="{Binding Property}" Foreground="#666" FontSize="10"
+                                                       FontFamily="Cascadia Mono,Consolas" VerticalAlignment="Bottom" />
+                                        </StackPanel>
+                                        <TextBlock Grid.Column="1" Text="{Binding Source}" FontSize="10"
+                                                   Foreground="#888" VerticalAlignment="Center" />
+                                    </Grid>
+                                    <TextBlock Text="{Binding DisplayValue}" FontFamily="Cascadia Mono,Consolas"
+                                               FontSize="12" Foreground="#e0e0e0" TextWrapping="Wrap" />
+                                </StackPanel>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+                <!-- Extras: one collapsible section per extra sub-table. Rows show
+                     Key | Value | Type | Source so the user can see where an inherited
+                     entry came from. Hidden entirely when the selection has no extras. -->
+                <StackPanel IsVisible="{Binding HasExtraSections}" Margin="4,8,4,4" Spacing="4">
+                    <TextBlock Text="{l:Localize Resolved.ExtrasHeading}" FontWeight="SemiBold"
+                               Foreground="#bbb" FontSize="12" Margin="2,0,0,0" />
+                    <ItemsControl ItemsSource="{Binding ExtraSections}"
+                                  HorizontalAlignment="Stretch">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate DataType="services:PropertyResolver+ResolvedExtraSection">
+                                <!-- HorizontalAlignment=Stretch on the Expander itself so the
+                                     collapsed header fills the panel width (without it the
+                                     Expander shrink-fits to the header content and the panel
+                                     appears to "widen" on expand). -->
+                                <Expander Margin="0,0,0,4" IsExpanded="False"
+                                          Background="#1e1e1e" Foreground="#ddd"
+                                          HorizontalAlignment="Stretch">
+                                    <Expander.Header>
+                                        <StackPanel Orientation="Horizontal" Spacing="8">
+                                            <TextBlock Text="{Binding Name}" FontWeight="SemiBold"
+                                                       FontFamily="Cascadia Mono,Consolas" Foreground="#9cdcfe" />
+                                            <TextBlock Text="{Binding Entries.Count, StringFormat=({0})}"
+                                                       Foreground="#666" FontSize="11" VerticalAlignment="Center" />
+                                        </StackPanel>
+                                    </Expander.Header>
+
+                                    <!-- Shared-size-scope lets the header grid and every data
+                                         row grid below agree on column widths, otherwise the
+                                         Auto columns measured independently per-grid and
+                                         headers didn't line up with their data. -->
+                                    <StackPanel Grid.IsSharedSizeScope="True">
+                                        <!-- Column headers -->
+                                        <Grid Margin="4,2,4,4">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" SharedSizeGroup="exKey" />
+                                                <ColumnDefinition Width="*"    SharedSizeGroup="exVal" />
+                                                <ColumnDefinition Width="Auto" SharedSizeGroup="exType" />
+                                                <ColumnDefinition Width="Auto" SharedSizeGroup="exSrc" />
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Grid.Column="0" Text="{l:Localize Resolved.Extras.Key}"
+                                                       Foreground="#666" FontSize="10" Padding="4,0" />
+                                            <TextBlock Grid.Column="1" Text="{l:Localize Resolved.Extras.Value}"
+                                                       Foreground="#666" FontSize="10" Padding="4,0" />
+                                            <TextBlock Grid.Column="2" Text="{l:Localize Resolved.Extras.Type}"
+                                                       Foreground="#666" FontSize="10" Padding="4,0" />
+                                            <TextBlock Grid.Column="3" Text="{l:Localize Resolved.Extras.Source}"
+                                                       Foreground="#666" FontSize="10" Padding="4,0" />
+                                        </Grid>
+                                        <ItemsControl ItemsSource="{Binding Entries}">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate DataType="services:PropertyResolver+ResolvedExtraEntry">
+                                                    <Grid Margin="4,1" Background="#181818">
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="Auto" SharedSizeGroup="exKey" />
+                                                            <ColumnDefinition Width="*"    SharedSizeGroup="exVal" />
+                                                            <ColumnDefinition Width="Auto" SharedSizeGroup="exType" />
+                                                            <ColumnDefinition Width="Auto" SharedSizeGroup="exSrc" />
+                                                        </Grid.ColumnDefinitions>
+                                                        <TextBlock Grid.Column="0" Text="{Binding Key}"
+                                                                   FontFamily="Cascadia Mono,Consolas"
+                                                                   Foreground="#e0e0e0" FontSize="12"
+                                                                   Padding="4,2" VerticalAlignment="Center" />
+                                                        <TextBlock Grid.Column="1" Text="{Binding Value}"
+                                                                   FontFamily="Cascadia Mono,Consolas"
+                                                                   Foreground="#e0e0e0" FontSize="12"
+                                                                   TextWrapping="Wrap" Padding="4,2"
+                                                                   VerticalAlignment="Center" />
+                                                        <TextBlock Grid.Column="2" Text="{Binding Kind}"
+                                                                   Foreground="#7fc2d7" FontSize="11"
+                                                                   Padding="4,2" VerticalAlignment="Center" />
+                                                        <TextBlock Grid.Column="3" Text="{Binding Source}"
+                                                                   ToolTip.Tip="{Binding Source}"
+                                                                   TextTrimming="CharacterEllipsis"
+                                                                   Foreground="#888" FontSize="11"
+                                                                   Padding="4,2" VerticalAlignment="Center" />
+                                                    </Grid>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
                                     </StackPanel>
-                                    <TextBlock Grid.Column="1" Text="{Binding Source}" FontSize="10"
-                                               Foreground="#888" VerticalAlignment="Center" />
-                                </Grid>
-                                <TextBlock Text="{Binding DisplayValue}" FontFamily="Cascadia Mono,Consolas"
-                                           FontSize="12" Foreground="#e0e0e0" TextWrapping="Wrap" />
-                            </StackPanel>
-                        </Border>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
+                                </Expander>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </StackPanel>
         </ScrollViewer>
     </DockPanel>
 </UserControl>

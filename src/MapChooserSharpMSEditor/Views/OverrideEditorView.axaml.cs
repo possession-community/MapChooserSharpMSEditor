@@ -1,24 +1,30 @@
 using System;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
+using Avalonia.Media;
 using MapChooserSharpMSEditor.Models;
+using MapChooserSharpMSEditor.Services;
 using MapChooserSharpMSEditor.ViewModels.Editors;
 
 namespace MapChooserSharpMSEditor.Views;
 
 public partial class OverrideEditorView : UserControl
 {
+    private static readonly IBrush _invalidBrush = new SolidColorBrush(Color.Parse("#e05a5a"));
+
     public OverrideEditorView() => InitializeComponent();
 
-    private void OnToggleTargetDay(object? sender, RoutedEventArgs e)
+    /// <summary>
+    /// Live validation for the TargetTimeRanges input: tint the border red when the text
+    /// doesn't parse as <c>HH:mm-HH:mm</c>. Empty is treated as valid so an untouched
+    /// field doesn't look broken before the user types anything.
+    /// </summary>
+    private void OnNewRangeTextChanged(object? sender, TextChangedEventArgs e)
     {
-        if (sender is Button b && b.Tag is DayOfWeek day && DataContext is OverrideEditorViewModel vm)
-        {
-            if (vm.Override.TargetDays.Contains(day))
-                vm.Override.TargetDays.Remove(day);
-            else
-                vm.Override.TargetDays.Add(day);
-        }
+        if (sender is not TextBox box) return;
+        var ok = string.IsNullOrWhiteSpace(box.Text) || TimeRangeSpec.TryParse(box.Text, out _);
+        box.BorderBrush = ok ? null : _invalidBrush;
+        ToolTip.SetTip(box, ok ? null : Localization.Get("Tip.InvalidTimeRange"));
     }
 
     private void OnAddTargetTimeRange(object? sender, RoutedEventArgs e)
