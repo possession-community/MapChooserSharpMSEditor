@@ -17,11 +17,20 @@ using MapChooserSharpMSEditor.Services;
 using MapChooserSharpMSEditor.ViewModels.Editors;
 using MapChooserSharpMSEditor.ViewModels.TreeNodes;
 using MapChooserSharpMSEditor.Views;
+using MapChooserSharpMSEditor.ViewModels.Editors.Legacy;
 
 namespace MapChooserSharpMSEditor.ViewModels;
 
 public sealed partial class MainWindowViewModel : ViewModelBase
 {
+    /// <summary>
+    /// Active schema mode. Toggling it swaps the workspace between Current
+    /// (MapChooserSharpMS) and Legacy (MapChooserSharp.API v0.1.5) trees so the user can
+    /// only have one schema open at a time. Legacy plumbing lives in the partial file
+    /// MainWindowViewModel.Legacy.cs.
+    /// </summary>
+    [ObservableProperty] private AppMode _mode = AppMode.Current;
+
     public ObservableCollection<TreeNodeBase> Tree { get; } = new();
 
     /// <summary>Shared across every editor for cross-file concerns (group autocomplete, etc.).</summary>
@@ -30,7 +39,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase
     public ResolvedPropertiesViewModel Resolved { get; } = new();
 
     /// <summary>Undo history (owned by Project so every VM that receives Project has access).</summary>
-    public UndoManager Undo => Project.Undo;
+    public UndoManager Undo => Mode == AppMode.Legacy ? LegacyUndo : Project.Undo;
 
     public SearchViewModel Search { get; }
 
@@ -57,12 +66,14 @@ public sealed partial class MainWindowViewModel : ViewModelBase
         Search = new SearchViewModel(this);
         Undo.PropertyChanged += (_, e) =>
         {
+            if (Mode != AppMode.Current) return;
             if (e.PropertyName == nameof(UndoManager.CanUndo))
                 UndoActionCommand.NotifyCanExecuteChanged();
             else if (e.PropertyName == nameof(UndoManager.CanRedo))
                 RedoActionCommand.NotifyCanExecuteChanged();
         };
         Project.Files.CollectionChanged += (_, _) => SyncProjectDefaultNode();
+        InitializeLegacyHooks();
     }
 
     private ProjectDefaultNode? _projectDefaultNode;
@@ -93,7 +104,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase
 
     private SearchWindow? _searchWindow;
 
-    [RelayCommand]
+    [RelayCommand(CanExecute = nameof(CanOpenSearch))]
     private void OpenSearch()
     {
         Log.Debug("Search", "OpenSearch window");
@@ -119,7 +130,10 @@ public sealed partial class MainWindowViewModel : ViewModelBase
     /// WorkshopId against Steam and pick which private/deleted items to mark Disabled.
     /// Result count is surfaced via StatusText after the dialog closes.
     /// </summary>
-    [RelayCommand]
+    private bool CanOpenSearch() => Mode == AppMode.Current;
+    private bool CanOpenWorkshop() => Mode == AppMode.Current;
+
+    [RelayCommand(CanExecute = nameof(CanOpenWorkshop))]
     private async Task OpenWorkshopCheckAsync()
     {
         Log.Debug("Workshop", "OpenWorkshopCheck window");
@@ -181,6 +195,15 @@ public sealed partial class MainWindowViewModel : ViewModelBase
 
     private bool CanUndoExec() => Undo.CanUndo;
     private bool CanRedoExec() => Undo.CanRedo;
+
+    /// <summary>Internal helpers exposed to the Legacy partial.</summary>
+    internal static TopLevel? GetTopLevelInternal() => GetTopLevel();
+    internal void _projectDefaultNodeInternalReset() => _projectDefaultNode = null;
+    internal void SelectAndExpandInternal(System.Func<TreeNodeBase, bool> match) => SelectAndExpand(match);
+    internal void ResetIfEmptyInternal() => ResetIfEmpty();
+    internal static string UniqueNameInternal(string baseName, System.Func<string, bool> exists) => UniqueName(baseName, exists);
+    internal FolderNode? FindParentFolderOfFolderInPublic(FolderNode target) => FindParentFolderOfFolder(target);
+    internal FolderNode? FindOrCreateFolderForInternal(string filePath) => FindOrCreateFolderFor(filePath);
 
     /// <summary>
     /// Programmatic tree navigation: used by overview/list views to jump to a specific map or
@@ -261,9 +284,24 @@ public sealed partial class MainWindowViewModel : ViewModelBase
             MapNode mn => new MapEditorViewModel(mn.File, mn.Map, Project, this),
             GroupNode gn => new GroupEditorViewModel(gn.File, gn.Group, Project, this),
             OverrideNode on => new OverrideEditorViewModel(on.File, on.Parent, on.Override, Project),
+            // Legacy nodes
+            LegacyFileNode lfn => new LegacyFileOverviewViewModel(lfn.File, this),
+            LegacyProjectDefaultNode => new LegacyDefaultSettingsViewModel(LegacyProject),
+            LegacyCategoryNode lcn => new LegacyCategoryListViewModel(lcn.File, lcn.Kind, this),
+            LegacyMapNode lmn => new LegacyMapEditorViewModel(lmn.File, lmn.Map, LegacyProject),
+            LegacyGroupNode lgn => new LegacyGroupEditorViewModel(lgn.File, lgn.Group, LegacyProject),
             _ => new WelcomeViewModel(),
         };
-        Resolved.Refresh(CurrentEditor, Project);
+        if (Mode == AppMode.Current)
+        {
+            Resolved.Refresh(CurrentEditor, Project);
+            LegacyResolved.Clear();
+        }
+        else
+        {
+            LegacyResolved.Refresh(CurrentEditor, LegacyProject);
+            Resolved.Clear();
+        }
     }
 
     [RelayCommand]
@@ -293,6 +331,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase
     [RelayCommand]
     private async Task OpenFolderAsync()
     {
+        if (Mode == AppMode.Legacy) { await LegacyDispatchOpenFolderAsync(); return; }
         var top = GetTopLevel();
         if (top is null) return;
         var folders = await top.StorageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
@@ -340,6 +379,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase
 
     public void OpenFolder(string folderPath)
     {
+        if (Mode == AppMode.Legacy) { LegacyOpenFolder(folderPath); return; }
         Log.Info("File", $"OpenFolder({folderPath})");
         try
         {
@@ -427,6 +467,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase
 
     public void OpenPath(string path)
     {
+        if (Mode == AppMode.Legacy) { LegacyOpenPath(path); return; }
         try
         {
             var file = TomlConfigLoader.LoadFile(path);
@@ -447,6 +488,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase
     [RelayCommand]
     private void Save()
     {
+        if (Mode == AppMode.Legacy) { LegacyDispatchSave(); return; }
         if (SelectedNode is null) return;
         var file = GetFileForNode(SelectedNode);
         if (file is null) return;
@@ -457,9 +499,18 @@ public sealed partial class MainWindowViewModel : ViewModelBase
     [RelayCommand]
     private void SaveAll()
     {
+        if (Mode == AppMode.Legacy) { LegacyDispatchSaveAll(); return; }
+        // Skip clean files: rewriting them strips comments and reorders properties even
+        // though the model didn't change, so SaveAll on a 100-file workspace would touch
+        // every file on disk for no semantic reason.
         var count = 0;
-        foreach (var fn in EnumerateFileNodes(Tree)) { SaveFile(fn.File); count++; }
-        Log.Info("File", $"SaveAll: {count} files");
+        foreach (var fn in EnumerateFileNodes(Tree))
+        {
+            if (!fn.File.IsDirty) continue;
+            SaveFile(fn.File);
+            count++;
+        }
+        Log.Info("File", $"SaveAll: {count} dirty file(s) saved");
     }
 
     private static IEnumerable<FileNode> EnumerateFileNodes(IEnumerable<TreeNodeBase> nodes)
@@ -495,6 +546,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase
     [RelayCommand]
     private async Task SaveAsAsync()
     {
+        if (Mode == AppMode.Legacy) { await LegacyDispatchSaveAsAsync(); return; }
         if (SelectedNode is null) return;
         var file = GetFileForNode(SelectedNode);
         if (file is null) return;
@@ -666,9 +718,45 @@ public sealed partial class MainWindowViewModel : ViewModelBase
         parent.Children.Insert(idx, newFile);
     }
 
+    /// <summary>
+    /// Close every loaded file + clear the workspace, prompting once if any files are dirty.
+    /// Mirrors the single-root-folder dirty prompt — names every dirty file, asks for one
+    /// yes/no.
+    /// </summary>
+    [RelayCommand]
+    private async Task CloseAllAsync()
+    {
+        if (Mode == AppMode.Legacy) { await LegacyDispatchCloseAllAsync(); return; }
+        if (Tree.Count == 0) return;
+        if (GetTopLevel() is not Window owner) return;
+
+        var dirty = Project.Files.Where(f => f.IsDirty).Select(f => f.DisplayName).ToList();
+        if (dirty.Count > 0)
+        {
+            var message = string.Format(Localization.Get("Confirm.CloseAll.Message"), string.Join("\n  • ", dirty));
+            var ok = await ConfirmDialog.ShowAsync(
+                owner,
+                Localization.Get("Confirm.CloseAll.Title"), message,
+                Localization.Get("Confirm.CloseAll.Yes"),
+                Localization.Get("Confirm.CloseAll.No"));
+            if (!ok) return;
+        }
+
+        Tree.Clear();
+        _projectDefaultNode = null;
+        _pinnedMapsTomlNode = null;
+        for (var i = Project.Files.Count - 1; i >= 0; i--)
+            Project.Remove(Project.Files[i]);
+        Undo.Clear();
+        SelectedNode = null;
+        CurrentEditor = new WelcomeViewModel();
+        StatusText = Localization.Get("Status.Ready");
+    }
+
     [RelayCommand]
     private async Task CloseFileAsync()
     {
+        if (Mode == AppMode.Legacy) { await LegacyDispatchCloseFileAsync(); return; }
         if (SelectedNode is null) return;
         var file = GetFileForNode(SelectedNode);
         if (file is null) return;
@@ -689,6 +777,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase
     [RelayCommand]
     private async Task RemoveFromViewAsync(TreeNodeBase? node)
     {
+        if (Mode == AppMode.Legacy) { await LegacyDispatchRemoveFromViewAsync(node); return; }
         if (node is null) return;
 
         switch (node)
@@ -800,10 +889,18 @@ public sealed partial class MainWindowViewModel : ViewModelBase
     }
 
     [RelayCommand]
-    private Task AddMapAsync() => AddEntryAsync(AddEntryKind.Map);
+    private Task AddMapAsync()
+    {
+        if (Mode == AppMode.Legacy) return LegacyDispatchAddMapAsync();
+        return AddEntryAsync(AddEntryKind.Map);
+    }
 
     [RelayCommand]
-    private Task AddGroupAsync() => AddEntryAsync(AddEntryKind.Group);
+    private Task AddGroupAsync()
+    {
+        if (Mode == AppMode.Legacy) return LegacyDispatchAddGroupAsync();
+        return AddEntryAsync(AddEntryKind.Group);
+    }
 
     /// <summary>
     /// Shared entry point for "Add Map" and "Add Group". Pops the dialog, which lets the

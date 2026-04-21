@@ -1,0 +1,23 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vmel="using:MapChooserSharpMSEditor.ViewModels.Editors.Legacy"
+             xmlns:views="using:MapChooserSharpMSEditor.Views.Legacy"
+             xmlns:l="using:MapChooserSharpMSEditor.Services"
+             x:Class="MapChooserSharpMSEditor.Views.Legacy.LegacyMapEditorView"
+             x:DataType="vmel:LegacyMapEditorViewModel">
+    <StackPanel Spacing="10">
+        <StackPanel Orientation="Horizontal" Spacing="10">
+            <TextBlock Text="&#xE707;" FontFamily="Segoe Fluent Icons,Segoe MDL2 Assets"
+                       FontSize="22" Foreground="#7aa2f7" VerticalAlignment="Center" />
+            <TextBlock Text="{l:Localize Editor.Map}" FontSize="20" FontWeight="SemiBold" VerticalAlignment="Center" />
+            <TextBox Text="{Binding Map.MapName}" Width="320" VerticalAlignment="Center" FontFamily="Cascadia Mono,Consolas" />
+            <Border Background="#3a2e16" BorderBrush="#a87a33" BorderThickness="1" CornerRadius="3"
+                    Padding="6,2" VerticalAlignment="Center">
+                <TextBlock Text="LEGACY" FontSize="11" FontWeight="SemiBold" Foreground="#fdd58c" />
+            </Border>
+        </StackPanel>
+        <TextBlock Text="{Binding File.DisplayName, StringFormat={l:Localize Label.FilePrefix}}" Foreground="#888" />
+        <Separator />
+        <views:LegacyPropertySetView DataContext="{Binding Properties}" />
+    </StackPanel>
+</UserControl>

@@ -60,6 +60,8 @@
                 <TextBlock Text="{l:Localize Default.NoOwner.Body}"
                            Foreground="#aaa" TextWrapping="Wrap" />
                 <StackPanel Orientation="Horizontal" Spacing="10">
+                    <TextBox Text="{Binding AssignFilter, Mode=TwoWay}" Width="220"
+                             Watermark="{l:Localize Watermark.Filter}" />
                     <ComboBox ItemsSource="{Binding AssignableFiles}"
                               SelectedItem="{Binding AssignTarget, Mode=TwoWay}"
                               MinWidth="260">

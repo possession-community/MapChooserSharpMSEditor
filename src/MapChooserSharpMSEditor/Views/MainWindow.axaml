@@ -6,6 +6,8 @@
         xmlns:vme="using:MapChooserSharpMSEditor.ViewModels.Editors"
         xmlns:vmt="using:MapChooserSharpMSEditor.ViewModels.TreeNodes"
         xmlns:views="using:MapChooserSharpMSEditor.Views"
+        xmlns:viewsl="using:MapChooserSharpMSEditor.Views.Legacy"
+        xmlns:vmel="using:MapChooserSharpMSEditor.ViewModels.Editors.Legacy"
         xmlns:l="using:MapChooserSharpMSEditor.Services"
         xmlns:svc="using:MapChooserSharpMSEditor.Services"
         mc:Ignorable="d" d:DesignWidth="1280" d:DesignHeight="800"
@@ -21,6 +23,7 @@
         <KeyBinding Gesture="Ctrl+Shift+Z" Command="{Binding RedoActionCommand}" />
         <KeyBinding Gesture="Ctrl+S" Command="{Binding SaveCommand}" />
         <KeyBinding Gesture="Ctrl+F" Command="{Binding OpenSearchCommand}" />
+        <KeyBinding Gesture="Ctrl+F" Command="{Binding OpenLegacySearchCommand}" />
     </Window.KeyBindings>
 
     <Window.Resources>
@@ -64,6 +67,22 @@
         <DataTemplate DataType="vme:CategoryListViewModel">
             <views:CategoryListView />
         </DataTemplate>
+        <!-- Legacy editor templates -->
+        <DataTemplate DataType="vmel:LegacyMapEditorViewModel">
+            <viewsl:LegacyMapEditorView />
+        </DataTemplate>
+        <DataTemplate DataType="vmel:LegacyGroupEditorViewModel">
+            <viewsl:LegacyGroupEditorView />
+        </DataTemplate>
+        <DataTemplate DataType="vmel:LegacyDefaultSettingsViewModel">
+            <viewsl:LegacyDefaultSettingsView />
+        </DataTemplate>
+        <DataTemplate DataType="vmel:LegacyFileOverviewViewModel">
+            <viewsl:LegacyFileOverviewView />
+        </DataTemplate>
+        <DataTemplate DataType="vmel:LegacyCategoryListViewModel">
+            <viewsl:LegacyCategoryListView />
+        </DataTemplate>
     </Window.DataTemplates>
 
     <DockPanel>
@@ -79,19 +98,38 @@
                 <MenuItem Header="{l:Localize Menu.File.SaveAll}" Command="{Binding SaveAllCommand}" />
                 <Separator />
                 <MenuItem Header="{l:Localize Menu.File.Close}" Command="{Binding CloseFileCommand}" />
+                <MenuItem Header="{l:Localize Menu.File.CloseAll}" Command="{Binding CloseAllCommand}" />
+                <Separator />
+                <MenuItem Header="{l:Localize Menu.File.Mode}">
+                    <MenuItem Header="{l:Localize Menu.File.Mode.Current}"
+                              Command="{Binding SwitchModeCommand}" CommandParameter="Current"
+                              ToggleType="Radio" GroupName="appMode"
+                              IsChecked="{Binding IsCurrentMode}" />
+                    <MenuItem Header="{l:Localize Menu.File.Mode.Legacy}"
+                              Command="{Binding SwitchModeCommand}" CommandParameter="Legacy"
+                              ToggleType="Radio" GroupName="appMode"
+                              IsChecked="{Binding IsLegacyMode}" />
+                </MenuItem>
             </MenuItem>
             <MenuItem Header="{l:Localize Menu.Edit}">
                 <MenuItem Header="{l:Localize Menu.Edit.Undo}" Command="{Binding UndoActionCommand}" InputGesture="Ctrl+Z" />
                 <MenuItem Header="{l:Localize Menu.Edit.Redo}" Command="{Binding RedoActionCommand}" InputGesture="Ctrl+Y" />
                 <Separator />
-                <MenuItem Header="{l:Localize Menu.Edit.Find}" Command="{Binding OpenSearchCommand}" InputGesture="Ctrl+F" />
+                <MenuItem Header="{l:Localize Menu.Edit.Find}" Command="{Binding OpenSearchCommand}" InputGesture="Ctrl+F"
+                          IsVisible="{Binding IsCurrentMode}" />
+                <MenuItem Header="{l:Localize Menu.Edit.Find}" Command="{Binding OpenLegacySearchCommand}" InputGesture="Ctrl+F"
+                          IsVisible="{Binding IsLegacyMode}" />
                 <Separator />
                 <MenuItem Header="{l:Localize Menu.Edit.AddMap}" Command="{Binding AddMapCommand}" />
                 <MenuItem Header="{l:Localize Menu.Edit.AddGroup}" Command="{Binding AddGroupCommand}" />
             </MenuItem>
             <MenuItem Header="{l:Localize Menu.Tools}">
                 <MenuItem Header="{l:Localize Menu.Tools.WorkshopCheck}"
-                          Command="{Binding OpenWorkshopCheckCommand}" />
+                          Command="{Binding OpenWorkshopCheckCommand}"
+                          IsVisible="{Binding IsCurrentMode}" />
+                <MenuItem Header="{l:Localize Menu.Tools.WorkshopCheck}"
+                          Command="{Binding OpenLegacyWorkshopCheckCommand}"
+                          IsVisible="{Binding IsLegacyMode}" />
             </MenuItem>
             <MenuItem Header="{l:Localize Menu.View}">
                 <!-- Locales are listed explicitly because MenuItem's ItemTemplate nests a
@@ -120,6 +158,15 @@
             <views:DebugConsolePanel />
         </Border>
 
+        <!-- Legacy mode banner: persistent reminder that the loaded files use the older
+             MapChooserSharp.API schema. Sits above the status bar so it's visible on every
+             screen until the user switches back to Current. -->
+        <Border DockPanel.Dock="Top" Background="#3a2e16" BorderBrush="#a87a33"
+                BorderThickness="0,0,0,1" Padding="12,4"
+                IsVisible="{Binding IsLegacyMode}">
+            <TextBlock Text="{l:Localize Mode.Banner}" Foreground="#fdd58c" FontSize="12" />
+        </Border>
+
         <!-- Section-collision banner: shows above the status bar whenever any section path
              exists in more than one loaded file. Server would reject this on concat-parse. -->
         <Border DockPanel.Dock="Bottom" Background="#3a1e1e" BorderBrush="#a33"
@@ -128,6 +175,27 @@
             <StackPanel Spacing="4">
                 <TextBlock Text="{l:Localize Banner.SectionCollisions}" FontWeight="SemiBold" Foreground="#fbb" />
                 <ItemsControl ItemsSource="{Binding Project.SectionCollisions}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock FontSize="11" Foreground="#fdd" FontFamily="Cascadia Mono,Consolas">
+                                <Run Text="[" /><Run Text="{Binding Path}" /><Run Text="] " />
+                                <Run Text="→" Foreground="#fbb" />
+                                <Run Text=" " />
+                                <Run Text="{Binding Owners, Converter={x:Static views:CollectionJoinConverter.Instance}}" />
+                            </TextBlock>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
+        </Border>
+
+        <!-- Legacy section-collision banner: same UX as Current, parallel binding. -->
+        <Border DockPanel.Dock="Bottom" Background="#3a1e1e" BorderBrush="#a33"
+                BorderThickness="0,1,0,1" Padding="12,6"
+                IsVisible="{Binding LegacyProject.HasSectionCollisions}">
+            <StackPanel Spacing="4">
+                <TextBlock Text="{l:Localize Banner.SectionCollisions}" FontWeight="SemiBold" Foreground="#fbb" />
+                <ItemsControl ItemsSource="{Binding LegacyProject.SectionCollisions}">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
                             <TextBlock FontSize="11" Foreground="#fdd" FontFamily="Cascadia Mono,Consolas">
@@ -221,7 +289,12 @@
                 <Border DockPanel.Dock="Right" Width="440" MinWidth="440" Background="#1a1a1a"
                         BorderBrush="#2a2a2a" BorderThickness="1,0,0,0"
                         IsVisible="{Binding IsResolvedPanelVisible}">
-                    <views:ResolvedPropertiesPanel DataContext="{Binding Resolved}" />
+                    <Grid>
+                        <views:ResolvedPropertiesPanel DataContext="{Binding Resolved}"
+                                                       IsVisible="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).IsCurrentMode}" />
+                        <viewsl:LegacyResolvedPropertiesPanel DataContext="{Binding LegacyResolved}"
+                                                              IsVisible="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).IsLegacyMode}" />
+                    </Grid>
                 </Border>
 
                 <GridSplitter DockPanel.Dock="Right" Width="3" Background="#2a2a2a"

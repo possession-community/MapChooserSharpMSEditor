@@ -25,6 +25,20 @@ public sealed partial class ResolvedPropertiesViewModel : ObservableObject
     [ObservableProperty] private string _heading = Localization.Get("Resolved.Placeholder.Heading");
     [ObservableProperty] private string _contextLine = Localization.Get("Resolved.Placeholder.Body");
 
+    /// <summary>
+    /// Reset the panel back to its placeholder state. Used when switching to a mode
+    /// (e.g. Legacy) that doesn't have a resolver wired up so the panel doesn't keep
+    /// showing stale Current-mode values.
+    /// </summary>
+    public void Clear()
+    {
+        Rows.Clear();
+        ExtraSections.Clear();
+        Heading = Localization.Get("Resolved.Placeholder.Heading");
+        ContextLine = Localization.Get("Resolved.Placeholder.Body");
+        OnPropertyChanged(nameof(HasExtraSections));
+    }
+
     public void Refresh(ViewModelBase? currentEditor, ProjectContext project)
     {
         Rows.Clear();

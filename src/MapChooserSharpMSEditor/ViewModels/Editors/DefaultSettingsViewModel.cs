@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -31,9 +32,12 @@ public sealed partial class DefaultSettingsViewModel : ViewModelBase
     [ObservableProperty] private PropertySetViewModel? _properties;
     [ObservableProperty] private bool _hasMultipleOwners;
     [ObservableProperty] private MapConfigFile? _assignTarget;
+    [ObservableProperty] private string _assignFilter = string.Empty;
 
-    /// <summary>Files eligible to receive a new Default, i.e. every loaded file.</summary>
-    public IReadOnlyList<MapConfigFile> AssignableFiles => _project.Files.ToList();
+    /// <summary>Files eligible to receive a new Default, filtered by <see cref="AssignFilter"/>.</summary>
+    public ObservableCollection<MapConfigFile> AssignableFiles { get; } = new();
+
+    partial void OnAssignFilterChanged(string value) => RebuildAssignableFiles();
 
     /// <summary>Every file that currently carries a DefaultSettings — used by the
     /// "duplicate Default" warning banner to list offenders.</summary>
@@ -46,8 +50,24 @@ public sealed partial class DefaultSettingsViewModel : ViewModelBase
     {
         _project = project;
         project.PropertyChanged += OnProjectChanged;
-        project.Files.CollectionChanged += (_, _) => OnPropertyChanged(nameof(AssignableFiles));
+        project.Files.CollectionChanged += (_, _) => RebuildAssignableFiles();
         Refresh();
+    }
+
+    private void RebuildAssignableFiles()
+    {
+        AssignableFiles.Clear();
+        var needle = AssignFilter?.Trim() ?? string.Empty;
+        foreach (var f in _project.Files)
+        {
+            if (string.IsNullOrEmpty(needle)
+                || f.DisplayName.Contains(needle, StringComparison.OrdinalIgnoreCase))
+                AssignableFiles.Add(f);
+        }
+        // If the selection fell off the filtered list, reset so the Assign button doesn't
+        // silently target a hidden file.
+        if (AssignTarget is not null && !AssignableFiles.Contains(AssignTarget))
+            AssignTarget = AssignableFiles.FirstOrDefault();
     }
 
     private void OnProjectChanged(object? sender, PropertyChangedEventArgs e)
@@ -70,9 +90,10 @@ public sealed partial class DefaultSettingsViewModel : ViewModelBase
         OnPropertyChanged(nameof(HasOwner));
         OnPropertyChanged(nameof(HasNoOwner));
         OnPropertyChanged(nameof(Owners));
+        RebuildAssignableFiles();
         // Default AssignTarget to first file so the dropdown isn't empty-looking when
         // we enter the no-owner state.
-        AssignTarget ??= _project.Files.FirstOrDefault();
+        AssignTarget ??= AssignableFiles.FirstOrDefault();
     }
 
     /// <summary>

@@ -1,0 +1,101 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vml="using:MapChooserSharpMSEditor.ViewModels.Legacy"
+        xmlns:l="using:MapChooserSharpMSEditor.Services"
+        x:Class="MapChooserSharpMSEditor.Views.Legacy.LegacyWorkshopCheckWindow"
+        x:DataType="vml:LegacyWorkshopCheckViewModel"
+        Title="{l:Localize WorkshopCheck.Title}"
+        Width="780" Height="620"
+        MinWidth="560" MinHeight="380"
+        Background="#1c1c1c"
+        WindowStartupLocation="CenterOwner">
+
+    <Window.Styles>
+        <Style Selector="Button.primary">
+            <Setter Property="Background" Value="#3470c8" />
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="Padding" Value="14,6" />
+        </Style>
+        <Style Selector="Button.primary:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="#4284dc" />
+        </Style>
+    </Window.Styles>
+
+    <DockPanel LastChildFill="True">
+        <Border DockPanel.Dock="Top" Background="#141414" Padding="12,10" BorderBrush="#2a2a2a" BorderThickness="0,0,0,1">
+            <StackPanel Spacing="8">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <TextBlock Text="{l:Localize WorkshopCheck.Intro}" TextWrapping="Wrap" Foreground="#bbb" FontSize="12" />
+                    <Border Background="#3a2e16" BorderBrush="#a87a33" BorderThickness="1" CornerRadius="3"
+                            Padding="6,2" VerticalAlignment="Top">
+                        <TextBlock Text="LEGACY" FontSize="11" FontWeight="SemiBold" Foreground="#fdd58c" />
+                    </Border>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Spacing="10">
+                    <Button Classes="primary" Content="{l:Localize WorkshopCheck.Run}"
+                            Command="{Binding RunCommand}" IsEnabled="{Binding !IsRunning}" />
+                    <ProgressBar Width="200" Minimum="0" Maximum="{Binding ProgressTotal}"
+                                 Value="{Binding ProgressDone}" IsVisible="{Binding IsRunning}"
+                                 VerticalAlignment="Center" />
+                    <TextBlock Text="{Binding StatusText}" VerticalAlignment="Center"
+                               Foreground="#aaa" FontSize="12" />
+                </StackPanel>
+            </StackPanel>
+        </Border>
+
+        <Border DockPanel.Dock="Bottom" Background="#141414" Padding="12,10"
+                BorderBrush="#2a2a2a" BorderThickness="0,1,0,0">
+            <DockPanel>
+                <StackPanel Orientation="Horizontal" Spacing="8" DockPanel.Dock="Right">
+                    <Button Content="{l:Localize Button.Cancel}" Click="OnCancelClick" MinWidth="90" />
+                    <Button Classes="primary" Content="{l:Localize WorkshopCheck.ApplySelected}"
+                            Click="OnApplyClick" MinWidth="140"
+                            IsEnabled="{Binding HasCandidates}" />
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <Button Content="{l:Localize WorkshopCheck.SelectAll}"
+                            Command="{Binding SelectAllCommand}" IsEnabled="{Binding HasCandidates}" />
+                    <Button Content="{l:Localize WorkshopCheck.SelectNone}"
+                            Command="{Binding SelectNoneCommand}" IsEnabled="{Binding HasCandidates}" />
+                </StackPanel>
+            </DockPanel>
+        </Border>
+
+        <Grid>
+            <TextBlock IsVisible="{Binding ShowEmptyMessage}"
+                       Text="{l:Localize WorkshopCheck.NoIssues}"
+                       HorizontalAlignment="Center" VerticalAlignment="Center"
+                       Foreground="#888" FontStyle="Italic" />
+
+            <ScrollViewer IsVisible="{Binding HasCandidates}">
+                <ItemsControl ItemsSource="{Binding Candidates}" Padding="4">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate DataType="vml:LegacyWorkshopCheckCandidate">
+                            <Border Background="#1e1e1e" Margin="4,2" Padding="10,6" CornerRadius="3">
+                                <Grid ColumnDefinitions="Auto,*,Auto,Auto">
+                                    <CheckBox Grid.Column="0" IsChecked="{Binding IsSelected, Mode=TwoWay}"
+                                              VerticalAlignment="Center" Margin="0,0,10,0" />
+                                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                        <TextBlock FontFamily="Cascadia Mono,Consolas" FontSize="13" Foreground="#e0e0e0">
+                                            <Run Text="{Binding Map.MapName}" />
+                                        </TextBlock>
+                                        <TextBlock FontSize="11" Foreground="#888">
+                                            <Run Text="Workshop:" />
+                                            <Run Text="{Binding WorkshopId}" />
+                                            <Run Text="  ·  " />
+                                            <Run Text="{Binding File.DisplayName}" />
+                                        </TextBlock>
+                                    </StackPanel>
+                                    <Border Grid.Column="2" Background="#3a1e1e" BorderBrush="#a33"
+                                            BorderThickness="1" CornerRadius="3" Padding="6,2" Margin="8,0">
+                                        <TextBlock Text="{Binding StatusLabel}" FontSize="10" Foreground="#fdd" />
+                                    </Border>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+        </Grid>
+    </DockPanel>
+</Window>
