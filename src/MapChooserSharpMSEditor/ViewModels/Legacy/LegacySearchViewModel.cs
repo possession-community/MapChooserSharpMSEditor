@@ -298,5 +298,22 @@ public sealed partial class LegacySearchViewModel : ViewModelBase
     }
 
     [RelayCommand]
+    private void OpenInline(LegacySearchResult? result)
+    {
+        if (result is null) return;
+        _main.LegacyNavigateToSearchResult(result);
+        Query = "";
+    }
+
+    [RelayCommand]
+    private void OpenInlineTop()
+    {
+        if (Results.Count > 0) OpenInline(Results[0]);
+    }
+
+    [RelayCommand]
+    private void ClearQuery() => Query = "";
+
+    [RelayCommand]
     private void Close() => _main.CloseLegacySearchWindow();
 }

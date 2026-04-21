@@ -396,6 +396,28 @@ public sealed partial class SearchViewModel : ViewModelBase
         if (Results.Count > 0) Open(Results[0]);
     }
 
+    /// <summary>
+    /// Inline-bar variant: navigate and clear the query so the dropdown hides. Used by the
+    /// menu-bar-adjacent quick-search strip where the user's "done" state is a single click.
+    /// </summary>
+    [RelayCommand]
+    private void OpenInline(SearchResult? result)
+    {
+        if (result is null) return;
+        _main.NavigateToSearchResult(result);
+        Query = "";
+    }
+
+    [RelayCommand]
+    private void OpenInlineTop()
+    {
+        if (Results.Count > 0) OpenInline(Results[0]);
+    }
+
+    /// <summary>Escape in the inline bar — clear the query without navigating.</summary>
+    [RelayCommand]
+    private void ClearQuery() => Query = "";
+
     /// <summary>Escape — closes the search window via the owner.</summary>
     [RelayCommand]
     private void Close() => _main.CloseSearchWindow();

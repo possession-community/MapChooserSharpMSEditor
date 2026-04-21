@@ -10,6 +10,8 @@
         xmlns:vmel="using:MapChooserSharpMSEditor.ViewModels.Editors.Legacy"
         xmlns:l="using:MapChooserSharpMSEditor.Services"
         xmlns:svc="using:MapChooserSharpMSEditor.Services"
+        xmlns:models="using:MapChooserSharpMSEditor.Models"
+        xmlns:mlegacy="using:MapChooserSharpMSEditor.Models.Legacy"
         mc:Ignorable="d" d:DesignWidth="1280" d:DesignHeight="800"
         x:Class="MapChooserSharpMSEditor.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
@@ -145,6 +147,107 @@
                           Command="{Binding ToggleDebugConsoleCommand}" />
             </MenuItem>
         </Menu>
+
+        <!-- Inline quick-search strip. Always visible just under the menu bar; typing filters
+             live, Enter jumps to the top match, clicking a row navigates and clears the query.
+             Ctrl+F still opens the full-featured Search window for advanced filters. -->
+        <Border DockPanel.Dock="Top" Background="#181818" BorderBrush="#2a2a2a"
+                BorderThickness="0,0,0,1" Padding="10,6">
+            <Grid ColumnDefinitions="Auto,400,*,Auto">
+                <!-- Current mode: bound to Search VM -->
+                <StackPanel Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal" Spacing="6"
+                            IsVisible="{Binding IsCurrentMode}">
+                    <TextBlock Text="&#xE721;" FontFamily="Segoe Fluent Icons,Segoe MDL2 Assets"
+                               FontSize="14" Foreground="#888" VerticalAlignment="Center" Margin="2,0,4,0" />
+                    <TextBox Width="380" Text="{Binding Search.Query, Mode=TwoWay}"
+                             Watermark="{l:Localize Search.Watermark}"
+                             FontSize="12">
+                        <TextBox.KeyBindings>
+                            <KeyBinding Gesture="Enter" Command="{Binding Search.OpenInlineTopCommand}" />
+                            <KeyBinding Gesture="Escape" Command="{Binding Search.ClearQueryCommand}" />
+                        </TextBox.KeyBindings>
+                    </TextBox>
+                </StackPanel>
+                <!-- Legacy mode: bound to LegacySearch VM -->
+                <StackPanel Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal" Spacing="6"
+                            IsVisible="{Binding IsLegacyMode}">
+                    <TextBlock Text="&#xE721;" FontFamily="Segoe Fluent Icons,Segoe MDL2 Assets"
+                               FontSize="14" Foreground="#888" VerticalAlignment="Center" Margin="2,0,4,0" />
+                    <TextBox Width="380" Text="{Binding LegacySearch.Query, Mode=TwoWay}"
+                             Watermark="{l:Localize Search.Watermark}"
+                             FontSize="12">
+                        <TextBox.KeyBindings>
+                            <KeyBinding Gesture="Enter" Command="{Binding LegacySearch.OpenInlineTopCommand}" />
+                            <KeyBinding Gesture="Escape" Command="{Binding LegacySearch.ClearQueryCommand}" />
+                        </TextBox.KeyBindings>
+                    </TextBox>
+                </StackPanel>
+                <TextBlock Grid.Column="3" Text="{l:Localize Search.InlineHint}"
+                           Foreground="#666" FontSize="11" VerticalAlignment="Center" Margin="8,0,2,0" />
+            </Grid>
+        </Border>
+
+        <!-- Result dropdown for inline search. Docked just below the bar; appears only when
+             the user has typed something AND there are matches. Click a row to navigate. -->
+        <Border DockPanel.Dock="Top" Background="#1a1a1a" BorderBrush="#3a3a3a"
+                BorderThickness="0,0,0,1" MaxHeight="280"
+                IsVisible="{Binding Search.HasResults}">
+            <StackPanel IsVisible="{Binding IsCurrentMode}">
+                <ScrollViewer MaxHeight="280">
+                    <ItemsControl ItemsSource="{Binding Search.Results}" Padding="4">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate DataType="models:SearchResult">
+                                <Button HorizontalContentAlignment="Left" HorizontalAlignment="Stretch"
+                                        Background="Transparent" BorderThickness="0" Padding="10,4"
+                                        Command="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).Search.OpenInlineCommand}"
+                                        CommandParameter="{Binding}">
+                                    <Grid ColumnDefinitions="Auto,*,Auto">
+                                        <Border Grid.Column="0" Background="#2a3148" CornerRadius="3"
+                                                Padding="6,1" Margin="0,0,10,0" VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding Kind}" FontSize="10" Foreground="#9cdcfe" />
+                                        </Border>
+                                        <TextBlock Grid.Column="1" Text="{Binding Label}"
+                                                   FontFamily="Cascadia Mono,Consolas" VerticalAlignment="Center" FontSize="12" />
+                                        <TextBlock Grid.Column="2" Text="{Binding FileName}" FontSize="11"
+                                                   Foreground="#666" VerticalAlignment="Center" />
+                                    </Grid>
+                                </Button>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+            </StackPanel>
+        </Border>
+
+        <Border DockPanel.Dock="Top" Background="#1a1a1a" BorderBrush="#3a3a3a"
+                BorderThickness="0,0,0,1" MaxHeight="280"
+                IsVisible="{Binding LegacySearch.HasResults}">
+            <StackPanel IsVisible="{Binding IsLegacyMode}">
+                <ScrollViewer MaxHeight="280">
+                    <ItemsControl ItemsSource="{Binding LegacySearch.Results}" Padding="4">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate DataType="mlegacy:LegacySearchResult">
+                                <Button HorizontalContentAlignment="Left" HorizontalAlignment="Stretch"
+                                        Background="Transparent" BorderThickness="0" Padding="10,4"
+                                        Command="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).LegacySearch.OpenInlineCommand}"
+                                        CommandParameter="{Binding}">
+                                    <Grid ColumnDefinitions="Auto,*,Auto">
+                                        <Border Grid.Column="0" Background="#2a3148" CornerRadius="3"
+                                                Padding="6,1" Margin="0,0,10,0" VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding Kind}" FontSize="10" Foreground="#9cdcfe" />
+                                        </Border>
+                                        <TextBlock Grid.Column="1" Text="{Binding Label}"
+                                                   FontFamily="Cascadia Mono,Consolas" VerticalAlignment="Center" FontSize="12" />
+                                        <TextBlock Grid.Column="2" Text="{Binding FileName}" FontSize="11"
+                                                   Foreground="#666" VerticalAlignment="Center" />
+                                    </Grid>
+                                </Button>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+            </StackPanel>
+        </Border>
 
         <!-- Status bar -->
         <Border DockPanel.Dock="Bottom" Background="#1f1f1f" Padding="8,3">

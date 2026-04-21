@@ -144,6 +144,7 @@ public static class Localization
             // ===== Search =====
             ["Search.Title"] = "Search",
             ["Search.Watermark"] = "Search maps, groups, overrides by name / alias / group name",
+            ["Search.InlineHint"] = "Ctrl+F for advanced",
             ["Search.NoResults"] = "No matches",
             ["Search.Filter.Maps"] = "Maps",
             ["Search.Filter.Groups"] = "Groups",
@@ -486,6 +487,7 @@ public static class Localization
 
             ["Search.Title"] = "検索",
             ["Search.Watermark"] = "名前・エイリアス・グループ名で検索",
+            ["Search.InlineHint"] = "Ctrl+F で詳細検索",
             ["Search.NoResults"] = "一致なし",
             ["Search.Filter.Maps"] = "Map",
             ["Search.Filter.Groups"] = "Group",
