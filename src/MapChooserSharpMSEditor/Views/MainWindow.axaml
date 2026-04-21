@@ -26,6 +26,8 @@
         <KeyBinding Gesture="Ctrl+S" Command="{Binding SaveCommand}" />
         <KeyBinding Gesture="Ctrl+F" Command="{Binding OpenSearchCommand}" />
         <KeyBinding Gesture="Ctrl+F" Command="{Binding OpenLegacySearchCommand}" />
+        <KeyBinding Gesture="Alt+Left" Command="{Binding NavigateBackCommand}" />
+        <KeyBinding Gesture="Alt+Right" Command="{Binding NavigateForwardCommand}" />
     </Window.KeyBindings>
 
     <Window.Resources>

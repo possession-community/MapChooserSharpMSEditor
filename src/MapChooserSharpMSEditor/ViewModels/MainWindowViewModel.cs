@@ -274,8 +274,86 @@ public sealed partial class MainWindowViewModel : ViewModelBase
         }
     }
 
+    // Browser-style navigation history for SelectedNode. Mouse XButton1 / XButton2
+    // (and Alt+Left / Alt+Right) pop entries; any normal selection change pushes the
+    // previous node onto the back stack and invalidates the forward stack.
+    private readonly Stack<TreeNodeBase> _backStack = new();
+    private readonly Stack<TreeNodeBase> _forwardStack = new();
+    private bool _isNavigatingHistory;
+    private TreeNodeBase? _previousSelectedNode;
+
+    [RelayCommand(CanExecute = nameof(CanNavigateBack))]
+    private void NavigateBack()
+    {
+        while (_backStack.Count > 0)
+        {
+            var target = _backStack.Pop();
+            if (!IsNodeInTree(target)) continue; // skip entries whose file got closed
+            if (SelectedNode is not null) _forwardStack.Push(SelectedNode);
+            _isNavigatingHistory = true;
+            try { SelectedNode = target; } finally { _isNavigatingHistory = false; }
+            NotifyHistoryCommands();
+            return;
+        }
+        NotifyHistoryCommands();
+    }
+
+    [RelayCommand(CanExecute = nameof(CanNavigateForward))]
+    private void NavigateForward()
+    {
+        while (_forwardStack.Count > 0)
+        {
+            var target = _forwardStack.Pop();
+            if (!IsNodeInTree(target)) continue;
+            if (SelectedNode is not null) _backStack.Push(SelectedNode);
+            _isNavigatingHistory = true;
+            try { SelectedNode = target; } finally { _isNavigatingHistory = false; }
+            NotifyHistoryCommands();
+            return;
+        }
+        NotifyHistoryCommands();
+    }
+
+    private bool CanNavigateBack() => _backStack.Count > 0;
+    private bool CanNavigateForward() => _forwardStack.Count > 0;
+
+    private void NotifyHistoryCommands()
+    {
+        NavigateBackCommand.NotifyCanExecuteChanged();
+        NavigateForwardCommand.NotifyCanExecuteChanged();
+    }
+
+    internal void ClearNavigationHistory()
+    {
+        _backStack.Clear();
+        _forwardStack.Clear();
+        _previousSelectedNode = null;
+        NotifyHistoryCommands();
+    }
+
+    private bool IsNodeInTree(TreeNodeBase target)
+    {
+        foreach (var n in EnumerateAllNodes(Tree))
+            if (ReferenceEquals(n, target)) return true;
+        return false;
+    }
+
     partial void OnSelectedNodeChanged(TreeNodeBase? value)
     {
+        // Normal selection change: remember the previous node so back/forward have something
+        // to pop. History navigation replays selections, which must NOT feed the stacks or
+        // they'd grow unboundedly.
+        if (!_isNavigatingHistory)
+        {
+            if (_previousSelectedNode is not null && _previousSelectedNode != value)
+            {
+                _backStack.Push(_previousSelectedNode);
+                _forwardStack.Clear(); // branching off old forward history invalidates it
+                NotifyHistoryCommands();
+            }
+        }
+        _previousSelectedNode = value;
+
         CurrentEditor = value switch
         {
             FileNode fn => new FileOverviewViewModel(fn.File, this),

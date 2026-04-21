@@ -1,5 +1,7 @@
 using Avalonia.Controls;
+using Avalonia.Input;
 using Avalonia.Threading;
+using MapChooserSharpMSEditor.ViewModels;
 
 namespace MapChooserSharpMSEditor.Views;
 
@@ -8,6 +10,32 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
+        // Mouse XButton1 (back) / XButton2 (forward) as browser-style nav over the view
+        // history. AddHandler with Tunnel routing catches the press even when a child
+        // control (e.g. a TextBox) would otherwise swallow it.
+        AddHandler(PointerPressedEvent, OnGlobalPointerPressed, Avalonia.Interactivity.RoutingStrategies.Tunnel);
+    }
+
+    private void OnGlobalPointerPressed(object? sender, PointerPressedEventArgs e)
+    {
+        if (DataContext is not MainWindowViewModel vm) return;
+        var props = e.GetCurrentPoint(this).Properties;
+        if (props.IsXButton1Pressed)
+        {
+            if (vm.NavigateBackCommand.CanExecute(null))
+            {
+                vm.NavigateBackCommand.Execute(null);
+                e.Handled = true;
+            }
+        }
+        else if (props.IsXButton2Pressed)
+        {
+            if (vm.NavigateForwardCommand.CanExecute(null))
+            {
+                vm.NavigateForwardCommand.Execute(null);
+                e.Handled = true;
+            }
+        }
     }
 
     /// <summary>

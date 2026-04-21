@@ -146,6 +146,7 @@ public sealed partial class MainWindowViewModel
         _projectDefaultNodeInternalReset();
         _legacyProjectDefaultNode = null;
         _legacyPinnedMapsTomlNode = null;
+        ClearNavigationHistory();
         if (Mode == AppMode.Current)
         {
             for (var i = Project.Files.Count - 1; i >= 0; i--)
