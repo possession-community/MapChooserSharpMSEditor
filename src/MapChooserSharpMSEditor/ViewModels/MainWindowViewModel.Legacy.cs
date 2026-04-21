@@ -507,17 +507,34 @@ public sealed partial class MainWindowViewModel
 
     internal Task LegacyDispatchSaveAsAsync() => LegacySaveAsAsync();
 
-    internal void LegacyDispatchSaveAll()
+    internal async Task LegacyDispatchSaveAllAsync()
     {
-        // Skip clean files — see MainWindowViewModel.SaveAll for the rationale.
-        var count = 0;
-        foreach (var fn in EnumerateLegacyFileNodes(Tree))
+        var dirtyFiles = EnumerateLegacyFileNodes(Tree)
+            .Select(n => n.File)
+            .Where(f => f.IsDirty)
+            .ToList();
+
+        if (dirtyFiles.Count == 0)
         {
-            if (!fn.File.IsDirty) continue;
-            LegacySaveFile(fn.File);
-            count++;
+            StatusText = Localization.Get("Status.SaveAllNoDirty");
+            return;
         }
-        Log.Info("LegacyFile", $"SaveAll: {count} dirty file(s) saved");
+
+        if (GetTopLevelInternal() is Window owner)
+        {
+            var names = dirtyFiles.Select(f => f.DisplayName);
+            var message = string.Format(Localization.Get("Confirm.SaveAll.Message"), string.Join("\n  • ", names));
+            var ok = await ConfirmDialog.ShowAsync(
+                owner,
+                Localization.Get("Confirm.SaveAll.Title"), message,
+                Localization.Get("Confirm.SaveAll.Yes"),
+                Localization.Get("Confirm.SaveAll.No"));
+            if (!ok) return;
+        }
+
+        foreach (var f in dirtyFiles) LegacySaveFile(f);
+        StatusText = Localization.Format("Status.SaveAllDone", dirtyFiles.Count);
+        Log.Info("LegacyFile", $"SaveAll: {dirtyFiles.Count} dirty file(s) saved");
     }
 
     private static IEnumerable<LegacyFileNode> EnumerateLegacyFileNodes(IEnumerable<TreeNodeBase> nodes)

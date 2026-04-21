@@ -497,20 +497,41 @@ public sealed partial class MainWindowViewModel : ViewModelBase
     }
 
     [RelayCommand]
-    private void SaveAll()
+    private async Task SaveAllAsync()
     {
-        if (Mode == AppMode.Legacy) { LegacyDispatchSaveAll(); return; }
+        if (Mode == AppMode.Legacy) { await LegacyDispatchSaveAllAsync(); return; }
         // Skip clean files: rewriting them strips comments and reorders properties even
         // though the model didn't change, so SaveAll on a 100-file workspace would touch
         // every file on disk for no semantic reason.
-        var count = 0;
-        foreach (var fn in EnumerateFileNodes(Tree))
+        var dirtyFiles = EnumerateFileNodes(Tree)
+            .Select(n => n.File)
+            .Where(f => f.IsDirty)
+            .ToList();
+
+        if (dirtyFiles.Count == 0)
         {
-            if (!fn.File.IsDirty) continue;
-            SaveFile(fn.File);
-            count++;
+            StatusText = Localization.Get("Status.SaveAllNoDirty");
+            return;
         }
-        Log.Info("File", $"SaveAll: {count} dirty file(s) saved");
+
+        // Bulk confirmation: list every file that's about to be written so the user
+        // can spot a surprise (e.g. a background tool marked something dirty) before
+        // the serializer touches disk.
+        if (GetTopLevel() is Window owner)
+        {
+            var names = dirtyFiles.Select(f => f.DisplayName);
+            var message = string.Format(Localization.Get("Confirm.SaveAll.Message"), string.Join("\n  • ", names));
+            var ok = await ConfirmDialog.ShowAsync(
+                owner,
+                Localization.Get("Confirm.SaveAll.Title"), message,
+                Localization.Get("Confirm.SaveAll.Yes"),
+                Localization.Get("Confirm.SaveAll.No"));
+            if (!ok) return;
+        }
+
+        foreach (var f in dirtyFiles) SaveFile(f);
+        StatusText = Localization.Format("Status.SaveAllDone", dirtyFiles.Count);
+        Log.Info("File", $"SaveAll: {dirtyFiles.Count} dirty file(s) saved");
     }
 
     private static IEnumerable<FileNode> EnumerateFileNodes(IEnumerable<TreeNodeBase> nodes)
