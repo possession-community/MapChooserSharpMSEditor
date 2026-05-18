@@ -1,0 +1,266 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:MapChooserSharpMSEditor.ViewModels"
+        xmlns:l="using:MapChooserSharpMSEditor.Services"
+        x:Class="MapChooserSharpMSEditor.Views.BatchEditWindow"
+        x:DataType="vm:BatchEditViewModel"
+        Title="{l:Localize BatchEdit.Title}"
+        Width="1040" Height="740"
+        MinWidth="820" MinHeight="520"
+        Background="#1c1c1c"
+        WindowStartupLocation="CenterOwner">
+
+    <Window.Styles>
+        <Style Selector="Button.primary">
+            <Setter Property="Background" Value="#3470c8" />
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="Padding" Value="14,6" />
+        </Style>
+        <Style Selector="Button.primary:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="#4284dc" />
+        </Style>
+        <Style Selector="Border.row">
+            <Setter Property="Background" Value="#1e1e1e" />
+            <Setter Property="Margin" Value="0,2" />
+            <Setter Property="Padding" Value="10,6" />
+            <Setter Property="CornerRadius" Value="3" />
+        </Style>
+        <!-- Mirrors PropertySetView so the batch editor reads as a familiar property pane. -->
+        <Style Selector="TextBlock.sectionHeader">
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Foreground" Value="#9cdcfe" />
+            <Setter Property="Margin" Value="0,12,0,6" />
+        </Style>
+        <Style Selector="TextBlock.helpIcon">
+            <Setter Property="FontFamily" Value="Segoe Fluent Icons,Segoe MDL2 Assets" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="Foreground" Value="#7a7a7a" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="Cursor" Value="Help" />
+        </Style>
+        <Style Selector="TextBlock.helpIcon:pointerover">
+            <Setter Property="Foreground" Value="#9cdcfe" />
+        </Style>
+        <Style Selector="Border.propRow">
+            <Setter Property="Padding" Value="8" />
+            <Setter Property="Margin" Value="0,2" />
+            <Setter Property="CornerRadius" Value="4" />
+            <Setter Property="Background" Value="#252525" />
+        </Style>
+        <!-- An included row is tinted so the checked set is easy to scan vertically. -->
+        <Style Selector="Border.propRow.included">
+            <Setter Property="Background" Value="#2a3148" />
+        </Style>
+        <Style Selector="TextBlock.propLabel">
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+    </Window.Styles>
+
+    <TabControl Margin="8">
+        <!-- ════════════════════ Tab 1: Batch Group ════════════════════ -->
+        <TabItem Header="{l:Localize BatchEdit.Tab.Group}">
+            <DockPanel LastChildFill="True" Margin="8">
+                <StackPanel DockPanel.Dock="Top" Spacing="8" Margin="0,0,0,12">
+                    <TextBlock Text="{l:Localize BatchEdit.GroupName}" FontWeight="SemiBold" FontSize="14" />
+                    <AutoCompleteBox Text="{Binding GroupName, Mode=TwoWay}"
+                                     ItemsSource="{Binding Project.AllGroupNames}"
+                                     FilterMode="Contains"
+                                     Watermark="{l:Localize BatchEdit.GroupName.Watermark}"
+                                     MinimumPrefixLength="0"
+                                     Width="400" HorizontalAlignment="Left" />
+                </StackPanel>
+
+                <Border DockPanel.Dock="Bottom" Margin="0,12,0,0">
+                    <StackPanel Spacing="8">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <Button Classes="primary"
+                                    Content="{Binding AddableCount, StringFormat={l:Localize BatchEdit.AddToMaps.WithCount}}"
+                                    IsEnabled="{Binding CanAddGroup}"
+                                    Command="{Binding AddGroupToMapsCommand}" />
+                            <Button Content="{Binding RemovableCount, StringFormat={l:Localize BatchEdit.RemoveFromMaps.WithCount}}"
+                                    IsEnabled="{Binding CanRemoveGroup}"
+                                    Command="{Binding RemoveGroupFromMapsCommand}" />
+                        </StackPanel>
+                        <TextBlock Text="{Binding GroupStatusText}" Foreground="#aaa" FontSize="12"
+                                   IsVisible="{Binding GroupStatusText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                    </StackPanel>
+                </Border>
+
+                <DockPanel DockPanel.Dock="Top" Margin="0,0,0,4" LastChildFill="True">
+                    <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="6">
+                        <Button Content="{l:Localize BatchEdit.SelectAll}" Command="{Binding SelectAllMapsCommand}" />
+                        <Button Content="{l:Localize BatchEdit.DeselectAll}" Command="{Binding DeselectAllMapsCommand}" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center"
+                                IsVisible="{Binding GroupName, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+                        <TextBlock Foreground="#aef0ae" FontSize="11" VerticalAlignment="Center"
+                                   Text="{Binding AddableCount, StringFormat={l:Localize BatchEdit.Group.AddTarget}}" />
+                        <TextBlock Foreground="#f0a0a0" FontSize="11" VerticalAlignment="Center"
+                                   Text="{Binding RemovableCount, StringFormat={l:Localize BatchEdit.Group.RemoveTarget}}" />
+                    </StackPanel>
+                </DockPanel>
+
+                <Border BorderBrush="#2a2a2a" BorderThickness="1" CornerRadius="3">
+                    <ScrollViewer>
+                        <ItemsControl ItemsSource="{Binding MapRows}" Padding="4">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate DataType="vm:BatchMapRow">
+                                    <Border Classes="row">
+                                        <Grid ColumnDefinitions="Auto,*,Auto,Auto">
+                                            <CheckBox Grid.Column="0"
+                                                      IsChecked="{Binding IsChecked, Mode=TwoWay}"
+                                                      VerticalAlignment="Center" Margin="0,0,10,0" />
+                                            <TextBlock Grid.Column="1" Text="{Binding MapName}"
+                                                       FontFamily="Cascadia Mono,Consolas" FontSize="13"
+                                                       VerticalAlignment="Center" Foreground="#e0e0e0" />
+                                            <!-- "Has group" badge: green when this map already references the typed group. -->
+                                            <Border Grid.Column="2" CornerRadius="3" Padding="6,2" Margin="8,0"
+                                                    Background="#1e3a1e" BorderBrush="#3a7a3a" BorderThickness="1"
+                                                    IsVisible="{Binding AlreadyHasGroup}">
+                                                <TextBlock Text="{l:Localize BatchEdit.Exists}"
+                                                           FontSize="10" Foreground="#aef0ae" />
+                                            </Border>
+                                            <TextBlock Grid.Column="3" Text="{Binding FileName}"
+                                                       FontSize="10" Foreground="#888"
+                                                       VerticalAlignment="Center" Margin="4,0,0,0" />
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </Border>
+            </DockPanel>
+        </TabItem>
+
+        <!-- ════════════════════ Tab 2: Batch Property ════════════════════ -->
+        <TabItem Header="{l:Localize BatchEdit.Tab.Property}">
+            <DockPanel LastChildFill="True" Margin="8">
+
+                <!-- Target + filter strip -->
+                <StackPanel DockPanel.Dock="Top" Spacing="8" Margin="0,0,0,10">
+                    <StackPanel Orientation="Horizontal" Spacing="12">
+                        <RadioButton Content="{l:Localize BatchEdit.TargetMaps}"
+                                     IsChecked="{Binding TargetKind, Converter={x:Static vm:BatchEditConverters.TargetMaps}}" />
+                        <RadioButton Content="{l:Localize BatchEdit.TargetGroups}"
+                                     IsChecked="{Binding TargetKind, Converter={x:Static vm:BatchEditConverters.TargetGroups}}" />
+                        <RadioButton Content="{l:Localize BatchEdit.TargetBoth}"
+                                     IsChecked="{Binding TargetKind, Converter={x:Static vm:BatchEditConverters.TargetBoth}}" />
+                    </StackPanel>
+                </StackPanel>
+
+                <!-- Apply strip pinned to the bottom — the same shape as the regular editor's
+                     primary actions, but operates on the checked-property set instead of a
+                     single field. -->
+                <Border DockPanel.Dock="Bottom" Margin="0,10,0,0">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <Button Classes="primary"
+                                Content="{l:Localize BatchEdit.Apply}"
+                                Command="{Binding ApplyPropertyCommand}" />
+                        <TextBlock Text="{Binding PropertyStatusText}" Foreground="#aaa"
+                                   FontSize="12" VerticalAlignment="Center"
+                                   IsVisible="{Binding PropertyStatusText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                    </StackPanel>
+                </Border>
+
+                <!-- Two-pane split: entries on the left, full property editor on the right.
+                     Mirrors the regular editor's property pane (sectionHeader + propRow)
+                     so the user is already familiar with the layout. -->
+                <Grid ColumnDefinitions="320,8,*">
+
+                    <!-- Left: target entries -->
+                    <DockPanel Grid.Column="0" LastChildFill="True">
+                        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="6" Margin="0,0,0,6">
+                            <TextBox Text="{Binding FilterText, Mode=TwoWay}"
+                                     Watermark="{l:Localize BatchEdit.Filter.Watermark}"
+                                     Width="160" />
+                            <Button Content="{l:Localize BatchEdit.SelectAll}" Command="{Binding SelectAllEntriesCommand}" />
+                            <Button Content="{l:Localize BatchEdit.DeselectAll}" Command="{Binding DeselectAllEntriesCommand}" />
+                        </StackPanel>
+                        <Border BorderBrush="#2a2a2a" BorderThickness="1" CornerRadius="3">
+                            <ScrollViewer>
+                                <ItemsControl ItemsSource="{Binding EntryRows}" Padding="4">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate DataType="vm:BatchEntryRow">
+                                            <Border Classes="row">
+                                                <Grid ColumnDefinitions="Auto,*,Auto">
+                                                    <CheckBox Grid.Column="0"
+                                                              IsChecked="{Binding IsChecked, Mode=TwoWay}"
+                                                              VerticalAlignment="Center" Margin="0,0,10,0" />
+                                                    <TextBlock Grid.Column="1" Text="{Binding Label}"
+                                                               FontFamily="Cascadia Mono,Consolas" FontSize="13"
+                                                               Foreground="#e0e0e0" VerticalAlignment="Center"
+                                                               TextTrimming="CharacterEllipsis"
+                                                               Margin="0,0,8,0" />
+                                                    <TextBlock Grid.Column="2" Text="{Binding FileName}"
+                                                               FontSize="10" Foreground="#888"
+                                                               VerticalAlignment="Center" />
+                                                </Grid>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </ScrollViewer>
+                        </Border>
+                    </DockPanel>
+
+                    <!-- Right: property sections — same look as PropertySetView -->
+                    <Border Grid.Column="2" BorderBrush="#2a2a2a" BorderThickness="1" CornerRadius="3">
+                        <ScrollViewer Padding="10,0,10,10">
+                            <ItemsControl ItemsSource="{Binding Sections}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate DataType="vm:BatchPropertySection">
+                                        <StackPanel Spacing="2">
+                                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                                <TextBlock Text="{Binding LocalizedTitle}" Classes="sectionHeader" />
+                                                <TextBlock Classes="helpIcon" Text="&#xE946;"
+                                                           VerticalAlignment="Bottom" Margin="0,0,0,8"
+                                                           ToolTip.Tip="{Binding LocalizedDescription}" />
+                                            </StackPanel>
+                                            <ItemsControl ItemsSource="{Binding Entries}">
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate DataType="vm:BatchPropertyEntry">
+                                                        <Border Classes="propRow" Classes.included="{Binding IsIncluded}">
+                                                            <Grid ColumnDefinitions="Auto,260,*">
+                                                                <!-- Include checkbox: gates whether this row participates in Apply. -->
+                                                                <CheckBox Grid.Column="0"
+                                                                          IsChecked="{Binding IsIncluded, Mode=TwoWay}"
+                                                                          VerticalAlignment="Center" Margin="0,0,8,0"
+                                                                          ToolTip.Tip="{l:Localize BatchEdit.IncludeTip}" />
+                                                                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
+                                                                    <TextBlock Classes="helpIcon" Text="&#xE946;"
+                                                                               ToolTip.Tip="{Binding LocalizedDescription}" />
+                                                                    <TextBlock Classes="propLabel" Text="{Binding LocalizedLabel}" />
+                                                                </StackPanel>
+                                                                <Panel Grid.Column="2">
+                                                                    <TextBox Text="{Binding StringValue, Mode=TwoWay}"
+                                                                             IsVisible="{Binding IsStringProp}" />
+                                                                    <NumericUpDown Value="{Binding IntValue, Mode=TwoWay}"
+                                                                                   IsVisible="{Binding IsIntProp}"
+                                                                                   FormatString="0" Minimum="0" />
+                                                                    <NumericUpDown Value="{Binding LongValue, Mode=TwoWay}"
+                                                                                   IsVisible="{Binding IsLongProp}"
+                                                                                   FormatString="0" Minimum="0" />
+                                                                    <CheckBox IsChecked="{Binding BoolValue, Mode=TwoWay}"
+                                                                              IsVisible="{Binding IsBoolProp}"
+                                                                              VerticalAlignment="Center" />
+                                                                </Panel>
+                                                            </Grid>
+                                                        </Border>
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+                    </Border>
+
+                    <GridSplitter Grid.Column="1" Width="6" Background="#1a1a1a" ResizeDirection="Columns" />
+                </Grid>
+            </DockPanel>
+        </TabItem>
+    </TabControl>
+</Window>

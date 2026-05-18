@@ -132,6 +132,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase
     /// </summary>
     private bool CanOpenSearch() => Mode == AppMode.Current;
     private bool CanOpenWorkshop() => Mode == AppMode.Current;
+    private bool CanOpenBatchEdit() => Mode == AppMode.Current;
 
     [RelayCommand(CanExecute = nameof(CanOpenWorkshop))]
     private async Task OpenWorkshopCheckAsync()
@@ -146,6 +147,22 @@ public sealed partial class MainWindowViewModel : ViewModelBase
             Log.Info("Workshop", $"Applied Disabled=true to {applied} map(s)");
             StatusText = Localization.Format("WorkshopCheck.Applied", applied);
         }
+    }
+
+    [RelayCommand(CanExecute = nameof(CanOpenBatchEdit))]
+    private async Task OpenBatchEditAsync()
+    {
+        Log.Debug("BatchEdit", "OpenBatchEdit window");
+        if (GetTopLevel() is not Window owner) return;
+        var vm = new BatchEditViewModel(Project);
+        var dlg = new BatchEditWindow { DataContext = vm };
+        vm.Owner = dlg;
+        await dlg.ShowDialog(owner);
+        // Surface the last status from whichever tab the user used.
+        var msg = !string.IsNullOrEmpty(vm.GroupStatusText) ? vm.GroupStatusText
+                : !string.IsNullOrEmpty(vm.PropertyStatusText) ? vm.PropertyStatusText
+                : null;
+        if (msg is not null) StatusText = msg;
     }
 
     /// <summary>Available languages for the View → Language submenu.</summary>

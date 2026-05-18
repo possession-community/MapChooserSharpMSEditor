@@ -128,6 +128,12 @@
                 <MenuItem Header="{l:Localize Menu.Edit.AddGroup}" Command="{Binding AddGroupCommand}" />
             </MenuItem>
             <MenuItem Header="{l:Localize Menu.Tools}">
+                <MenuItem Header="{l:Localize Menu.Tools.BatchEdit}"
+                          Command="{Binding OpenBatchEditCommand}"
+                          IsVisible="{Binding IsCurrentMode}" />
+                <MenuItem Header="{l:Localize Menu.Tools.BatchEdit}"
+                          Command="{Binding OpenLegacyBatchEditCommand}"
+                          IsVisible="{Binding IsLegacyMode}" />
                 <MenuItem Header="{l:Localize Menu.Tools.WorkshopCheck}"
                           Command="{Binding OpenWorkshopCheckCommand}"
                           IsVisible="{Binding IsCurrentMode}" />

@@ -51,6 +51,7 @@ public sealed partial class MainWindowViewModel
         OpenWorkshopCheckCommand.NotifyCanExecuteChanged();
         OpenLegacySearchCommand.NotifyCanExecuteChanged();
         OpenLegacyWorkshopCheckCommand.NotifyCanExecuteChanged();
+        OpenLegacyBatchEditCommand.NotifyCanExecuteChanged();
         OpenLegacyBranchDiffCommand.NotifyCanExecuteChanged();
         UndoActionCommand.NotifyCanExecuteChanged();
         RedoActionCommand.NotifyCanExecuteChanged();
@@ -836,6 +837,24 @@ public sealed partial class MainWindowViewModel
     }
 
     private bool CanOpenLegacyWorkshop() => Mode == AppMode.Legacy;
+
+    [RelayCommand(CanExecute = nameof(CanOpenLegacyBatchEdit))]
+    private async Task OpenLegacyBatchEditAsync()
+    {
+        Log.Debug("LegacyBatchEdit", "OpenLegacyBatchEdit window");
+        if (GetTopLevelInternal() is not Window owner) return;
+        var vm = new LegacyBatchEditViewModel(LegacyProject);
+        var dlg = new Views.Legacy.LegacyBatchEditWindow { DataContext = vm };
+        vm.Owner = dlg;
+        await dlg.ShowDialog(owner);
+        // Surface whichever tab's status text the user ended on.
+        var msg = !string.IsNullOrEmpty(vm.GroupStatusText) ? vm.GroupStatusText
+                : !string.IsNullOrEmpty(vm.PropertyStatusText) ? vm.PropertyStatusText
+                : null;
+        if (msg is not null) StatusText = msg;
+    }
+
+    private bool CanOpenLegacyBatchEdit() => Mode == AppMode.Legacy;
 
     public void LegacyNavigateToSearchResult(LegacySearchResult r)
     {
