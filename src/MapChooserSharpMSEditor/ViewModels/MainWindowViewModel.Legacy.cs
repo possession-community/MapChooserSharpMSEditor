@@ -51,6 +51,7 @@ public sealed partial class MainWindowViewModel
         OpenWorkshopCheckCommand.NotifyCanExecuteChanged();
         OpenLegacySearchCommand.NotifyCanExecuteChanged();
         OpenLegacyWorkshopCheckCommand.NotifyCanExecuteChanged();
+        OpenLegacyBranchDiffCommand.NotifyCanExecuteChanged();
         UndoActionCommand.NotifyCanExecuteChanged();
         RedoActionCommand.NotifyCanExecuteChanged();
     }
@@ -203,6 +204,15 @@ public sealed partial class MainWindowViewModel
         var folderPath = folder.TryGetLocalPath();
         if (string.IsNullOrEmpty(folderPath) || !Directory.Exists(folderPath)) return;
 
+        await LegacyOpenFolderAfterPickAsync(folderPath);
+    }
+
+    /// <summary>
+    /// Legacy folder-open logic without the picker — used when the caller (e.g. the
+    /// schema-mismatch flow in <see cref="OpenFolderAsync"/>) already has the path.
+    /// </summary>
+    internal async Task LegacyOpenFolderAfterPickAsync(string folderPath)
+    {
         var existingRoot = Tree.OfType<FolderNode>().FirstOrDefault(n => n.IsRoot);
         if (existingRoot is not null || _legacyPinnedMapsTomlNode is not null)
         {
@@ -784,6 +794,32 @@ public sealed partial class MainWindowViewModel
 
     public void CloseLegacySearchWindow() => _legacySearchWindow?.Close();
     private bool CanOpenLegacySearch() => Mode == AppMode.Legacy;
+
+    private Views.Legacy.LegacyBranchDiffWindow? _legacyBranchDiffWindow;
+
+    [RelayCommand(CanExecute = nameof(CanOpenLegacyBranchDiff))]
+    private void OpenLegacyBranchDiff()
+    {
+        if (GetTopLevelInternal() is not Window owner) return;
+        if (_legacyBranchDiffWindow is { IsVisible: true })
+        {
+            _legacyBranchDiffWindow.Activate();
+            return;
+        }
+        var vm = new LegacyBranchDiffViewModel(LegacyProject);
+        if (vm.RepoRoot is null)
+        {
+            StatusText = Localization.Get("BranchDiff.NoRepo");
+            return;
+        }
+        _legacyBranchDiffWindow = new Views.Legacy.LegacyBranchDiffWindow { DataContext = vm };
+        _legacyBranchDiffWindow.Closed += (_, _) => _legacyBranchDiffWindow = null;
+        // Show (not ShowDialog) — keeps the main window interactive so the user can
+        // keep navigating / editing while the diff floats alongside.
+        _legacyBranchDiffWindow.Show(owner);
+    }
+
+    private bool CanOpenLegacyBranchDiff() => Mode == AppMode.Legacy;
 
     [RelayCommand(CanExecute = nameof(CanOpenLegacyWorkshop))]
     private async Task OpenLegacyWorkshopCheckAsync()

@@ -134,6 +134,10 @@
                 <MenuItem Header="{l:Localize Menu.Tools.WorkshopCheck}"
                           Command="{Binding OpenLegacyWorkshopCheckCommand}"
                           IsVisible="{Binding IsLegacyMode}" />
+                <Separator IsVisible="{Binding IsLegacyMode}" />
+                <MenuItem Header="{l:Localize Menu.Tools.BranchDiff}"
+                          Command="{Binding OpenLegacyBranchDiffCommand}"
+                          IsVisible="{Binding IsLegacyMode}" />
             </MenuItem>
             <MenuItem Header="{l:Localize Menu.View}">
                 <!-- Locales are listed explicitly because MenuItem's ItemTemplate nests a

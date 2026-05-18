@@ -53,4 +53,56 @@ public static class ConfirmDialog
         await dialog.ShowDialog(owner);
         return await tcs.Task;
     }
+
+    public enum TriResult { Primary, Secondary, Cancel }
+
+    /// <summary>
+    /// Three-button variant for choices that aren't yes/no — e.g. schema mismatch
+    /// ("switch mode" / "open anyway" / "cancel"). Primary is the default button.
+    /// </summary>
+    public static async Task<TriResult> ShowTriAsync(
+        Window owner, string title, string message,
+        string primaryText, string secondaryText, string cancelText)
+    {
+        var tcs = new TaskCompletionSource<TriResult>();
+
+        var primary = new Button { Content = primaryText, IsDefault = true, MinWidth = 110 };
+        var secondary = new Button { Content = secondaryText, MinWidth = 110, Margin = new Thickness(8, 0, 0, 0) };
+        var cancel = new Button { Content = cancelText, IsCancel = true, MinWidth = 90, Margin = new Thickness(8, 0, 0, 0) };
+
+        var dialog = new Window
+        {
+            Title = title,
+            Width = 480,
+            SizeToContent = SizeToContent.Height,
+            CanResize = false,
+            ShowInTaskbar = false,
+            WindowStartupLocation = WindowStartupLocation.CenterOwner,
+            Background = Brush.Parse("#1c1c1c"),
+        };
+
+        primary.Click += (_, _) => { tcs.TrySetResult(TriResult.Primary); dialog.Close(); };
+        secondary.Click += (_, _) => { tcs.TrySetResult(TriResult.Secondary); dialog.Close(); };
+        cancel.Click += (_, _) => { tcs.TrySetResult(TriResult.Cancel); dialog.Close(); };
+        dialog.Closed += (_, _) => tcs.TrySetResult(TriResult.Cancel);
+
+        dialog.Content = new StackPanel
+        {
+            Margin = new Thickness(20),
+            Spacing = 16,
+            Children =
+            {
+                new TextBlock { Text = message, TextWrapping = TextWrapping.Wrap, FontSize = 13 },
+                new StackPanel
+                {
+                    Orientation = Orientation.Horizontal,
+                    HorizontalAlignment = HorizontalAlignment.Right,
+                    Children = { primary, secondary, cancel },
+                },
+            },
+        };
+
+        await dialog.ShowDialog(owner);
+        return await tcs.Task;
+    }
 }

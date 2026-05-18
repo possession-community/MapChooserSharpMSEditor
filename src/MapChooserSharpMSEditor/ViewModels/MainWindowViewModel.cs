@@ -398,18 +398,69 @@ public sealed partial class MainWindowViewModel : ViewModelBase
         foreach (var f in files)
         {
             var path = f.TryGetLocalPath();
-            if (!string.IsNullOrEmpty(path) && File.Exists(path))
-            {
-                Log.Info("File", $"Opening {path}");
-                OpenPath(path);
-            }
+            if (string.IsNullOrEmpty(path) || !File.Exists(path)) continue;
+
+            // Schema sniff before we touch the loader: if the file belongs to the other
+            // mode we offer an explicit switch so the user doesn't silently drop keys
+            // (e.g. NominationCost parsed by Legacy but written back in Current mode
+            // would vanish on save).
+            if (!await EnsureMatchingModeAsync(ConfigSchemaDetector.DetectFromFile(path), forFolder: false)) continue;
+
+            Log.Info("File", $"Opening {path}");
+            OpenPath(path);
+        }
+    }
+
+    /// <summary>
+    /// Compare <paramref name="detected"/> to the current <see cref="Mode"/>. Returns true
+    /// if the open should proceed (either the schemas match, the sniff was inconclusive,
+    /// or the user picked "open anyway"). A false return means the user cancelled.
+    /// When the user picks "switch mode", this method actually does the switch before
+    /// returning true.
+    /// </summary>
+    private async Task<bool> EnsureMatchingModeAsync(ConfigSchemaKind detected, bool forFolder)
+    {
+        if (detected == ConfigSchemaKind.Ambiguous) return true;
+        var wantMode = detected == ConfigSchemaKind.Legacy ? AppMode.Legacy : AppMode.Current;
+        if (wantMode == Mode) return true;
+        if (GetTopLevel() is not Window owner) return true;
+
+        var messageKey = (wantMode, forFolder) switch
+        {
+            (AppMode.Legacy, false) => "SchemaMismatch.ToLegacy",
+            (AppMode.Current, false) => "SchemaMismatch.ToCurrent",
+            (AppMode.Legacy, true) => "SchemaMismatch.FolderToLegacy",
+            _ => "SchemaMismatch.FolderToCurrent",
+        };
+
+        var choice = await ConfirmDialog.ShowTriAsync(
+            owner,
+            Localization.Get("SchemaMismatch.Title"),
+            Localization.Get(messageKey),
+            Localization.Get("SchemaMismatch.Switch"),
+            Localization.Get("SchemaMismatch.OpenAnyway"),
+            Localization.Get("SchemaMismatch.Cancel"));
+
+        switch (choice)
+        {
+            case ConfirmDialog.TriResult.Primary:
+                await SwitchModeAsync(wantMode.ToString());
+                // SwitchModeAsync bails out if the user refuses to drop dirty files;
+                // re-check so we don't proceed with the open in the wrong mode.
+                return Mode == wantMode;
+            case ConfirmDialog.TriResult.Secondary:
+                return true;
+            default:
+                return false;
         }
     }
 
     [RelayCommand]
     private async Task OpenFolderAsync()
     {
-        if (Mode == AppMode.Legacy) { await LegacyDispatchOpenFolderAsync(); return; }
+        // Folder picker is mode-agnostic — we always pop it here, sniff the folder's
+        // schema, then dispatch to the right loader (and offer to switch modes first
+        // if the folder looks like it belongs to the other schema).
         var top = GetTopLevel();
         if (top is null) return;
         var folders = await top.StorageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
@@ -421,6 +472,16 @@ public sealed partial class MainWindowViewModel : ViewModelBase
         if (folder is null) return;
         var folderPath = folder.TryGetLocalPath();
         if (string.IsNullOrEmpty(folderPath) || !Directory.Exists(folderPath)) return;
+
+        if (!await EnsureMatchingModeAsync(ConfigSchemaDetector.DetectFromFolder(folderPath), forFolder: true)) return;
+
+        if (Mode == AppMode.Legacy)
+        {
+            // Re-enter the Legacy picker? No — we already have folderPath, so go straight
+            // to its load path, skipping LegacyDispatchOpenFolderAsync's own picker.
+            await LegacyOpenFolderAfterPickAsync(folderPath);
+            return;
+        }
 
         // Enforce single-root-folder policy: opening a second folder while one is already
         // loaded made per-file origin tracking ambiguous (nested roots, duplicate files,

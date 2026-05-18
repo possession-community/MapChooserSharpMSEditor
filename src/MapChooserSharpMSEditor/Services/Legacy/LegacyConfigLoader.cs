@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using CsToml;
 using CsToml.Extensions;
 using CsToml.Values;
@@ -25,6 +26,24 @@ public static class LegacyConfigLoader
         Populate(file, doc);
         Log.Info("LegacyLoader",
             $"Loaded {file.DisplayName}: groups={file.Groups.Count}, maps={file.Maps.Count}, hasDefault={file.DefaultSettings is not null}");
+        return file;
+    }
+
+    /// <summary>
+    /// Parse TOML content directly from a string. Used when the content comes from
+    /// somewhere other than a disk path — e.g. <c>git show branch:path</c> piping a
+    /// historical revision into the branch-diff tool without materializing a temp file.
+    /// </summary>
+    public static LegacyMapConfigFile LoadFromText(string content, string displayName, string? originalPath = null)
+    {
+        var file = new LegacyMapConfigFile
+        {
+            FilePath = originalPath,
+            DisplayName = displayName,
+        };
+        var bytes = Encoding.UTF8.GetBytes(content);
+        var doc = CsTomlSerializer.Deserialize<TomlDocument>(bytes);
+        Populate(file, doc);
         return file;
     }
 
