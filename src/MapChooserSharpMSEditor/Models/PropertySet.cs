@@ -45,6 +45,8 @@ public partial class PropertySet : ObservableObject
     partial void OnProhibitAdminNominationChanged(bool value) => HasProhibitAdminNomination = true;
     partial void OnCooldownChanged(int value) => HasCooldown = true;
     partial void OnCooldownDateTimeChanged(string value) => HasCooldownDateTime = true;
+    partial void OnNominationCooldownChanged(int value) => HasNominationCooldown = true;
+    partial void OnNominationCooldownDateTimeChanged(string value) => HasNominationCooldownDateTime = true;
 
     // ===== Basic =====
     [ObservableProperty] private bool _hasMapNameAlias;
@@ -111,6 +113,12 @@ public partial class PropertySet : ObservableObject
 
     [ObservableProperty] private bool _hasCooldownDateTime;
     [ObservableProperty] private string _cooldownDateTime = string.Empty;
+
+    [ObservableProperty] private bool _hasNominationCooldown;
+    [ObservableProperty] private int _nominationCooldown;
+
+    [ObservableProperty] private bool _hasNominationCooldownDateTime;
+    [ObservableProperty] private string _nominationCooldownDateTime = string.Empty;
 
     // ===== Extra sub-tables (custom external plugin data) =====
     public ObservableCollection<ExtraSection> Extras { get; } = new();

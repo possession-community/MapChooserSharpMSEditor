@@ -104,6 +104,8 @@ public static class TomlConfigWriter
         if (p.HasAllowedTimeRanges) sb.Append("AllowedTimeRanges = ").AppendLine(FormatTimeRangeArray(p.AllowedTimeRanges));
         if (p.HasCooldown) sb.Append("Cooldown = ").AppendLine(p.Cooldown.ToString(CultureInfo.InvariantCulture));
         if (p.HasCooldownDateTime) sb.Append("CooldownDateTime = ").AppendLine(Quote(p.CooldownDateTime));
+        if (p.HasNominationCooldown) sb.Append("NominationCooldown = ").AppendLine(p.NominationCooldown.ToString(CultureInfo.InvariantCulture));
+        if (p.HasNominationCooldownDateTime) sb.Append("NominationCooldownDateTime = ").AppendLine(Quote(p.NominationCooldownDateTime));
     }
 
     private static void WriteOverrideProperties(StringBuilder sb, DaySettingsOverrideModel ov, PropertyScope scope)

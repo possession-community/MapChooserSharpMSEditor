@@ -341,6 +341,8 @@ public sealed partial class BatchEditViewModel : ViewModelBase
         // Cooldown
         ("Cooldown",               "Prop.Cooldown",               typeof(int),    "Section.Cooldown",    false, false),
         ("CooldownDateTime",       "Prop.CooldownDateTime",       typeof(string), "Section.Cooldown",    false, false),
+        ("NominationCooldown",     "Prop.NominationCooldown",     typeof(int),    "Section.Cooldown",    false, false),
+        ("NominationCooldownDateTime","Prop.NominationCooldownDateTime",typeof(string),"Section.Cooldown",false, false),
     };
 
     private void RebuildSections()

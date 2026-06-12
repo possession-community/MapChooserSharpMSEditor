@@ -31,6 +31,8 @@ public static class ConfigSchemaDetector
         ".DaySettings.",
         "CooldownDateTime",
         "CooldownOverride",
+        "NominationCooldown",
+        "NominationCooldownDateTime",
     };
 
     // Only-Legacy markers. All property assignments on Default / Group / Map sections.

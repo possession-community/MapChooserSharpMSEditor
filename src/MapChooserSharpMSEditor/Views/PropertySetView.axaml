@@ -439,6 +439,32 @@
             </Grid>
         </Border>
 
+        <Border Classes="propRow" Classes.hasOverride="{Binding Model.HasNominationCooldown}">
+            <Grid ColumnDefinitions="220,*,130,Auto">
+                <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
+                    <TextBlock Classes="helpIcon" Text="&#xE946;" ToolTip.Tip="{l:Localize Prop.NominationCooldown.Desc}" />
+                    <TextBlock Classes="propLabel" Text="{l:Localize Prop.NominationCooldown}" />
+                </StackPanel>
+                <NumericUpDown Grid.Column="1" Value="{Binding Model.NominationCooldown}" FormatString="0" Minimum="0" />
+                <TextBlock Grid.Column="2" Text="{Binding InheritedStatusText}" Classes="usingDefault" Margin="8,0" IsVisible="{Binding !Model.HasNominationCooldown}" />
+                <Button Grid.Column="3" Classes="action" Content="{l:Localize Button.Reset}" ToolTip.Tip="{l:Localize Tip.Reset}" Command="{Binding ClearOverrideCommand}" CommandParameter="NominationCooldown"
+                        IsVisible="{Binding Model.HasNominationCooldown}" />
+            </Grid>
+        </Border>
+
+        <Border Classes="propRow" Classes.hasOverride="{Binding Model.HasNominationCooldownDateTime}">
+            <Grid ColumnDefinitions="220,*,130,Auto">
+                <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
+                    <TextBlock Classes="helpIcon" Text="&#xE946;" ToolTip.Tip="{l:Localize Prop.NominationCooldownDateTime.Desc}" />
+                    <TextBlock Classes="propLabel" Text="{l:Localize Prop.NominationCooldownDateTime}" />
+                </StackPanel>
+                <TextBox Grid.Column="1" Text="{Binding Model.NominationCooldownDateTime}" Watermark="{l:Localize Watermark.CooldownDateTime}" />
+                <TextBlock Grid.Column="2" Text="{Binding InheritedStatusText}" Classes="usingDefault" Margin="8,0" IsVisible="{Binding !Model.HasNominationCooldownDateTime}" />
+                <Button Grid.Column="3" Classes="action" Content="{l:Localize Button.Reset}" ToolTip.Tip="{l:Localize Tip.Reset}" Command="{Binding ClearOverrideCommand}" CommandParameter="NominationCooldownDateTime"
+                        IsVisible="{Binding Model.HasNominationCooldownDateTime}" />
+            </Grid>
+        </Border>
+
         <TextBlock Text="{l:Localize Section.Extra}" Classes="sectionHeader" />
         <Border Classes="propRow">
             <StackPanel Spacing="6">

@@ -92,6 +92,7 @@ public static class Localization
             ["Menu.Tools.WorkshopCheck"] = "Check _Workshop items...",
             ["Menu.Tools.BatchEdit"] = "_Batch Edit...",
             ["Menu.Tools.BranchDiff"] = "Compare with _branch... (Legacy)",
+            ["Menu.Tools.Migration"] = "_Migrate Legacy → Current...",
             ["BranchDiff.NoRepo"] = "No git repository found for the loaded config files.",
 
             // ===== Schema mismatch prompt =====
@@ -437,6 +438,26 @@ public static class Localization
             ["Prop.AllowedTimeRanges.Desc"] = "Nomination and Random Map Pick restricted to these time windows.",
             ["Prop.Cooldown.Desc"] = "Number of map plays before this map can be picked again.",
             ["Prop.CooldownDateTime.Desc"] = "Real-time cooldown. Format: e.g. 2d (days) or 1m (months).",
+            ["Prop.NominationCooldown"] = "Nomination Cooldown (plays)",
+            ["Prop.NominationCooldown.Desc"] = "Number of map plays before this map can be nominated again. 0 = disabled.",
+            ["Prop.NominationCooldownDateTime"] = "Nomination Cooldown (time)",
+            ["Prop.NominationCooldownDateTime.Desc"] = "Time-based nomination cooldown. Format: e.g. 2d (days) or 1m (months).",
+
+            // ===== Migration =====
+            ["Migration.Title"] = "Migrate: Legacy → Current",
+            ["Migration.Description"] = "Convert Legacy (MapChooserSharp.API) config files to the Current (MapChooserSharpMS) format. Properties unique to Legacy will be removed; new Current-only properties become available after migration.",
+            ["Migration.Removed"] = "Removed (Legacy-only)",
+            ["Migration.Added"] = "Added (Current-only)",
+            ["Migration.BrowseSource"] = "Select Legacy config folder...",
+            ["Migration.BrowseOutput"] = "Browse...",
+            ["Migration.PickSource"] = "Select folder containing Legacy .toml files",
+            ["Migration.PickOutput"] = "Select output folder for migrated files",
+            ["Migration.OutputFolder"] = "Output:",
+            ["Migration.Execute"] = "Migrate",
+            ["Migration.NoFiles"] = "No .toml files found in the selected folder.",
+            ["Migration.Loaded"] = "Loaded {0} Legacy config file(s). Review and click Migrate.",
+            ["Migration.Done"] = "Successfully migrated {0} file(s) to {1}.",
+            ["Migration.Error"] = "Migration failed: {0}",
 
             // ===== Mode (Current vs Legacy) =====
             ["Menu.File.Mode"] = "_Mode (schema)",
@@ -498,6 +519,7 @@ public static class Localization
             ["Menu.Tools.WorkshopCheck"] = "Workshop アイテム確認(_W)...",
             ["Menu.Tools.BatchEdit"] = "一括編集(_B)...",
             ["Menu.Tools.BranchDiff"] = "ブランチと比較...(_B) (Legacy)",
+            ["Menu.Tools.Migration"] = "Legacy → Current マイグレーション(_M)...",
             ["BranchDiff.NoRepo"] = "読み込み済み設定ファイルの親階層に git リポジトリが見つかりません。",
 
             ["SchemaMismatch.Title"] = "スキーマ不一致",
@@ -815,6 +837,25 @@ public static class Localization
             ["Prop.AllowedTimeRanges.Desc"] = "Nominate / Random Map Pick を許可する時間帯。",
             ["Prop.Cooldown.Desc"] = "このマップが再度選ばれるまでに必要なマッププレイ回数。",
             ["Prop.CooldownDateTime.Desc"] = "実時間のクールダウン。例: 2d (日), 1m (月)。",
+            ["Prop.NominationCooldown"] = "Nomination クールダウン (プレイ回数)",
+            ["Prop.NominationCooldown.Desc"] = "このマップが再度 Nominate されるまでに必要なマッププレイ回数。0 = 無効。",
+            ["Prop.NominationCooldownDateTime"] = "Nomination クールダウン (実時間)",
+            ["Prop.NominationCooldownDateTime.Desc"] = "実時間の Nomination クールダウン。例: 2d (日), 1m (月)。",
+
+            ["Migration.Title"] = "マイグレーション: Legacy → Current",
+            ["Migration.Description"] = "Legacy (MapChooserSharp.API) の設定ファイルを Current (MapChooserSharpMS) 形式に変換します。Legacy 専用プロパティは削除され、Current 専用の新しいプロパティが利用可能になります。",
+            ["Migration.Removed"] = "削除 (Legacy専用)",
+            ["Migration.Added"] = "追加 (Current専用)",
+            ["Migration.BrowseSource"] = "Legacy設定フォルダを選択...",
+            ["Migration.BrowseOutput"] = "参照...",
+            ["Migration.PickSource"] = "Legacy .toml ファイルを含むフォルダを選択",
+            ["Migration.PickOutput"] = "変換先フォルダを選択",
+            ["Migration.OutputFolder"] = "出力先:",
+            ["Migration.Execute"] = "マイグレーション実行",
+            ["Migration.NoFiles"] = "選択フォルダに .toml ファイルが見つかりません。",
+            ["Migration.Loaded"] = "{0} 件の Legacy 設定ファイルを読み込みました。内容を確認してマイグレーションを実行してください。",
+            ["Migration.Done"] = "{0} 件のファイルを {1} に変換しました。",
+            ["Migration.Error"] = "マイグレーションに失敗しました: {0}",
 
             ["Menu.File.Mode"] = "モード(_M) (スキーマ)",
             ["Menu.File.Mode.Current"] = "Current (MapChooserSharpMS)",

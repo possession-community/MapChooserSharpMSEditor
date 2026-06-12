@@ -39,6 +39,7 @@ public static class PropertyResolver
         "OnlyNomination", "MaxPlayers", "MinPlayers", "ProhibitAdminNomination",
         "DaysAllowed", "AllowedTimeRanges",
         "Cooldown", "CooldownDateTime",
+        "NominationCooldown", "NominationCooldownDateTime",
     };
 
     public static List<ResolvedRow> ResolveDefault(MapConfigFile file)

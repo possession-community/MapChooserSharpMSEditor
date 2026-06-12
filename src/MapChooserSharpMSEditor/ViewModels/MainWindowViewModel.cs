@@ -165,6 +165,17 @@ public sealed partial class MainWindowViewModel : ViewModelBase
         if (msg is not null) StatusText = msg;
     }
 
+    [RelayCommand]
+    private async Task OpenMigrationAsync()
+    {
+        Log.Debug("Migration", "OpenMigration window");
+        if (GetTopLevel() is not Window owner) return;
+        var vm = new MigrationViewModel { Owner = owner };
+        var dlg = new MigrationWindow { DataContext = vm };
+        vm.Owner = dlg;
+        await dlg.ShowDialog(owner);
+    }
+
     /// <summary>Available languages for the View → Language submenu.</summary>
     public LocaleOption[] AvailableLocales => Localization.AvailableLocales;
 

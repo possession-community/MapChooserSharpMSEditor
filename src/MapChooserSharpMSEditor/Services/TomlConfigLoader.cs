@@ -337,6 +337,12 @@ public static class TomlConfigLoader
             case "CooldownDateTime":
                 if (v.TryGetString(out var cdt)) { p.HasCooldownDateTime = true; p.CooldownDateTime = cdt; }
                 break;
+            case "NominationCooldown":
+                if (v.TryGetInt64(out var ncd)) { p.HasNominationCooldown = true; p.NominationCooldown = (int)ncd; }
+                break;
+            case "NominationCooldownDateTime":
+                if (v.TryGetString(out var ncdt)) { p.HasNominationCooldownDateTime = true; p.NominationCooldownDateTime = ncdt; }
+                break;
         }
     }
 
