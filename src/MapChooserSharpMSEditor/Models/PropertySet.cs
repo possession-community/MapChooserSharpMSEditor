@@ -33,12 +33,15 @@ public partial class PropertySet : ObservableObject
     partial void OnWorkshopIdChanged(long value) => HasWorkshopId = true;
     partial void OnIsDisabledChanged(bool value) => HasIsDisabled = true;
     partial void OnCooldownOverrideChanged(int value) => HasCooldownOverride = true;
+    partial void OnShortGroupNameChanged(string value) => HasShortGroupName = true;
+    partial void OnNominationLimitChanged(int value) => HasNominationLimit = true;
     partial void OnMaxExtendsChanged(int value) => HasMaxExtends = true;
     partial void OnMaxExtCommandUsesChanged(int value) => HasMaxExtCommandUses = true;
     partial void OnExtendTimePerExtendsChanged(int value) => HasExtendTimePerExtends = true;
     partial void OnMapTimeChanged(int value) => HasMapTime = true;
     partial void OnExtendRoundsPerExtendsChanged(int value) => HasExtendRoundsPerExtends = true;
     partial void OnMapRoundsChanged(int value) => HasMapRounds = true;
+    partial void OnMapSelectionWeightChanged(int value) => HasMapSelectionWeight = true;
     partial void OnOnlyNominationChanged(bool value) => HasOnlyNomination = true;
     partial void OnMaxPlayersChanged(int value) => HasMaxPlayers = true;
     partial void OnMinPlayersChanged(int value) => HasMinPlayers = true;
@@ -69,6 +72,14 @@ public partial class PropertySet : ObservableObject
     [ObservableProperty] private bool _hasCooldownOverride;
     [ObservableProperty] private int _cooldownOverride;
 
+    // Group-only: short tag for display (max 4 chars, e.g. "HD", "EZ")
+    [ObservableProperty] private bool _hasShortGroupName;
+    [ObservableProperty] private string _shortGroupName = string.Empty;
+
+    // Group-only: max nominations from this group (0 = unlimited)
+    [ObservableProperty] private bool _hasNominationLimit;
+    [ObservableProperty] private int _nominationLimit;
+
     // ===== Extend =====
     [ObservableProperty] private bool _hasMaxExtends;
     [ObservableProperty] private int _maxExtends;
@@ -89,6 +100,9 @@ public partial class PropertySet : ObservableObject
     [ObservableProperty] private int _mapRounds;
 
     // ===== Nomination / pick =====
+    [ObservableProperty] private bool _hasMapSelectionWeight;
+    [ObservableProperty] private int _mapSelectionWeight;
+
     [ObservableProperty] private bool _hasOnlyNomination;
     [ObservableProperty] private bool _onlyNomination;
 

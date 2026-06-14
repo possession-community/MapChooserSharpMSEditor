@@ -90,12 +90,15 @@ public static class TomlConfigWriter
         if (p.HasIsDisabled) sb.Append("IsDisabled = ").AppendLine(p.IsDisabled ? "true" : "false");
         if (allowMapOnly && p.HasGroupSettings) sb.Append("GroupSettings = ").AppendLine(FormatStringArray(p.GroupSettings));
         if (allowGroupOnly && p.HasCooldownOverride) sb.Append("CooldownOverride = ").AppendLine(p.CooldownOverride.ToString(CultureInfo.InvariantCulture));
+        if (allowGroupOnly && p.HasShortGroupName) sb.Append("ShortGroupName = ").AppendLine(Quote(p.ShortGroupName));
+        if (allowGroupOnly && p.HasNominationLimit) sb.Append("NominationLimit = ").AppendLine(p.NominationLimit.ToString(CultureInfo.InvariantCulture));
         if (p.HasMaxExtends) sb.Append("MaxExtends = ").AppendLine(p.MaxExtends.ToString(CultureInfo.InvariantCulture));
         if (p.HasMaxExtCommandUses) sb.Append("MaxExtCommandUses = ").AppendLine(p.MaxExtCommandUses.ToString(CultureInfo.InvariantCulture));
         if (p.HasExtendTimePerExtends) sb.Append("ExtendTimePerExtends = ").AppendLine(p.ExtendTimePerExtends.ToString(CultureInfo.InvariantCulture));
         if (p.HasMapTime) sb.Append("MapTime = ").AppendLine(p.MapTime.ToString(CultureInfo.InvariantCulture));
         if (p.HasExtendRoundsPerExtends) sb.Append("ExtendRoundsPerExtends = ").AppendLine(p.ExtendRoundsPerExtends.ToString(CultureInfo.InvariantCulture));
         if (p.HasMapRounds) sb.Append("MapRounds = ").AppendLine(p.MapRounds.ToString(CultureInfo.InvariantCulture));
+        if (p.HasMapSelectionWeight) sb.Append("MapSelectionWeight = ").AppendLine(p.MapSelectionWeight.ToString(CultureInfo.InvariantCulture));
         if (p.HasOnlyNomination) sb.Append("OnlyNomination = ").AppendLine(p.OnlyNomination ? "true" : "false");
         if (p.HasMaxPlayers) sb.Append("MaxPlayers = ").AppendLine(p.MaxPlayers.ToString(CultureInfo.InvariantCulture));
         if (p.HasMinPlayers) sb.Append("MinPlayers = ").AppendLine(p.MinPlayers.ToString(CultureInfo.InvariantCulture));

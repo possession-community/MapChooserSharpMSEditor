@@ -200,6 +200,32 @@
             </Grid>
         </Border>
 
+        <Border Classes="propRow" Classes.hasOverride="{Binding Model.HasShortGroupName}" IsVisible="{Binding ShowShortGroupName}">
+            <Grid ColumnDefinitions="220,*,130,Auto">
+                <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
+                    <TextBlock Classes="helpIcon" Text="&#xE946;" ToolTip.Tip="{l:Localize Prop.ShortGroupName.Desc}" />
+                    <TextBlock Classes="propLabel" Text="{l:Localize Prop.ShortGroupName}" />
+                </StackPanel>
+                <TextBox Grid.Column="1" Text="{Binding Model.ShortGroupName}" MaxLength="4" Watermark="{l:Localize Watermark.ShortGroupName}" />
+                <TextBlock Grid.Column="2" Text="{l:Localize Status.NoOverride}" Classes="usingDefault" Margin="8,0" IsVisible="{Binding !Model.HasShortGroupName}" />
+                <Button Grid.Column="3" Classes="action" Content="{l:Localize Button.Reset}" ToolTip.Tip="{l:Localize Tip.Reset}" Command="{Binding ClearOverrideCommand}" CommandParameter="ShortGroupName"
+                        IsVisible="{Binding Model.HasShortGroupName}" />
+            </Grid>
+        </Border>
+
+        <Border Classes="propRow" Classes.hasOverride="{Binding Model.HasNominationLimit}" IsVisible="{Binding ShowNominationLimit}">
+            <Grid ColumnDefinitions="220,*,130,Auto">
+                <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
+                    <TextBlock Classes="helpIcon" Text="&#xE946;" ToolTip.Tip="{l:Localize Prop.NominationLimit.Desc}" />
+                    <TextBlock Classes="propLabel" Text="{l:Localize Prop.NominationLimit}" />
+                </StackPanel>
+                <NumericUpDown Grid.Column="1" Value="{Binding Model.NominationLimit}" FormatString="0" Minimum="0" />
+                <TextBlock Grid.Column="2" Text="{l:Localize Status.NoOverride}" Classes="usingDefault" Margin="8,0" IsVisible="{Binding !Model.HasNominationLimit}" />
+                <Button Grid.Column="3" Classes="action" Content="{l:Localize Button.Reset}" ToolTip.Tip="{l:Localize Tip.Reset}" Command="{Binding ClearOverrideCommand}" CommandParameter="NominationLimit"
+                        IsVisible="{Binding Model.HasNominationLimit}" />
+            </Grid>
+        </Border>
+
         <TextBlock Text="{l:Localize Section.ExtendTime}" Classes="sectionHeader" />
 
         <Border Classes="propRow" Classes.hasOverride="{Binding Model.HasMaxExtends}">
@@ -281,6 +307,19 @@
         </Border>
 
         <TextBlock Text="{l:Localize Section.Nomination}" Classes="sectionHeader" />
+
+        <Border Classes="propRow" Classes.hasOverride="{Binding Model.HasMapSelectionWeight}">
+            <Grid ColumnDefinitions="220,*,130,Auto">
+                <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
+                    <TextBlock Classes="helpIcon" Text="&#xE946;" ToolTip.Tip="{l:Localize Prop.MapSelectionWeight.Desc}" />
+                    <TextBlock Classes="propLabel" Text="{l:Localize Prop.MapSelectionWeight}" />
+                </StackPanel>
+                <NumericUpDown Grid.Column="1" Value="{Binding Model.MapSelectionWeight}" FormatString="0" Minimum="0" />
+                <TextBlock Grid.Column="2" Text="{Binding InheritedStatusText}" Classes="usingDefault" Margin="8,0" IsVisible="{Binding !Model.HasMapSelectionWeight}" />
+                <Button Grid.Column="3" Classes="action" Content="{l:Localize Button.Reset}" ToolTip.Tip="{l:Localize Tip.Reset}" Command="{Binding ClearOverrideCommand}" CommandParameter="MapSelectionWeight"
+                        IsVisible="{Binding Model.HasMapSelectionWeight}" />
+            </Grid>
+        </Border>
 
         <Border Classes="propRow" Classes.hasOverride="{Binding Model.HasOnlyNomination}">
             <Grid ColumnDefinitions="220,*,130,Auto">

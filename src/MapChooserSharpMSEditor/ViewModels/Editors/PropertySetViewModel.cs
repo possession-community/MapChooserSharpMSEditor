@@ -68,6 +68,8 @@ public partial class PropertySetViewModel : ViewModelBase
     public bool ShowWorkshopId => Scope is PropertyScope.Default or PropertyScope.Map;
     public bool ShowGroupSettings => Scope is PropertyScope.Default or PropertyScope.Map;
     public bool ShowCooldownOverride => Scope is PropertyScope.Default or PropertyScope.Group;
+    public bool ShowShortGroupName => Scope is PropertyScope.Default or PropertyScope.Group;
+    public bool ShowNominationLimit => Scope is PropertyScope.Default or PropertyScope.Group;
 
     /// <summary>
     /// Localized phrase shown where a row has no override. Override editors pass a

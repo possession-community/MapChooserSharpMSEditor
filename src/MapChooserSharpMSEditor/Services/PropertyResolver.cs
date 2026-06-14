@@ -36,6 +36,7 @@ public static class PropertyResolver
         "MapNameAlias", "MapDescription", "WorkshopId", "IsDisabled",
         "MaxExtends", "MaxExtCommandUses", "ExtendTimePerExtends", "MapTime",
         "ExtendRoundsPerExtends", "MapRounds",
+        "MapSelectionWeight",
         "OnlyNomination", "MaxPlayers", "MinPlayers", "ProhibitAdminNomination",
         "DaysAllowed", "AllowedTimeRanges",
         "Cooldown", "CooldownDateTime",
@@ -70,6 +71,14 @@ public static class PropertyResolver
             ? new ResolvedRow("CooldownOverride", group.Properties.CooldownOverride.ToString(CultureInfo.InvariantCulture),
                 Localization.Format("Source.Group", group.GroupName))
             : new ResolvedRow("CooldownOverride", "—", Localization.Get("Source.Unset")));
+        rows.Add(group.Properties.HasShortGroupName
+            ? new ResolvedRow("ShortGroupName", group.Properties.ShortGroupName,
+                Localization.Format("Source.Group", group.GroupName))
+            : new ResolvedRow("ShortGroupName", "—", Localization.Get("Source.Unset")));
+        rows.Add(group.Properties.HasNominationLimit
+            ? new ResolvedRow("NominationLimit", group.Properties.NominationLimit.ToString(CultureInfo.InvariantCulture),
+                Localization.Format("Source.Group", group.GroupName))
+            : new ResolvedRow("NominationLimit", "—", Localization.Get("Source.Unset")));
         return rows;
     }
 

@@ -323,6 +323,8 @@ public sealed partial class BatchEditViewModel : ViewModelBase
         ("WorkshopId",             "Prop.WorkshopId",             typeof(long),   "Section.Basic",       true,  false),
         ("IsDisabled",             "Prop.IsDisabled",             typeof(bool),   "Section.Basic",       false, false),
         ("CooldownOverride",       "Prop.CooldownOverride",       typeof(int),    "Section.Basic",       false, true),
+        ("ShortGroupName",         "Prop.ShortGroupName",         typeof(string), "Section.Basic",       false, true),
+        ("NominationLimit",        "Prop.NominationLimit",        typeof(int),    "Section.Basic",       false, true),
 
         // Extend / Time
         ("MaxExtends",             "Prop.MaxExtends",             typeof(int),    "Section.ExtendTime",  false, false),
@@ -333,6 +335,7 @@ public sealed partial class BatchEditViewModel : ViewModelBase
         ("MapRounds",              "Prop.MapRounds",              typeof(int),    "Section.ExtendTime",  false, false),
 
         // Nomination
+        ("MapSelectionWeight",     "Prop.MapSelectionWeight",     typeof(int),    "Section.Nomination",  false, false),
         ("OnlyNomination",         "Prop.OnlyNomination",         typeof(bool),   "Section.Nomination",  false, false),
         ("MaxPlayers",             "Prop.MaxPlayers",             typeof(int),    "Section.Nomination",  false, false),
         ("MinPlayers",             "Prop.MinPlayers",             typeof(int),    "Section.Nomination",  false, false),

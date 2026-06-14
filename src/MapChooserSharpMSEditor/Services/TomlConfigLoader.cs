@@ -288,6 +288,12 @@ public static class TomlConfigLoader
             case "CooldownOverride":
                 if (v.TryGetInt64(out var co)) { p.HasCooldownOverride = true; p.CooldownOverride = (int)co; }
                 break;
+            case "ShortGroupName":
+                if (v.TryGetString(out var sgn)) { p.HasShortGroupName = true; p.ShortGroupName = sgn; }
+                break;
+            case "NominationLimit":
+                if (v.TryGetInt64(out var nl)) { p.HasNominationLimit = true; p.NominationLimit = Math.Max(0, (int)nl); }
+                break;
             case "IsDisabled":
                 if (v.TryGetBool(out var dis)) { p.HasIsDisabled = true; p.IsDisabled = dis; }
                 break;
@@ -311,6 +317,9 @@ public static class TomlConfigLoader
                 break;
             case "OnlyNomination":
                 if (v.TryGetBool(out var on)) { p.HasOnlyNomination = true; p.OnlyNomination = on; }
+                break;
+            case "MapSelectionWeight":
+                if (v.TryGetInt64(out var msw)) { p.HasMapSelectionWeight = true; p.MapSelectionWeight = (int)msw; }
                 break;
             case "MaxPlayers":
                 if (v.TryGetInt64(out var mp)) { p.HasMaxPlayers = true; p.MaxPlayers = (int)mp; }
