@@ -23,16 +23,7 @@
         <PackageReference Include="CsToml.Extensions" Version="1.5.1" />
     </ItemGroup>
 
-    <!--
-      Config schema interfaces live in MapChooserSharpMS.Shared.
-      Using a ProjectReference for now; swap to a PackageReference once Shared is
-      published to NuGet (e.g. <PackageReference Include="MapChooserSharpMS.Shared" Version="x.y.z" />).
-    -->
-    <ItemGroup>
-        <ProjectReference Include="..\..\..\MapChooserSharpMS\MapChooserSharpMS.Shared\MapChooserSharpMS.Shared.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
+<ItemGroup>
         <AvaloniaResource Include="Assets\**" />
     </ItemGroup>
 

@@ -1,14 +1,9 @@
 using System;
 using System.Globalization;
-using MapChooserSharpMS.Shared.MapConfig;
 
 namespace MapChooserSharpMSEditor.Models;
 
-/// <summary>
-/// Editor-side time range. Implements <see cref="ITimeRange"/> so it stays compatible
-/// with the MCS schema contract defined in MapChooserSharpMS.Shared.
-/// </summary>
-public sealed record TimeRangeSpec(TimeOnly StartTime, TimeOnly EndTime) : ITimeRange
+public sealed record TimeRangeSpec(TimeOnly StartTime, TimeOnly EndTime)
 {
     public bool IsInRange(TimeOnly time)
     {
