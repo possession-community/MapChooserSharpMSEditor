@@ -4,6 +4,7 @@ on:
   push:
     tags:
       - 'v*'
+      - 'pre-*'
 
 permissions:
   contents: write
@@ -35,4 +36,5 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           generate_release_notes: true
+          prerelease: ${{ startsWith(github.ref_name, 'pre-') }}
           files: MapChooserSharpMSEditor-${{ github.ref_name }}-win-x64.zip
