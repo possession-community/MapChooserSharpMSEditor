@@ -22,6 +22,7 @@ public partial class PropertySet : ObservableObject
         // emits to TOML. Put here (not in the VM) so undo's depth counter sees the flag flip
         // as part of the same stack frame as the collection change.
         GroupSettings.CollectionChanged += (_, _) => HasGroupSettings = true;
+        SearchTags.CollectionChanged += (_, _) => HasSearchTags = true;
         DaysAllowed.CollectionChanged += (_, _) => HasDaysAllowed = true;
         AllowedTimeRanges.CollectionChanged += (_, _) => HasAllowedTimeRanges = true;
     }
@@ -46,6 +47,7 @@ public partial class PropertySet : ObservableObject
     partial void OnMaxPlayersChanged(int value) => HasMaxPlayers = true;
     partial void OnMinPlayersChanged(int value) => HasMinPlayers = true;
     partial void OnProhibitAdminNominationChanged(bool value) => HasProhibitAdminNomination = true;
+    partial void OnRestrictToAllowedUsersOnlyChanged(bool value) => HasRestrictToAllowedUsersOnly = true;
     partial void OnCooldownChanged(int value) => HasCooldown = true;
     partial void OnCooldownDateTimeChanged(string value) => HasCooldownDateTime = true;
     partial void OnNominationCooldownChanged(int value) => HasNominationCooldown = true;
@@ -67,6 +69,10 @@ public partial class PropertySet : ObservableObject
     // Map-only: which group names to inherit from
     [ObservableProperty] private bool _hasGroupSettings;
     public ObservableCollection<string> GroupSettings { get; } = new();
+
+    // Map-only: search tags for nomination search
+    [ObservableProperty] private bool _hasSearchTags;
+    public ObservableCollection<string> SearchTags { get; } = new();
 
     // Group-only: overrides the cooldown of any map that references this group
     [ObservableProperty] private bool _hasCooldownOverride;
@@ -114,6 +120,9 @@ public partial class PropertySet : ObservableObject
 
     [ObservableProperty] private bool _hasProhibitAdminNomination;
     [ObservableProperty] private bool _prohibitAdminNomination;
+
+    [ObservableProperty] private bool _hasRestrictToAllowedUsersOnly;
+    [ObservableProperty] private bool _restrictToAllowedUsersOnly;
 
     [ObservableProperty] private bool _hasDaysAllowed;
     public ObservableCollection<DayOfWeek> DaysAllowed { get; } = new();

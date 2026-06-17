@@ -187,6 +187,37 @@
             </StackPanel>
         </Border>
 
+        <Border Classes="propRow" Classes.hasOverride="{Binding Model.HasSearchTags}" IsVisible="{Binding ShowSearchTags}">
+            <StackPanel Spacing="6">
+                <Grid ColumnDefinitions="220,*,130,Auto">
+                    <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
+                        <TextBlock Classes="helpIcon" Text="&#xE946;" ToolTip.Tip="{l:Localize Prop.SearchTags.Desc}" />
+                        <TextBlock Classes="propLabel" Text="{l:Localize Prop.SearchTags}" />
+                    </StackPanel>
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6">
+                        <TextBox Width="220" Text="{Binding NewSearchTag}" Watermark="{l:Localize Watermark.SearchTag}" />
+                        <Button Content="{l:Localize Button.Add}" Command="{Binding AddSearchTagCommand}" />
+                    </StackPanel>
+                    <TextBlock Grid.Column="2" Text="{Binding InheritedStatusText}" Classes="usingDefault" Margin="8,0" IsVisible="{Binding !Model.HasSearchTags}" />
+                    <Button Grid.Column="3" Classes="action" Content="{l:Localize Button.ResetAll}" ToolTip.Tip="{l:Localize Tip.ResetAll}"
+                            Command="{Binding ClearOverrideCommand}" CommandParameter="SearchTags"
+                            IsVisible="{Binding Model.HasSearchTags}" />
+                </Grid>
+                <ItemsControl ItemsSource="{Binding Model.SearchTags}" Margin="24,0,0,0">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Grid ColumnDefinitions="*,Auto" Margin="0,2">
+                                <TextBlock Grid.Column="0" Text="{Binding}" VerticalAlignment="Center" />
+                                <Button Grid.Column="1" Content="×" Padding="6,2"
+                                        Command="{Binding $parent[ItemsControl].((vme:PropertySetViewModel)DataContext).RemoveSearchTagCommand}"
+                                        CommandParameter="{Binding}" />
+                            </Grid>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
+        </Border>
+
         <Border Classes="propRow" Classes.hasOverride="{Binding Model.HasCooldownOverride}" IsVisible="{Binding ShowCooldownOverride}">
             <Grid ColumnDefinitions="220,*,130,Auto">
                 <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
@@ -370,6 +401,19 @@
                 <TextBlock Grid.Column="2" Text="{Binding InheritedStatusText}" Classes="usingDefault" Margin="8,0" IsVisible="{Binding !Model.HasProhibitAdminNomination}" />
                 <Button Grid.Column="3" Classes="action" Content="{l:Localize Button.Reset}" ToolTip.Tip="{l:Localize Tip.Reset}" Command="{Binding ClearOverrideCommand}" CommandParameter="ProhibitAdminNomination"
                         IsVisible="{Binding Model.HasProhibitAdminNomination}" />
+            </Grid>
+        </Border>
+
+        <Border Classes="propRow" Classes.hasOverride="{Binding Model.HasRestrictToAllowedUsersOnly}">
+            <Grid ColumnDefinitions="220,*,130,Auto">
+                <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
+                    <TextBlock Classes="helpIcon" Text="&#xE946;" ToolTip.Tip="{l:Localize Prop.RestrictToAllowedUsersOnly.Desc}" />
+                    <TextBlock Classes="propLabel" Text="{l:Localize Prop.RestrictToAllowedUsersOnly}" />
+                </StackPanel>
+                <CheckBox Grid.Column="1" IsChecked="{Binding Model.RestrictToAllowedUsersOnly}" />
+                <TextBlock Grid.Column="2" Text="{Binding InheritedStatusText}" Classes="usingDefault" Margin="8,0" IsVisible="{Binding !Model.HasRestrictToAllowedUsersOnly}" />
+                <Button Grid.Column="3" Classes="action" Content="{l:Localize Button.Reset}" ToolTip.Tip="{l:Localize Tip.Reset}" Command="{Binding ClearOverrideCommand}" CommandParameter="RestrictToAllowedUsersOnly"
+                        IsVisible="{Binding Model.HasRestrictToAllowedUsersOnly}" />
             </Grid>
         </Border>
 

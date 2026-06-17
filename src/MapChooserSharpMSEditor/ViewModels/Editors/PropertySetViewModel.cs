@@ -67,6 +67,7 @@ public partial class PropertySetViewModel : ViewModelBase
     public bool ShowMapDescription => Scope is PropertyScope.Default or PropertyScope.Map;
     public bool ShowWorkshopId => Scope is PropertyScope.Default or PropertyScope.Map;
     public bool ShowGroupSettings => Scope is PropertyScope.Default or PropertyScope.Map;
+    public bool ShowSearchTags => true;
     public bool ShowCooldownOverride => Scope is PropertyScope.Default or PropertyScope.Group;
     public bool ShowShortGroupName => Scope is PropertyScope.Default or PropertyScope.Group;
     public bool ShowNominationLimit => Scope is PropertyScope.Default or PropertyScope.Group;
@@ -149,6 +150,7 @@ public partial class PropertySetViewModel : ViewModelBase
 
     partial void OnNewTimeRangeChanged(string value) => OnPropertyChanged(nameof(IsNewTimeRangeValid));
     [ObservableProperty] private string _newGroupName = string.Empty;
+    [ObservableProperty] private string _newSearchTag = string.Empty;
     [ObservableProperty] private string _newExtraSectionName = string.Empty;
 
     [RelayCommand]
@@ -309,6 +311,25 @@ public partial class PropertySetViewModel : ViewModelBase
     }
 
     // Reordering for GroupReferences is driven by the ☰ drag handle in the view.
+
+    [RelayCommand]
+    private void AddSearchTag()
+    {
+        var tag = NewSearchTag?.Trim();
+        if (string.IsNullOrEmpty(tag)) return;
+        using var _ = Project?.Undo.BeginBatch("Add search tag");
+        if (!Model.SearchTags.Contains(tag))
+            Model.SearchTags.Add(tag);
+        NewSearchTag = string.Empty;
+    }
+
+    [RelayCommand]
+    private void RemoveSearchTag(string? tag)
+    {
+        if (string.IsNullOrEmpty(tag)) return;
+        using var _ = Project?.Undo.BeginBatch("Remove search tag");
+        Model.SearchTags.Remove(tag);
+    }
 
     [RelayCommand]
     private void AddExtraSection()

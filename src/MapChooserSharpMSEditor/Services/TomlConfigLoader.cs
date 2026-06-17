@@ -285,6 +285,11 @@ public static class TomlConfigLoader
                 p.GroupSettings.Clear();
                 foreach (var s in ReadStringArray(v)) p.GroupSettings.Add(s);
                 break;
+            case "SearchTags":
+                p.HasSearchTags = true;
+                p.SearchTags.Clear();
+                foreach (var s in ReadStringArray(v)) p.SearchTags.Add(s);
+                break;
             case "CooldownOverride":
                 if (v.TryGetInt64(out var co)) { p.HasCooldownOverride = true; p.CooldownOverride = (int)co; }
                 break;
@@ -329,6 +334,9 @@ public static class TomlConfigLoader
                 break;
             case "ProhibitAdminNomination":
                 if (v.TryGetBool(out var pan)) { p.HasProhibitAdminNomination = true; p.ProhibitAdminNomination = pan; }
+                break;
+            case "RestrictToAllowedUsersOnly":
+                if (v.TryGetBool(out var rta)) { p.HasRestrictToAllowedUsersOnly = true; p.RestrictToAllowedUsersOnly = rta; }
                 break;
             case "DaysAllowed":
                 p.HasDaysAllowed = true;

@@ -36,9 +36,9 @@ public static class ConfigSchemaDetector
     };
 
     // Only-Legacy markers. All property assignments on Default / Group / Map sections.
+    // RestrictToAllowedUsersOnly was Legacy-only but is now shared (Current has it too).
     private static readonly string[] LegacyMarkers =
     {
-        "RestrictToAllowedUsersOnly",
         "RequiredPermissions",
         "AllowedSteamIds",
         "DisallowedSteamIds",

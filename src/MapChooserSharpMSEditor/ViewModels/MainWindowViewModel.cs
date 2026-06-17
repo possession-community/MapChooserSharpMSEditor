@@ -1299,6 +1299,9 @@ public sealed partial class MainWindowViewModel : ViewModelBase
             UndoHooks.HookCollection(p.GroupSettings, Undo);
             p.GroupSettings.CollectionChanged += (_, _) => MarkDirty();
 
+            UndoHooks.HookCollection(p.SearchTags, Undo);
+            p.SearchTags.CollectionChanged += (_, _) => MarkDirty();
+
             UndoHooks.HookCollection(p.DaysAllowed, Undo);
             p.DaysAllowed.CollectionChanged += (_, _) => MarkDirty();
 

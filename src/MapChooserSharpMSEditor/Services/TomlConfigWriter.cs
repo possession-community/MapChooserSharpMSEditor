@@ -89,6 +89,7 @@ public static class TomlConfigWriter
         if (allowMapOnly && p.HasWorkshopId) sb.Append("WorkshopId = ").AppendLine(p.WorkshopId.ToString(CultureInfo.InvariantCulture));
         if (p.HasIsDisabled) sb.Append("IsDisabled = ").AppendLine(p.IsDisabled ? "true" : "false");
         if (allowMapOnly && p.HasGroupSettings) sb.Append("GroupSettings = ").AppendLine(FormatStringArray(p.GroupSettings));
+        if (p.HasSearchTags) sb.Append("SearchTags = ").AppendLine(FormatStringArray(p.SearchTags));
         if (allowGroupOnly && p.HasCooldownOverride) sb.Append("CooldownOverride = ").AppendLine(p.CooldownOverride.ToString(CultureInfo.InvariantCulture));
         if (allowGroupOnly && p.HasShortGroupName) sb.Append("ShortGroupName = ").AppendLine(Quote(p.ShortGroupName));
         if (allowGroupOnly && p.HasNominationLimit) sb.Append("NominationLimit = ").AppendLine(p.NominationLimit.ToString(CultureInfo.InvariantCulture));
@@ -103,6 +104,7 @@ public static class TomlConfigWriter
         if (p.HasMaxPlayers) sb.Append("MaxPlayers = ").AppendLine(p.MaxPlayers.ToString(CultureInfo.InvariantCulture));
         if (p.HasMinPlayers) sb.Append("MinPlayers = ").AppendLine(p.MinPlayers.ToString(CultureInfo.InvariantCulture));
         if (p.HasProhibitAdminNomination) sb.Append("ProhibitAdminNomination = ").AppendLine(p.ProhibitAdminNomination ? "true" : "false");
+        if (p.HasRestrictToAllowedUsersOnly) sb.Append("RestrictToAllowedUsersOnly = ").AppendLine(p.RestrictToAllowedUsersOnly ? "true" : "false");
         if (p.HasDaysAllowed) sb.Append("DaysAllowed = ").AppendLine(FormatDayArray(p.DaysAllowed));
         if (p.HasAllowedTimeRanges) sb.Append("AllowedTimeRanges = ").AppendLine(FormatTimeRangeArray(p.AllowedTimeRanges));
         if (p.HasCooldown) sb.Append("Cooldown = ").AppendLine(p.Cooldown.ToString(CultureInfo.InvariantCulture));

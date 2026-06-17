@@ -340,6 +340,7 @@ public sealed partial class BatchEditViewModel : ViewModelBase
         ("MaxPlayers",             "Prop.MaxPlayers",             typeof(int),    "Section.Nomination",  false, false),
         ("MinPlayers",             "Prop.MinPlayers",             typeof(int),    "Section.Nomination",  false, false),
         ("ProhibitAdminNomination","Prop.ProhibitAdminNomination",typeof(bool),   "Section.Nomination",  false, false),
+        ("RestrictToAllowedUsersOnly","Prop.RestrictToAllowedUsersOnly",typeof(bool),"Section.Nomination",false, false),
 
         // Cooldown
         ("Cooldown",               "Prop.Cooldown",               typeof(int),    "Section.Cooldown",    false, false),
