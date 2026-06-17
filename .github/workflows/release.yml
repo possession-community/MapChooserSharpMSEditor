@@ -26,15 +26,15 @@ jobs:
           -p:PublishSingleFile=true
           -p:IncludeNativeLibrariesForSelfExtract=true
 
-      - name: Zip release
+      - name: Rename exe with version
         run: |
-          Compress-Archive `
-            -Path src/MapChooserSharpMSEditor/bin/Release/net10.0/win-x64/publish/MapChooserSharpMSEditor.exe `
-            -DestinationPath MapChooserSharpMSEditor-${{ github.ref_name }}-win-x64.zip
+          Copy-Item `
+            src/MapChooserSharpMSEditor/bin/Release/net10.0/win-x64/publish/MapChooserSharpMSEditor.exe `
+            MapChooserSharpMSEditor-${{ github.ref_name }}.exe
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           generate_release_notes: true
           prerelease: ${{ startsWith(github.ref_name, 'pre-') }}
-          files: MapChooserSharpMSEditor-${{ github.ref_name }}-win-x64.zip
+          files: MapChooserSharpMSEditor-${{ github.ref_name }}.exe
