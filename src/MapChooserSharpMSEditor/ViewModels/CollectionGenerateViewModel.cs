@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
@@ -22,12 +23,13 @@ public partial class CollectionGenerateViewModel : ViewModelBase
     [ObservableProperty] private bool _hasItems;
     [ObservableProperty] private int _publicCount;
     [ObservableProperty] private int _nonPublicCount;
+    [ObservableProperty] private bool _splitPerMap;
 
     public ObservableCollection<CollectionItemViewModel> Items { get; } = new();
 
     public Window? Owner { get; set; }
 
-    public MapConfigFile? GeneratedFile { get; private set; }
+    public List<MapConfigFile>? GeneratedFiles { get; private set; }
 
     private readonly CollectionGenerateService _service = new();
     private CancellationTokenSource? _cts;
@@ -94,7 +96,17 @@ public partial class CollectionGenerateViewModel : ViewModelBase
         if (Items.Count == 0) return;
         if (Owner is null) return;
 
-        var picked = await Owner.StorageProvider.SaveFilePickerAsync(new FilePickerSaveOptions
+        var collectionItems = Items.Select(i => new CollectionItem(i.WorkshopId, i.Title, i.IsPublic)).ToList();
+
+        if (SplitPerMap)
+            await GeneratePerMapAsync(collectionItems);
+        else
+            await GenerateSingleFileAsync(collectionItems);
+    }
+
+    private async Task GenerateSingleFileAsync(List<CollectionItem> items)
+    {
+        var picked = await Owner!.StorageProvider.SaveFilePickerAsync(new FilePickerSaveOptions
         {
             Title = Localization.Get("Collection.SaveTitle"),
             SuggestedFileName = $"collection_{CollectionId}.toml",
@@ -105,14 +117,53 @@ public partial class CollectionGenerateViewModel : ViewModelBase
         var path = picked.TryGetLocalPath();
         if (string.IsNullOrEmpty(path)) return;
 
-        var collectionItems = Items.Select(i => new CollectionItem(i.WorkshopId, i.Title, i.IsPublic)).ToList();
-        var file = _service.GenerateConfig(collectionItems, Path.GetFileName(path));
+        var file = _service.GenerateConfig(items, Path.GetFileName(path));
         file.FilePath = path;
         TomlConfigWriter.SaveFile(file);
-        GeneratedFile = file;
+        GeneratedFiles = [file];
 
         StatusText = Localization.Format("Collection.Generated", file.Maps.Count, path);
         Log.Info("Collection", $"Generated {file.Maps.Count} map(s) → {path}");
+    }
+
+    private async Task GeneratePerMapAsync(List<CollectionItem> items)
+    {
+        var folders = await Owner!.StorageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
+        {
+            AllowMultiple = false,
+            Title = Localization.Get("Collection.PickFolder"),
+        });
+        var folder = folders.FirstOrDefault();
+        if (folder is null) return;
+        var folderPath = folder.TryGetLocalPath();
+        if (string.IsNullOrEmpty(folderPath)) return;
+
+        Directory.CreateDirectory(folderPath);
+        var files = new List<MapConfigFile>();
+        var usedNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var item in items)
+        {
+            var file = _service.GenerateConfig([item], $"{item.WorkshopId}.toml");
+            var mapName = file.Maps[0].MapName;
+            var fileName = mapName + ".toml";
+
+            var candidate = fileName;
+            var i = 2;
+            while (usedNames.Contains(candidate))
+                candidate = $"{mapName}_{i++}.toml";
+            usedNames.Add(candidate);
+
+            var path = Path.Combine(folderPath, candidate);
+            file.FilePath = path;
+            file.DisplayName = candidate;
+            TomlConfigWriter.SaveFile(file);
+            files.Add(file);
+        }
+
+        GeneratedFiles = files;
+        StatusText = Localization.Format("Collection.GeneratedSplit", files.Count, folderPath);
+        Log.Info("Collection", $"Generated {files.Count} file(s) → {folderPath}");
     }
 }
 

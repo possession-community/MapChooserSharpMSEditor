@@ -174,14 +174,16 @@ public sealed partial class MainWindowViewModel : ViewModelBase
         var dlg = new CollectionGenerateWindow { DataContext = vm };
         vm.Owner = dlg;
         await dlg.ShowDialog(owner);
-        if (vm.GeneratedFile is { } file)
+        if (vm.GeneratedFiles is { Count: > 0 } files)
         {
-            Project.Add(file);
-            AttachDirtyTracking(file);
-            var node = BuildFileNode(file);
-            Tree.Add(node);
-            SelectedNode = node;
-            StatusText = Localization.Format("Collection.Opened", file.DisplayName);
+            foreach (var file in files)
+            {
+                Project.Add(file);
+                AttachDirtyTracking(file);
+                Tree.Add(BuildFileNode(file));
+            }
+            SelectedNode = Tree.LastOrDefault();
+            StatusText = Localization.Format("Collection.Opened", files.Count);
         }
     }
 

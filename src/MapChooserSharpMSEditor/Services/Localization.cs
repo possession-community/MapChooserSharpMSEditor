@@ -490,7 +490,10 @@ public static class Localization
             ["Collection.Fetched"] = "Found {0} item(s): {1} public, {2} private/unlisted.",
             ["Collection.Error"] = "Fetch failed: {0}",
             ["Collection.Generated"] = "Generated {0} map(s) → {1}",
-            ["Collection.Opened"] = "Opened generated file: {0}",
+            ["Collection.GeneratedSplit"] = "Generated {0} file(s) → {1}",
+            ["Collection.SplitPerMap"] = "One file per map",
+            ["Collection.PickFolder"] = "Select output folder",
+            ["Collection.Opened"] = "Opened {0} generated file(s)",
 
             // ===== Mode (Current vs Legacy) =====
             ["Menu.File.Mode"] = "_Mode (schema)",
@@ -920,7 +923,10 @@ public static class Localization
             ["Collection.Fetched"] = "{0} 件: 公開 {1}、非公開/限定 {2}",
             ["Collection.Error"] = "取得に失敗しました: {0}",
             ["Collection.Generated"] = "{0} マップを生成 → {1}",
-            ["Collection.Opened"] = "生成ファイルを開きました: {0}",
+            ["Collection.GeneratedSplit"] = "{0} ファイルを生成 → {1}",
+            ["Collection.SplitPerMap"] = "マップごとにファイル分割",
+            ["Collection.PickFolder"] = "出力フォルダを選択",
+            ["Collection.Opened"] = "{0} 件の生成ファイルを開きました",
 
             ["Menu.File.Mode"] = "モード(_M) (スキーマ)",
             ["Menu.File.Mode.Current"] = "Current (MapChooserSharpMS)",

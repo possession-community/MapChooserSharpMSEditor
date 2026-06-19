@@ -38,9 +38,11 @@
 
         <!-- Status + Generate -->
         <Border DockPanel.Dock="Bottom" Padding="0,8,0,0">
-            <Grid ColumnDefinitions="*,Auto">
-                <TextBlock Grid.Column="0" Text="{Binding StatusText}" Foreground="#aaa" FontSize="12" VerticalAlignment="Center" />
-                <Button Grid.Column="1" Content="{l:Localize Collection.Generate}" Command="{Binding GenerateCommand}"
+            <Grid ColumnDefinitions="Auto,*,Auto">
+                <CheckBox Grid.Column="0" IsChecked="{Binding SplitPerMap}" Content="{l:Localize Collection.SplitPerMap}"
+                          Foreground="#aaa" VerticalAlignment="Center" Margin="0,0,16,0" />
+                <TextBlock Grid.Column="1" Text="{Binding StatusText}" Foreground="#aaa" FontSize="12" VerticalAlignment="Center" />
+                <Button Grid.Column="2" Content="{l:Localize Collection.Generate}" Command="{Binding GenerateCommand}"
                         IsEnabled="{Binding HasItems}"
                         Background="#2d5a2d" Foreground="White" FontWeight="SemiBold" Padding="16,6" />
             </Grid>
