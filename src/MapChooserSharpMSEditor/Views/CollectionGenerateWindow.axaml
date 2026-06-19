@@ -1,0 +1,75 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="using:MapChooserSharpMSEditor.ViewModels"
+        xmlns:l="using:MapChooserSharpMSEditor.Services"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="600"
+        x:Class="MapChooserSharpMSEditor.Views.CollectionGenerateWindow"
+        x:DataType="vm:CollectionGenerateViewModel"
+        Title="{l:Localize Collection.Title}"
+        Width="860" Height="640"
+        MinWidth="700" MinHeight="400">
+
+    <DockPanel Margin="16">
+        <!-- Header -->
+        <TextBlock DockPanel.Dock="Top" Text="{l:Localize Collection.Title}"
+                   FontSize="20" FontWeight="Bold" Foreground="#ddd" Margin="0,0,0,8" />
+        <TextBlock DockPanel.Dock="Top" Text="{l:Localize Collection.Description}"
+                   Foreground="#aaa" FontSize="13" TextWrapping="Wrap" Margin="0,0,0,16" />
+
+        <!-- Input fields -->
+        <Border DockPanel.Dock="Top" Background="#1e1e1e" CornerRadius="6" Padding="16" Margin="0,0,0,12">
+            <StackPanel Spacing="10">
+                <Grid ColumnDefinitions="140,*,Auto">
+                    <TextBlock Grid.Column="0" Text="{l:Localize Collection.IdLabel}" VerticalAlignment="Center" Foreground="#aaa" />
+                    <TextBox Grid.Column="1" Text="{Binding CollectionId}" Watermark="{l:Localize Collection.IdWatermark}" Margin="0,0,8,0" />
+                    <Button Grid.Column="2" Content="{l:Localize Collection.Fetch}" Command="{Binding FetchCommand}"
+                            IsEnabled="{Binding !IsBusy}"
+                            Background="#2d4a7a" Foreground="White" FontWeight="SemiBold" Padding="16,6" />
+                </Grid>
+                <Grid ColumnDefinitions="140,*">
+                    <TextBlock Grid.Column="0" Text="{l:Localize Collection.ApiKeyLabel}" VerticalAlignment="Center" Foreground="#aaa" />
+                    <TextBox Grid.Column="1" Text="{Binding ApiKey}" PasswordChar="*"
+                             Watermark="{l:Localize Collection.ApiKeyWatermark}" />
+                </Grid>
+            </StackPanel>
+        </Border>
+
+        <!-- Status + Generate -->
+        <Border DockPanel.Dock="Bottom" Padding="0,8,0,0">
+            <Grid ColumnDefinitions="*,Auto">
+                <TextBlock Grid.Column="0" Text="{Binding StatusText}" Foreground="#aaa" FontSize="12" VerticalAlignment="Center" />
+                <Button Grid.Column="1" Content="{l:Localize Collection.Generate}" Command="{Binding GenerateCommand}"
+                        IsEnabled="{Binding HasItems}"
+                        Background="#2d5a2d" Foreground="White" FontWeight="SemiBold" Padding="16,6" />
+            </Grid>
+        </Border>
+
+        <!-- Item list -->
+        <Border Background="#181818" CornerRadius="4" Padding="4" IsVisible="{Binding HasItems}" Margin="0,0,0,8">
+            <ScrollViewer>
+                <ItemsControl ItemsSource="{Binding Items}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate DataType="vm:CollectionItemViewModel">
+                            <Border Background="#1e1e1e" Margin="2,1" Padding="10,6" CornerRadius="3">
+                                <Grid ColumnDefinitions="Auto,*,Auto">
+                                    <TextBlock Grid.Column="0" Text="{Binding WorkshopId}"
+                                               FontFamily="Cascadia Mono,Consolas" FontSize="12" Foreground="#888"
+                                               Width="120" VerticalAlignment="Center" />
+                                    <TextBlock Grid.Column="1" Text="{Binding Title}"
+                                               FontSize="13" Foreground="#ddd" VerticalAlignment="Center"
+                                               TextTrimming="CharacterEllipsis" />
+                                    <Border Grid.Column="2" CornerRadius="3" Padding="6,2" VerticalAlignment="Center"
+                                            Background="#3a1e1e" IsVisible="{Binding !IsPublic}">
+                                        <TextBlock Text="{Binding StatusLabel}" FontSize="10" Foreground="#f48771" />
+                                    </Border>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+        </Border>
+    </DockPanel>
+</Window>

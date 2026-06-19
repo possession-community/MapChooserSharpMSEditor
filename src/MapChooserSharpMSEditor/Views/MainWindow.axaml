@@ -140,6 +140,9 @@
                 <MenuItem Header="{l:Localize Menu.Tools.WorkshopCheck}"
                           Command="{Binding OpenLegacyWorkshopCheckCommand}"
                           IsVisible="{Binding IsLegacyMode}" />
+                <MenuItem Header="{l:Localize Menu.Tools.CollectionGenerate}"
+                          Command="{Binding OpenCollectionGenerateCommand}"
+                          IsVisible="{Binding IsCurrentMode}" />
                 <Separator />
                 <MenuItem Header="{l:Localize Menu.Tools.Migration}"
                           Command="{Binding OpenMigrationCommand}" />

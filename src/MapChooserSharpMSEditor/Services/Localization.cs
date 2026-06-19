@@ -93,6 +93,7 @@ public static class Localization
             ["Menu.Tools.BatchEdit"] = "_Batch Edit...",
             ["Menu.Tools.BranchDiff"] = "Compare with _branch... (Legacy)",
             ["Menu.Tools.Migration"] = "_Migrate Legacy → Current...",
+            ["Menu.Tools.CollectionGenerate"] = "Generate from Workshop _Collection...",
             ["BranchDiff.NoRepo"] = "No git repository found for the loaded config files.",
 
             // ===== Schema mismatch prompt =====
@@ -471,6 +472,26 @@ public static class Localization
             ["Migration.Done"] = "Successfully migrated {0} file(s) to {1}.",
             ["Migration.Error"] = "Migration failed: {0}",
 
+            // ===== Collection Generate =====
+            ["Collection.Title"] = "Generate Config from Workshop Collection",
+            ["Collection.Description"] = "Enter a Steam Workshop Collection ID to auto-generate map config entries. An optional Steam Web API key enables detailed visibility checks.",
+            ["Collection.IdLabel"] = "Collection ID:",
+            ["Collection.IdWatermark"] = "e.g. 3456789012",
+            ["Collection.ApiKeyLabel"] = "API Key (optional):",
+            ["Collection.ApiKeyWatermark"] = "Steam Web API key for detailed info",
+            ["Collection.Fetch"] = "Fetch",
+            ["Collection.Generate"] = "Generate & Save",
+            ["Collection.SaveTitle"] = "Save generated config",
+            ["Collection.NoId"] = "Please enter a Collection ID.",
+            ["Collection.Empty"] = "Collection is empty or not found.",
+            ["Collection.Fetching"] = "Fetching collection...",
+            ["Collection.FetchingDetails"] = "Fetching details for {0} item(s)...",
+            ["Collection.Progress"] = "Fetching details... {0}/{1}",
+            ["Collection.Fetched"] = "Found {0} item(s): {1} public, {2} private/unlisted.",
+            ["Collection.Error"] = "Fetch failed: {0}",
+            ["Collection.Generated"] = "Generated {0} map(s) → {1}",
+            ["Collection.Opened"] = "Opened generated file: {0}",
+
             // ===== Mode (Current vs Legacy) =====
             ["Menu.File.Mode"] = "_Mode (schema)",
             ["Menu.File.Mode.Current"] = "Current (MapChooserSharpMS)",
@@ -532,6 +553,7 @@ public static class Localization
             ["Menu.Tools.BatchEdit"] = "一括編集(_B)...",
             ["Menu.Tools.BranchDiff"] = "ブランチと比較...(_B) (Legacy)",
             ["Menu.Tools.Migration"] = "Legacy → Current マイグレーション(_M)...",
+            ["Menu.Tools.CollectionGenerate"] = "Workshop コレクションから生成(_C)...",
             ["BranchDiff.NoRepo"] = "読み込み済み設定ファイルの親階層に git リポジトリが見つかりません。",
 
             ["SchemaMismatch.Title"] = "スキーマ不一致",
@@ -880,6 +902,25 @@ public static class Localization
             ["Migration.Loaded"] = "{0} 件の Legacy 設定ファイルを読み込みました。内容を確認してマイグレーションを実行してください。",
             ["Migration.Done"] = "{0} 件のファイルを {1} に変換しました。",
             ["Migration.Error"] = "マイグレーションに失敗しました: {0}",
+
+            ["Collection.Title"] = "Workshop コレクションからコンフィグ生成",
+            ["Collection.Description"] = "Steam Workshop コレクション ID を入力してマップ設定を自動生成します。Steam Web API キーを入力すると公開状態の詳細が確認できます。",
+            ["Collection.IdLabel"] = "コレクション ID:",
+            ["Collection.IdWatermark"] = "例: 3456789012",
+            ["Collection.ApiKeyLabel"] = "API キー (任意):",
+            ["Collection.ApiKeyWatermark"] = "Steam Web API キー (詳細情報用)",
+            ["Collection.Fetch"] = "取得",
+            ["Collection.Generate"] = "生成して保存",
+            ["Collection.SaveTitle"] = "生成した設定を保存",
+            ["Collection.NoId"] = "コレクション ID を入力してください。",
+            ["Collection.Empty"] = "コレクションが空か見つかりませんでした。",
+            ["Collection.Fetching"] = "コレクションを取得中...",
+            ["Collection.FetchingDetails"] = "{0} 件のアイテム詳細を取得中...",
+            ["Collection.Progress"] = "詳細取得中... {0}/{1}",
+            ["Collection.Fetched"] = "{0} 件: 公開 {1}、非公開/限定 {2}",
+            ["Collection.Error"] = "取得に失敗しました: {0}",
+            ["Collection.Generated"] = "{0} マップを生成 → {1}",
+            ["Collection.Opened"] = "生成ファイルを開きました: {0}",
 
             ["Menu.File.Mode"] = "モード(_M) (スキーマ)",
             ["Menu.File.Mode.Current"] = "Current (MapChooserSharpMS)",

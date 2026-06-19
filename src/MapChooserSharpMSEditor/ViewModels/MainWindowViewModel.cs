@@ -166,6 +166,26 @@ public sealed partial class MainWindowViewModel : ViewModelBase
     }
 
     [RelayCommand]
+    private async Task OpenCollectionGenerateAsync()
+    {
+        Log.Debug("Collection", "OpenCollectionGenerate window");
+        if (GetTopLevel() is not Window owner) return;
+        var vm = new CollectionGenerateViewModel { Owner = owner };
+        var dlg = new CollectionGenerateWindow { DataContext = vm };
+        vm.Owner = dlg;
+        await dlg.ShowDialog(owner);
+        if (vm.GeneratedFile is { } file)
+        {
+            Project.Add(file);
+            AttachDirtyTracking(file);
+            var node = BuildFileNode(file);
+            Tree.Add(node);
+            SelectedNode = node;
+            StatusText = Localization.Format("Collection.Opened", file.DisplayName);
+        }
+    }
+
+    [RelayCommand]
     private async Task OpenMigrationAsync()
     {
         Log.Debug("Migration", "OpenMigration window");
