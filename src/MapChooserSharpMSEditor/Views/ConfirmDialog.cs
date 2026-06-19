@@ -23,6 +23,7 @@ public static class ConfirmDialog
         {
             Title = title,
             Width = 420,
+            MaxHeight = 500,
             SizeToContent = SizeToContent.Height,
             CanResize = false,
             ShowInTaskbar = false,
@@ -34,21 +35,22 @@ public static class ConfirmDialog
         no.Click += (_, _) => { tcs.TrySetResult(false); dialog.Close(); };
         dialog.Closed += (_, _) => tcs.TrySetResult(false);
 
-        dialog.Content = new StackPanel
+        var panel = new DockPanel { Margin = new Thickness(20) };
+        var buttons = new StackPanel
         {
-            Margin = new Thickness(20),
-            Spacing = 16,
-            Children =
-            {
-                new TextBlock { Text = message, TextWrapping = TextWrapping.Wrap, FontSize = 13 },
-                new StackPanel
-                {
-                    Orientation = Orientation.Horizontal,
-                    HorizontalAlignment = HorizontalAlignment.Right,
-                    Children = { yes, no },
-                },
-            },
+            Orientation = Orientation.Horizontal,
+            HorizontalAlignment = HorizontalAlignment.Right,
+            Margin = new Thickness(0, 16, 0, 0),
+            Children = { yes, no },
         };
+        DockPanel.SetDock(buttons, Dock.Bottom);
+        panel.Children.Add(buttons);
+        panel.Children.Add(new ScrollViewer
+        {
+            MaxHeight = 380,
+            Content = new TextBlock { Text = message, TextWrapping = TextWrapping.Wrap, FontSize = 13 },
+        });
+        dialog.Content = panel;
 
         await dialog.ShowDialog(owner);
         return await tcs.Task;
@@ -74,6 +76,7 @@ public static class ConfirmDialog
         {
             Title = title,
             Width = 480,
+            MaxHeight = 500,
             SizeToContent = SizeToContent.Height,
             CanResize = false,
             ShowInTaskbar = false,
@@ -86,21 +89,22 @@ public static class ConfirmDialog
         cancel.Click += (_, _) => { tcs.TrySetResult(TriResult.Cancel); dialog.Close(); };
         dialog.Closed += (_, _) => tcs.TrySetResult(TriResult.Cancel);
 
-        dialog.Content = new StackPanel
+        var panel = new DockPanel { Margin = new Thickness(20) };
+        var buttons = new StackPanel
         {
-            Margin = new Thickness(20),
-            Spacing = 16,
-            Children =
-            {
-                new TextBlock { Text = message, TextWrapping = TextWrapping.Wrap, FontSize = 13 },
-                new StackPanel
-                {
-                    Orientation = Orientation.Horizontal,
-                    HorizontalAlignment = HorizontalAlignment.Right,
-                    Children = { primary, secondary, cancel },
-                },
-            },
+            Orientation = Orientation.Horizontal,
+            HorizontalAlignment = HorizontalAlignment.Right,
+            Margin = new Thickness(0, 16, 0, 0),
+            Children = { primary, secondary, cancel },
         };
+        DockPanel.SetDock(buttons, Dock.Bottom);
+        panel.Children.Add(buttons);
+        panel.Children.Add(new ScrollViewer
+        {
+            MaxHeight = 380,
+            Content = new TextBlock { Text = message, TextWrapping = TextWrapping.Wrap, FontSize = 13 },
+        });
+        dialog.Content = panel;
 
         await dialog.ShowDialog(owner);
         return await tcs.Task;
