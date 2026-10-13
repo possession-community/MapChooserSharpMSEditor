@@ -1,0 +1,13 @@
+<Solution>
+  <Configurations>
+    <Platform Name="Any CPU" />
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Folder Name="/src/">
+    <Project Path="src/MapChooserSharpMSEditor/MapChooserSharpMSEditor.csproj" />
+  </Folder>
+  <Folder Name="/test/">
+    <Project Path="test/SmokeTest/SmokeTest.csproj" />
+  </Folder>
+</Solution>
